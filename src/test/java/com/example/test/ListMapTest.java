@@ -32,14 +32,6 @@ class ListMapTest {
     }
 
     @Test
-    void qwe() {
-        String s = null;
-        String d = "a";
-        d.equals(s);
-        s.equals(d);
-    }
-
-    @Test
     void containsNullTrue() {
         ListMap m = new ListMap();
 

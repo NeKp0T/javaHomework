@@ -1,5 +1,8 @@
 package com.example;
 
+
+import java.util.Objects;
+
 /**
  * Implements Map interface based on single linked list with String as both key and value types.
  */
@@ -72,10 +75,10 @@ public class ListMap {
 	 */
 	public boolean contains(String key) {
 		for (ListElement p = head; p != null; p = p.next) {
-			if (p.key.equals(key)) {
+			if (Objects.equals(p.key, key)) {
 				return true;
-			}	
-		}	
+			}
+		}
 		return false;
 	}
 
@@ -86,7 +89,7 @@ public class ListMap {
 	 */
 	public String get(String key) {
 		for (ListElement p = head; p != null; p = p.next) {
-			if (p.key.equals(key)) {
+			if (Objects.equals(p.key, key)) {
 				return p.value;
 			}
 		}
@@ -118,11 +121,11 @@ public class ListMap {
 	 */
 	public String remove(String key) {
 		for (ListElement p = head; p != null; p = p.next) {
-			if (p.key.equals(key)) {
+			if (Objects.equals(p.key, key)) {
 				eraseListElement(p);
 				return p.value;
-			}	
-		}	
+			}
+		}
 		return null;
 	}
 
@@ -132,7 +135,7 @@ public class ListMap {
 	public void clear() {
 		head = null;
 	}
-	
+
 	/**
 	 * Returns the number of mappings stored.
 	 * @return	the number of mappings stored
