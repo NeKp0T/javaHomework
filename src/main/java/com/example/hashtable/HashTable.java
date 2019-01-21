@@ -1,4 +1,6 @@
-package com.example;
+package com.example.hashtable;
+
+import java.util.List;
 
 /**
  * Provides list-based implementation of hash table with String as both key and value type.
@@ -9,7 +11,6 @@ public class HashTable {
     static final private int INVERSE_LOAD_FACTOR = 2;
     static final private int INIT_CAPACITY = 11;
 
-    private int capacity;
     private ListMap[] buckets;
     private int entriesCount;
 
@@ -44,11 +45,12 @@ public class HashTable {
      * 			or <code>null</code> if there were no previous value
      */
     public String put(String key, String value) {
-        String rewritten = getBucket(key).put(key, value);
+        ListMap l = getBucket(key);
+        int oldLSize = l.size();
+        String rewritten = l.put(key, value);
 
-        if (rewritten == null) {
-            entriesCount++;
-        }
+        entriesCount += l.size() - oldLSize;
+
         tryGrow();
         return rewritten;
     }
@@ -60,11 +62,12 @@ public class HashTable {
      * 			or <code>null</code> if there were no previous value
      */
     public String remove(String key) {
-        String removed = getBucket(key).remove(key);
+        ListMap l = getBucket(key);
+        int oldLSize = l.size();
+        String removed = l.remove(key);
         
-        if (removed != null) {
-            entriesCount--;
-        }
+        entriesCount += l.size() - oldLSize;
+
         return removed;
     }
 
@@ -72,9 +75,8 @@ public class HashTable {
      * Removes all entries from HashTable
      */
     public void clear() {
-        capacity = INIT_CAPACITY;
-        buckets = new ListMap[capacity];
-        for (int i = 0; i < capacity; i++)
+        buckets = new ListMap[INIT_CAPACITY];
+        for (int i = 0; i < buckets.length; i++)
             buckets[i] = new ListMap();
         entriesCount = 0;
     }
@@ -89,26 +91,27 @@ public class HashTable {
     }
 
     private ListMap getBucket(String key) {
-        return buckets[Math.floorMod(extendedHashCode(key), capacity)];
+        return buckets[Math.floorMod(extendedHashCode(key), buckets.length)];
     }
 
     private void tryGrow() {
-        if (size() * INVERSE_LOAD_FACTOR >= capacity) {
-            int capacityNew = capacity * CAPACITY_MULTIPLIER;
-            var bucketsNew = new ListMap[capacityNew];
-
-            for (int i = 0; i < capacityNew; i++) {
-                bucketsNew[i] = new ListMap();
-            }
-            for (var l : buckets) {
-                for (var entry = l.pop(); entry != null; entry = l.pop()) {
-                    bucketsNew[extendedHashCode(entry.key) % capacityNew].put(entry.key, entry.value);
-                }
-            }
-            
-            capacity = capacityNew;
-            buckets = bucketsNew;
+        if (size() * INVERSE_LOAD_FACTOR < buckets.length) {
+            return;
         }
+
+        int capacityNew = buckets.length * CAPACITY_MULTIPLIER;
+        var bucketsNew = new ListMap[capacityNew];
+
+        for (int i = 0; i < capacityNew; i++) {
+            bucketsNew[i] = new ListMap();
+        }
+        for (var l : buckets) {
+            for (var entry = l.pop(); entry != null; entry = l.pop()) {
+                bucketsNew[Math.floorMod(extendedHashCode(entry.key), capacityNew)].put(entry.key, entry.value);
+            }
+        }
+
+        buckets = bucketsNew;
     }
 
     private int extendedHashCode(String s) {

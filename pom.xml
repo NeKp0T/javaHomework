@@ -20,7 +20,7 @@
                 <version>3.0.0-M3</version>
                 <configuration>
                     <includes>
-                        <include>com/example/test/*Test.java</include>
+                        <include>com/example/hashtable/test/*Test.java</include>
                     </includes>
                 </configuration>
             </plugin>

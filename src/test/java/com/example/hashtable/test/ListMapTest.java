@@ -1,16 +1,18 @@
-package com.example.test;
+package com.example.hashtable.test;
 
-import com.example.HashTable;
+import com.example.hashtable.ListMap;
 import org.junit.jupiter.api.Test;
+
+import java.lang.reflect.Field;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class HashTableTest {
-
+class ListMapTest {
     @Test
     void containsBasic() {
-        HashTable m1 = new HashTable();
-        HashTable m2 = new HashTable();
+        ListMap m1 = new ListMap();
+        ListMap m2 = new ListMap();
 
         m1.put("looooooooong string", "some string");
         m1.put("bob", "");
@@ -31,7 +33,7 @@ class HashTableTest {
 
     @Test
     void containsNullTrue() {
-        HashTable m = new HashTable();
+        ListMap m = new ListMap();
 
         m.put(null, "a");
         assertTrue(m.contains(null));
@@ -39,21 +41,21 @@ class HashTableTest {
 
     @Test
     void containsNullFalse() {
-        HashTable m = new HashTable();
+        ListMap m = new ListMap();
 
         m.put("not null", "a");
         assertFalse(m.contains(null));
     }
 
     @Test
-    void containsAfterRehash() {
-        HashTable m = new HashTable();
+    void containswithManyKeys() {
+        ListMap m = new ListMap();
 
         m.put("a", "aa");
         m.put("b", "bb");
         m.put("c", "cc");
 
-        causeRehash(m);
+        addTenKeys(m);
 
         assertTrue(m.contains("a"));
         assertTrue(m.contains("b"));
@@ -64,7 +66,7 @@ class HashTableTest {
 
     @Test
     void containsChecksKeysNotValues() {
-        HashTable m = new HashTable();
+        ListMap m = new ListMap();
 
         m.put("", "a");
         assertTrue(m.contains(""));
@@ -72,28 +74,8 @@ class HashTableTest {
     }
 
     @Test
-    void containsCollision() {
-        // two strings with the same hashCode
-        String a = "FB";
-        String b = "Ea";
-
-        if (a.hashCode() != b.hashCode()) {
-            fail("Bad test");
-        }
-
-        HashTable m = new HashTable();
-        m.put(a, "");
-        m.put(b, "");
-
-        assertTrue(m.contains(new String(a)));
-        assertTrue(m.contains(new String(b)));
-        assertTrue(m.contains(a));
-        assertTrue(m.contains(b));
-    }
-
-    @Test
     void getBasic() {
-        HashTable m = new HashTable();
+        ListMap m = new ListMap();
 
         m.put("aaa", "a");
         m.put("bbb", "b");
@@ -104,50 +86,21 @@ class HashTableTest {
     }
 
     @Test
-    void getNull() {
-        HashTable m = new HashTable();
-
-        m.put(null, "a");
-        assertEquals("a", m.get(null));
-    }
-
-    @Test
-    void getAfterRehash() {
-        HashTable m = new HashTable();
+    void getWithManyKeys() {
+        ListMap m = new ListMap();
 
         m.put("aaa", "a");
         m.put("bbb", "b");
 
-        causeRehash(m);
+        addTenKeys(m);
 
         assertEquals("a", m.get("aaa"));
         assertEquals("b", m.get("bbb"));
         assertNull(m.get("ccc"));
     }
 
-    @Test void getCollision() {
-        // two strings with the same hasCode
-        String a = "FB";
-        String b = "Ea";
-
-        if (a.hashCode() != b.hashCode()) {
-            fail("Bad test");
-        }
-
-        HashTable m = new HashTable();
-        m.put(a, "a");
-        m.put(b, "b");
-
-        assertEquals("a", m.get(new String(a)));
-        assertEquals("b", m.get(new String(b)));
-
-        HashTable m2 = new HashTable();
-        m2.put(a, "a");
-        assertNull(m2.get(b));
-    }
-
     @Test
-    void getCollisionAfterRehash() {
+    void getCollisionWithManyKeys() {
 // two strings with the same hasCode
         String a = "FB";
         String b = "Ea";
@@ -156,23 +109,31 @@ class HashTableTest {
             fail("Bad test");
         }
 
-        HashTable m = new HashTable();
+        ListMap m = new ListMap();
         m.put(a, "a");
         m.put(b, "b");
 
-        causeRehash(m);
+        addTenKeys(m);
 
         assertEquals("a", m.get(new String(a)));
         assertEquals("b", m.get(new String(b)));
 
-        HashTable m2 = new HashTable();
+        ListMap m2 = new ListMap();
         m2.put(a, "a");
         assertNull(m2.get(b));
     }
 
     @Test
+    void removeNull() {
+        ListMap m = new ListMap();
+
+        m.put(null, "a");
+        assertEquals("a", m.remove(null));
+    }
+
+    @Test
     void putMultipleValuesWithSameKey() {
-        HashTable m = new HashTable();
+        ListMap m = new ListMap();
 
         m.put("a", "1");
         assertEquals("1", m.put("a", "2"));
@@ -182,7 +143,7 @@ class HashTableTest {
 
     @Test
     void removeBasic() {
-        HashTable m = new HashTable();
+        ListMap m = new ListMap();
 
         m.put("a", "aa");
         m.put("b", "bb");
@@ -193,18 +154,9 @@ class HashTableTest {
         assertEquals("aa", m.get("a"));
     }
 
-
-    @Test
-    void removeNull() {
-        HashTable m = new HashTable();
-
-        m.put(null, "a");
-        assertEquals("a", m.remove(null));
-    }
-
     @Test
     void removeMultipleValuesWithSameKey() {
-        HashTable m = new HashTable();
+        ListMap m = new ListMap();
 
         m.put("b", "bb");
         m.put("b", "cc");
@@ -216,7 +168,7 @@ class HashTableTest {
 
     @Test
     void clear() {
-        HashTable m = new HashTable();
+        ListMap m = new ListMap();
 
         m.put("a", "aa");
         m.put("b", "bb");
@@ -230,14 +182,54 @@ class HashTableTest {
 
     @Test
     void size() {
-        HashTable m = new HashTable();
+        ListMap m = new ListMap();
         for (int i = 0; i < 100; i++) {
             assertEquals(i, m.size());
             m.put(String.valueOf(i), "");
         }
     }
 
-    private static void causeRehash(HashTable m) {
+    @Test
+    void sizeAfterOperationsWithNull() {
+        ListMap m = new ListMap();
+        m.put(null, null);
+        assertEquals(1, m.size());
+        m.put(null, "a");
+        assertEquals(1, m.size());
+        m.put("a", null);
+        assertEquals(2, m.size());
+        m.put("a", "a");
+        assertEquals(2, m.size());
+    }
+
+    @Test
+    void popEmpty() {
+        ListMap m = new ListMap();
+
+        assertNull(m.pop());
+    }
+
+    @Test
+    void popReturn() {
+        ListMap m = new ListMap();
+        m.put("a", "aa");
+
+        ListMap.Entry e = m.pop();
+        assertEquals("a", e.key);
+        assertEquals("aa", e.value);
+    }
+
+    @Test
+    void popErases() {
+        ListMap m = new ListMap();
+        m.put("a", "aa");
+
+        ListMap.Entry e = m.pop();
+        assertEquals(0, m.size());
+        assertNull(m.pop());
+    }
+
+    private static void addTenKeys(ListMap m) {
         for (int i = 0; i < 10; i++) {
             m.put(String.valueOf(i), "string");
         }

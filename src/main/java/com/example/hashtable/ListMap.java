@@ -1,4 +1,4 @@
-package com.example;
+package com.example.hashtable;
 
 
 import java.util.Objects;
@@ -8,6 +8,7 @@ import java.util.Objects;
  */
 public class ListMap {
 	private ListElement head;
+	private int size;
 
 	/**
 	 * Simple immutable structure for storing both key and value.
@@ -25,10 +26,11 @@ public class ListMap {
 		}
 	}
 
-	private class ListElement {
-		final String key;
-		String value;
-		private ListElement prev, next;
+	static private class ListElement {
+		private final String key;
+		private String value;
+		private ListElement prev;
+		private ListElement next;
 
 		private ListElement(String key, String value, ListElement prev, ListElement next) {
 			this.key = key;
@@ -111,6 +113,9 @@ public class ListMap {
 		} else {
 			head = newHead;
 		}
+
+		size++;
+
 		return oldValue;
 	}
 
@@ -122,6 +127,7 @@ public class ListMap {
 	public String remove(String key) {
 		for (ListElement p = head; p != null; p = p.next) {
 			if (Objects.equals(p.key, key)) {
+				size--;
 				eraseListElement(p);
 				return p.value;
 			}
