@@ -76,8 +76,9 @@ public class HashTable {
      */
     public void clear() {
         buckets = new ListMap[INIT_CAPACITY];
-        for (int i = 0; i < buckets.length; i++)
+        for (int i = 0; i < buckets.length; i++) {
             buckets[i] = new ListMap();
+        }
         entriesCount = 0;
     }
 
