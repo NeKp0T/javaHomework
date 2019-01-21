@@ -1,16 +1,23 @@
 package com.example.hashtable.test;
 
 import com.example.hashtable.HashTable;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class HashTableTest {
+    static private HashTable m;
+
+    @BeforeEach
+    void initM() {
+        m = new HashTable();
+    }
 
     @Test
     void containsBasic() {
-        HashTable m1 = new HashTable();
-        HashTable m2 = new HashTable();
+        var m1 = new HashTable();
+        var m2 = new HashTable();
 
         m1.put("looooooooong string", "some string");
         m1.put("bob", "");
@@ -31,8 +38,6 @@ class HashTableTest {
 
     @Test
     void containsNullTrue() {
-        HashTable m = new HashTable();
-
         m.put(null, "a");
         assertTrue(m.contains(null));
     }
@@ -47,8 +52,6 @@ class HashTableTest {
 
     @Test
     void containsAfterRehash() {
-        HashTable m = new HashTable();
-
         m.put("a", "aa");
         m.put("b", "bb");
         m.put("c", "cc");
@@ -64,8 +67,6 @@ class HashTableTest {
 
     @Test
     void containsChecksKeysNotValues() {
-        HashTable m = new HashTable();
-
         m.put("", "a");
         assertTrue(m.contains(""));
         assertFalse(m.contains("a"));
@@ -81,7 +82,6 @@ class HashTableTest {
             fail("Bad test");
         }
 
-        HashTable m = new HashTable();
         m.put(a, "");
         m.put(b, "");
 
@@ -93,8 +93,6 @@ class HashTableTest {
 
     @Test
     void getBasic() {
-        HashTable m = new HashTable();
-
         m.put("aaa", "a");
         m.put("bbb", "b");
 
@@ -105,16 +103,12 @@ class HashTableTest {
 
     @Test
     void getNull() {
-        HashTable m = new HashTable();
-
         m.put(null, "a");
         assertEquals("a", m.get(null));
     }
 
     @Test
     void getAfterRehash() {
-        HashTable m = new HashTable();
-
         m.put("aaa", "a");
         m.put("bbb", "b");
 
@@ -134,7 +128,6 @@ class HashTableTest {
             fail("Bad test");
         }
 
-        HashTable m = new HashTable();
         m.put(a, "a");
         m.put(b, "b");
 
@@ -156,7 +149,6 @@ class HashTableTest {
             fail("Bad test");
         }
 
-        HashTable m = new HashTable();
         m.put(a, "a");
         m.put(b, "b");
 
@@ -172,8 +164,6 @@ class HashTableTest {
 
     @Test
     void putMultipleValuesWithSameKey() {
-        HashTable m = new HashTable();
-
         m.put("a", "1");
         assertEquals("1", m.put("a", "2"));
 
@@ -182,8 +172,6 @@ class HashTableTest {
 
     @Test
     void removeBasic() {
-        HashTable m = new HashTable();
-
         m.put("a", "aa");
         m.put("b", "bb");
 
@@ -196,16 +184,12 @@ class HashTableTest {
 
     @Test
     void removeNull() {
-        HashTable m = new HashTable();
-
         m.put(null, "a");
         assertEquals("a", m.remove(null));
     }
 
     @Test
     void removeMultipleValuesWithSameKey() {
-        HashTable m = new HashTable();
-
         m.put("b", "bb");
         m.put("b", "cc");
 
@@ -216,8 +200,6 @@ class HashTableTest {
 
     @Test
     void clear() {
-        HashTable m = new HashTable();
-
         m.put("a", "aa");
         m.put("b", "bb");
 
@@ -230,7 +212,6 @@ class HashTableTest {
 
     @Test
     void size() {
-        HashTable m = new HashTable();
         for (int i = 0; i < 100; i++) {
             assertEquals(i, m.size());
             m.put(String.valueOf(i), "");
@@ -239,7 +220,6 @@ class HashTableTest {
 
     @Test
     void sizeAfterOperationsWithNull() {
-        HashTable m = new HashTable();
         m.put(null, null);
         assertEquals(1, m.size());
         m.put(null, "a");

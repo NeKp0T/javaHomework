@@ -1,6 +1,8 @@
 package com.example.hashtable.test;
 
 import com.example.hashtable.ListMap;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
@@ -9,10 +11,17 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ListMapTest {
+    static private ListMap m;
+
+    @BeforeEach
+    void initM() {
+        m = new ListMap();
+    }
+
     @Test
     void containsBasic() {
-        ListMap m1 = new ListMap();
-        ListMap m2 = new ListMap();
+        var m1 = new ListMap();
+        var m2 = new ListMap();
 
         m1.put("looooooooong string", "some string");
         m1.put("bob", "");
@@ -33,24 +42,18 @@ class ListMapTest {
 
     @Test
     void containsNullTrue() {
-        ListMap m = new ListMap();
-
         m.put(null, "a");
         assertTrue(m.contains(null));
     }
 
     @Test
     void containsNullFalse() {
-        ListMap m = new ListMap();
-
         m.put("not null", "a");
         assertFalse(m.contains(null));
     }
 
     @Test
     void containswithManyKeys() {
-        ListMap m = new ListMap();
-
         m.put("a", "aa");
         m.put("b", "bb");
         m.put("c", "cc");
@@ -66,8 +69,6 @@ class ListMapTest {
 
     @Test
     void containsChecksKeysNotValues() {
-        ListMap m = new ListMap();
-
         m.put("", "a");
         assertTrue(m.contains(""));
         assertFalse(m.contains("a"));
@@ -75,8 +76,6 @@ class ListMapTest {
 
     @Test
     void getBasic() {
-        ListMap m = new ListMap();
-
         m.put("aaa", "a");
         m.put("bbb", "b");
 
@@ -87,8 +86,6 @@ class ListMapTest {
 
     @Test
     void getWithManyKeys() {
-        ListMap m = new ListMap();
-
         m.put("aaa", "a");
         m.put("bbb", "b");
 
@@ -109,7 +106,6 @@ class ListMapTest {
             fail("Bad test");
         }
 
-        ListMap m = new ListMap();
         m.put(a, "a");
         m.put(b, "b");
 
@@ -125,16 +121,12 @@ class ListMapTest {
 
     @Test
     void removeNull() {
-        ListMap m = new ListMap();
-
         m.put(null, "a");
         assertEquals("a", m.remove(null));
     }
 
     @Test
     void putMultipleValuesWithSameKey() {
-        ListMap m = new ListMap();
-
         m.put("a", "1");
         assertEquals("1", m.put("a", "2"));
 
@@ -143,8 +135,6 @@ class ListMapTest {
 
     @Test
     void removeBasic() {
-        ListMap m = new ListMap();
-
         m.put("a", "aa");
         m.put("b", "bb");
 
@@ -156,8 +146,6 @@ class ListMapTest {
 
     @Test
     void removeMultipleValuesWithSameKey() {
-        ListMap m = new ListMap();
-
         m.put("b", "bb");
         m.put("b", "cc");
 
@@ -168,8 +156,6 @@ class ListMapTest {
 
     @Test
     void clear() {
-        ListMap m = new ListMap();
-
         m.put("a", "aa");
         m.put("b", "bb");
 
@@ -182,7 +168,6 @@ class ListMapTest {
 
     @Test
     void size() {
-        ListMap m = new ListMap();
         for (int i = 0; i < 100; i++) {
             assertEquals(i, m.size());
             m.put(String.valueOf(i), "");
@@ -191,7 +176,6 @@ class ListMapTest {
 
     @Test
     void sizeAfterOperationsWithNull() {
-        ListMap m = new ListMap();
         m.put(null, null);
         assertEquals(1, m.size());
         m.put(null, "a");
@@ -204,14 +188,11 @@ class ListMapTest {
 
     @Test
     void popEmpty() {
-        ListMap m = new ListMap();
-
         assertNull(m.pop());
     }
 
     @Test
     void popReturn() {
-        ListMap m = new ListMap();
         m.put("a", "aa");
 
         ListMap.Entry e = m.pop();
@@ -221,7 +202,6 @@ class ListMapTest {
 
     @Test
     void popErases() {
-        ListMap m = new ListMap();
         m.put("a", "aa");
 
         ListMap.Entry e = m.pop();
