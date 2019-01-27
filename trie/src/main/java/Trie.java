@@ -1,31 +1,36 @@
+import java.io.IOException;
 import java.util.HashMap;
 
 public class Trie {
     private static class Node {
          /*
-          * Methods of this class do not accept null as argument.
+          * Methods of this class do not work correctly with null as argument.
           * However they don't perform any checks because outer class Trie does in instead.
           */
-        private HashMap<Integer, Node> next;
-        private int stringsEndHere;
+        private HashMap<Character, Node> next;
+        private boolean stringEndsHere;
         private int stringsEndSubtree;
 
         public Node() {
-            next = new HashMap<Integer, Node>();
+            next = new HashMap<Character, Node>();
         }
 
         public boolean add(String element, int position) {
             if (element.length() == position) {
-                stringsEndHereChange(1);
-                return stringsEndHere > 1;
+                boolean hadString = stringEndsHere;
+                stringEndsHereSet(true);
+                return !hadString;
             }
-            stringsEndSubtreeChange(1);
-            return accessNext(element.charAt(position)).add(element, position + 1);
+            boolean added = accessNext(element.charAt(position)).add(element, position + 1);
+            if (added) {
+                stringsEndSubtreeChange(1);
+            }
+            return added;
         }
 
         public boolean contains(String element, int position) {
             if (element.length() == position) {
-                return stringsEndHere > 0;
+                return stringEndsHere;
             }
             Node nextNode = getNext(element.charAt(position));
             return nextNode != null && nextNode.contains(element, position + 1);
@@ -33,11 +38,9 @@ public class Trie {
 
         public boolean remove(String element, int position) {
             if (element.length() == position) {
-                if (stringsEndHere > 0) {
-                    stringsEndHereChange(-1);
-                    return true;
-                }
-                return false;
+                boolean hadString = stringEndsHere;
+                stringEndsHereSet(false);
+                return hadString;
             }
 
             final boolean removed = accessNext(element.charAt(position)).remove(element, position + 1);
@@ -63,23 +66,29 @@ public class Trie {
             return stringsEndSubtree;
         }
 
-        private void stringsEndHereChange(int difference) {
-            stringsEndHere += difference;
-            stringsEndSubtreeChange(difference);
+        private void stringEndsHereSet(boolean value) {
+            if (value != stringEndsHere) {
+                if (value) {
+                    stringsEndSubtreeChange(1);
+                } else {
+                    stringsEndSubtreeChange(-1);
+                }
+            }
+            stringEndsHere = value;
         }
 
         private void stringsEndSubtreeChange(int difference) {
             stringsEndSubtree += difference;
         }
 
-        private Node accessNext(int character) {
+        private Node accessNext(char character) {
             if (!next.containsKey(character)) {
                 next.put(character, new Node());
             }
             return next.get(character);
         }
 
-        private Node getNext(int character) {
+        private Node getNext(char character) {
             return next.get(character);
         }
     }
@@ -90,28 +99,28 @@ public class Trie {
         root = new Node();
     }
 
-    boolean add(String element) throws IllegalArgumentException {
+    public boolean add(String element) throws IllegalArgumentException {
         if (element == null) {
             throw new IllegalArgumentException();
         }
         return root.add(element, 0);
     }
-    boolean contains(String element) throws IllegalArgumentException {
+    public boolean contains(String element) throws IllegalArgumentException {
         if (element == null) {
             throw new IllegalArgumentException();
         }
         return root.contains(element, 0);
     }
-    boolean remove(String element) {
+    public boolean remove(String element) {
         if (element == null) {
             throw new IllegalArgumentException();
         }
         return root.remove(element, 0);
     }
-    int size() {
+    public int size() {
         return root.getStringsEndSubtree();
     }
-    int howManyStartsWithPrefix(String prefix) {
+    public int howManyStartsWithPrefix(String prefix) {
         if (prefix == null) {
             throw new IllegalArgumentException();
         }
