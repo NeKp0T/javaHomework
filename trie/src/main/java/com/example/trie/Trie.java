@@ -1,9 +1,10 @@
+package com.example.trie;
+
 import java.io.*;
 import java.util.HashMap;
 
-
 /**
- * TODO
+ *
  */
 public class Trie {
     private static class Node {
