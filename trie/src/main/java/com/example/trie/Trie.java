@@ -4,7 +4,11 @@ import java.io.*;
 import java.util.HashMap;
 
 /**
+ * Implements trie data structure. Each string can only occur in a trie once.
  *
+ * All methods do not accept null string as an argument.
+ *
+ * Can be serialized and deserialized using corresponding methods
  */
 public class Trie {
     private static class Node {
