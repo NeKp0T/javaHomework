@@ -10,7 +10,7 @@ import java.util.HashMap;
  *
  * Can be serialized and deserialized using corresponding methods
  */
-public class Trie {
+public class Trie implements Serializable {
     private static class Node {
          /*
           * Methods of this class do not work correctly with null as argument.
