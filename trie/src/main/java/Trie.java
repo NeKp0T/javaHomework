@@ -1,5 +1,6 @@
-import java.io.IOException;
+import java.io.*;
 import java.util.HashMap;
+
 
 public class Trie {
     private static class Node {
@@ -91,6 +92,43 @@ public class Trie {
         private Node getNext(char character) {
             return next.get(character);
         }
+
+        /**
+         * int:
+         *   three bytes -- size of hashMap
+         *   one byte (zero or not) -- stringEndsHere
+         * for each hashMap entity:
+         *   char -- key of entry
+         *   Node serialization
+         */
+        public void deserialize(InputStream in) throws IOException {
+            var dataIn = new DataInputStream(in);
+
+            int firstInt = dataIn.readInt();
+            int mapSize = firstInt & ((1 << 24) - 1);
+            stringEndsHere = (firstInt >> 24 != 0);
+
+            for (int i = 0; i < mapSize; i++) {
+                char key = dataIn.readChar();
+                var value = new Node();
+                value.deserialize(in);
+                next.put(key, value);
+            }
+        }
+
+        public void serialize(OutputStream out) throws IOException {
+            var dataOut = new DataOutputStream(out);
+            int firstInt = next.size();
+            if (stringEndsHere) {
+                firstInt |= 1 << 24;
+            }
+            dataOut.writeInt(firstInt);
+
+            for (var i : next.entrySet()) {
+                dataOut.writeChar(i.getKey());
+                i.getValue().serialize(out);
+            }
+        }
     }
 
     Node root;
@@ -125,5 +163,12 @@ public class Trie {
             throw new IllegalArgumentException();
         }
         return root.howManyStartsWithPrefix(prefix, 0);
+    }
+
+    public void serialize(OutputStream out) throws IOException {
+        root.serialize(out);
+    }
+    public void deserialize(InputStream in) throws IOException {
+        root.deserialize(in);
     }
 }

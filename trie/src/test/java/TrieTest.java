@@ -1,5 +1,8 @@
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
+
+import java.io.*;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 
@@ -124,5 +127,25 @@ class TrieTest {
         assertEquals(2, trie.howManyStartsWithPrefix("q"));
         assertEquals(1, trie.howManyStartsWithPrefix("qwe"));
         assertEquals(1, trie.howManyStartsWithPrefix("qwer"));
+    }
+
+    @Test
+    void serializeDeserialize() throws IOException {
+        trie.add("qqaa");
+        trie.add("qqbb");
+        trie.add("");
+        trie.add("qq");
+        var out = new ByteArrayOutputStream();
+        trie.serialize(out);
+
+        var in = new ByteArrayInputStream(out.toByteArray());
+        var trieRead = new Trie();
+        trieRead.deserialize(in);
+        assertTrue(trieRead.contains("qqaa"));
+        assertTrue(trieRead.contains("qqbb"));
+        assertTrue(trieRead.contains(""));
+        assertTrue(trieRead.contains("qq"));
+        assertFalse(trieRead.contains("q"));
+        assertFalse(trieRead.contains("qqb"));
     }
 }
