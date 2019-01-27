@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Executable;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -160,5 +161,30 @@ class TrieTest {
                 trieRead.howManyStartsWithPrefix("qq"));
         assertEquals(trie.howManyStartsWithPrefix("qqa"),
                 trieRead.howManyStartsWithPrefix("qqa"));
+    }
+
+    @Test
+    void addThrowsTest() {
+        assertThrows(IllegalArgumentException.class, () -> trie.add(null));
+    }
+
+    @Test
+    void containsThrowsTest() {
+        assertThrows(IllegalArgumentException.class, () -> trie.contains(null));
+    }
+
+    @Test
+    void removeThrowsTest() {
+        assertThrows(IllegalArgumentException.class, () -> trie.remove(null));
+    }
+
+    @Test
+    void serializeThrowsTest() {
+        assertThrows(NullPointerException.class, () -> trie.serialize(null));
+    }
+
+    @Test
+    void deserializeThrowsTest() {
+        assertThrows(NullPointerException.class, () -> trie.deserialize(null));
     }
 }
