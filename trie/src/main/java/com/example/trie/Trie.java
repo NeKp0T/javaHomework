@@ -111,17 +111,21 @@ public class Trie implements Serializable {
          */
         public void deserialize(InputStream in) throws IOException {
             next = new HashMap<>();
+            stringEndsHere = false;
+            stringsEndSubtree = 0;
+
             var dataIn = new DataInputStream(in);
 
             int firstInt = dataIn.readInt();
             int mapSize = firstInt & ((1 << 24) - 1);
-            stringEndsHere = (firstInt >> 24 != 0);
+            stringEndsHereSet(firstInt >> 24 != 0);
 
             for (int i = 0; i < mapSize; i++) {
                 char key = dataIn.readChar();
                 var value = new Node();
                 value.deserialize(in);
                 next.put(key, value);
+                stringsEndSubtreeChange(value.getStringsEndSubtree());
             }
         }
 

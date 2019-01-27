@@ -151,5 +151,14 @@ class TrieTest {
         assertTrue(trieRead.contains("qq"));
         assertFalse(trieRead.contains("q"));
         assertFalse(trieRead.contains("qqb"));
+
+        assertEquals(trie.howManyStartsWithPrefix(""),
+                trieRead.howManyStartsWithPrefix(""));
+        assertEquals(trie.howManyStartsWithPrefix("q"),
+                trieRead.howManyStartsWithPrefix("q"));
+        assertEquals(trie.howManyStartsWithPrefix("qq"),
+                trieRead.howManyStartsWithPrefix("qq"));
+        assertEquals(trie.howManyStartsWithPrefix("qqa"),
+                trieRead.howManyStartsWithPrefix("qqa"));
     }
 }
