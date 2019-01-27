@@ -43,7 +43,7 @@ class TrieTest {
         String punctuation = "\"',./<>?\\|!@#$%^&*()_+";
         String rus = "абвгдеёжзийклмнопрстуфхцчшщъыбэюя";
         String arabic = "غظضذخثتشرقصفعسنملكيطحزوهدجبأ";
-        String emoji = "\uD83D\uDD25\uD83D\uDCAF"; // TODO
+        String emoji = "\uD83D\uDD25\uD83D\uDCAF";
         trie.add(punctuation);
         trie.add(rus);
         trie.add(arabic);
@@ -140,6 +140,7 @@ class TrieTest {
 
         var in = new ByteArrayInputStream(out.toByteArray());
         var trieRead = new Trie();
+        trieRead.add("q");
         trieRead.deserialize(in);
         assertTrue(trieRead.contains("qqaa"));
         assertTrue(trieRead.contains("qqbb"));
