@@ -1,5 +1,5 @@
-import com.sun.source.tree.Tree;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -143,47 +143,33 @@ class MyTreeSetImplementation<E extends Comparable<? super E>> extends AbstractS
         this.comparator = comparator;
     }
 
-    private TreeNode<E> addReturningNode(E e) {
-        if (root == null) {
-            root = new TreeNode<E>(e);
-            firstNode = root;
-            lastNode = root;
-            return root;
-        }
-        var i = root;
-        while (true) {
-            int res = comparator.compare(i.value, e);
-            if (res == 0) {
-                return null;
-            }
-            if (res < 0) {
-                if (i.left == null) {
-                    i.left = new TreeNode<E>(e);
-                    return i.left;
-                } else {
-                    i = i.left;
-                }
-            } else { // res > 0
-                if (i.right == null) {
-                    i.right = new TreeNode<E>(e);
-                    return i.right;
-                } else {
-                    i = i.right;
-                }
-            }
-        }
-    }
 
     public boolean add(E e) {
-        var node = addReturningNode(e);
-        if (node == null) {
+        if (root == null) {
+            root = new TreeNode<>(e);
+            return true;
+        }
+        var adjucent = findAdjacent(e);
+        int dir = comparator.compare(e, adjucent.value);
+
+        if (dir == 0) {
             return false;
         }
+
+        TreeNode<E> newNode;
+        if (dir < 0) {
+            adjucent.left = new TreeNode<>(e);
+            newNode = adjucent.left;
+        } else {
+            adjucent.right = new TreeNode<>(e);
+            newNode = adjucent.right;
+        }
+
         if (comparator.compare(e, firstNode.value) < 0) {
-            firstNode = node;
+            firstNode = newNode;
         }
         if (comparator.compare(e, lastNode.value) > 0) {
-            lastNode = node;
+            lastNode = newNode;
         }
         size++;
         return true;
@@ -203,7 +189,7 @@ class MyTreeSetImplementation<E extends Comparable<? super E>> extends AbstractS
     }
 
     public MyTreeSet<E> descendingSet() {
-        return null; // TODO
+        return new DescendingSetView();
     }
 
     public E first() {
@@ -220,20 +206,62 @@ class MyTreeSetImplementation<E extends Comparable<? super E>> extends AbstractS
         return lastNode.value;
     }
 
+    private TreeNode<E> floorNode(E e) {
+        var node = findAdjacent(e);
+        if (node == null) {
+            return null;
+        }
+        int dir = comparator.compare(node.value, e);
+        if (dir <= 0) {
+            return node;
+        } else {
+            return node.getPrev();
+        }
+    }
+
+    private TreeNode<E> ceilNode(E e) {
+        var node = findAdjacent(e);
+        if (node == null) {
+            return null;
+        }
+        int dir = comparator.compare(node.value, e);
+        if (dir >= 0) {
+            return node;
+        } else {
+            return node.getNext();
+        }
+    }
+
     public E lower(E e) {
-        return null;
+        var node = floorNode(e);
+        if (node == null || node.getPrev() == null) {
+            return null;
+        }
+        return node.getPrev().value;
     }
 
     public E floor(E e) {
-        return null;
+        var node = floorNode(e);
+        if (node == null) {
+            return null;
+        }
+        return node.value;
     }
 
     public E ceiling(E e) {
-        return null;
+        var node = ceilNode(e);
+        if (node == null) {
+            return null;
+        }
+        return node.value;
     }
 
     public E higher(E e) {
-        return null;
+        var node = ceilNode(e);
+        if (node == null || node.getNext() == null) {
+            return null;
+        }
+        return node.getNext().value;
     }
 
     public boolean isEmpty() {
@@ -242,5 +270,88 @@ class MyTreeSetImplementation<E extends Comparable<? super E>> extends AbstractS
 
     public boolean contains(Object o) {
         return false;
+    }
+
+    // null only if root is null
+    // returns position of e if it is present,
+    // or such node that e can be placed instead of left or right of it.
+    private @Nullable TreeNode<E> findAdjacent(E e) {
+        if (root == null) {
+            return null;
+        }
+        TreeNode<E> i = root;
+        while (true) {
+            int dir = comparator.compare(i.value, e);
+            if (dir == 0) {
+                return i;
+            }
+            if (dir < 0) {
+                if (i.left == null) {
+                    return i;
+                } else {
+                    i = i.left;
+                }
+            } else { // dir > 0
+                if (i.right == null) {
+                    return i;
+                } else {
+                    i = i.right;
+                }
+            }
+        }
+    }
+
+    private class DescendingSetView extends AbstractSet<E>
+    implements MyTreeSet<E> {
+
+        @Override
+        public Iterator<E> descendingIterator() {
+            return MyTreeSetImplementation.this.iterator();
+        }
+
+        @Override
+        public MyTreeSet<E> descendingSet() {
+            return MyTreeSetImplementation.this;
+        }
+
+        @Override
+        public E first() {
+            return MyTreeSetImplementation.this.last();
+        }
+
+        @Override
+        public E last() {
+            return MyTreeSetImplementation.this.first();
+        }
+
+        @Override
+        public E lower(E e) {
+            return MyTreeSetImplementation.this.higher(e);
+        }
+
+        @Override
+        public E floor(E e) {
+            return MyTreeSetImplementation.this.ceiling(e);
+        }
+
+        @Override
+        public E ceiling(E e) {
+            return MyTreeSetImplementation.this.floor(e);
+        }
+
+        @Override
+        public E higher(E e) {
+            return MyTreeSetImplementation.this.lower(e);
+        }
+
+        @Override
+        public Iterator<E> iterator() {
+            return MyTreeSetImplementation.this.descendingIterator();
+        }
+
+        @Override
+        public int size() {
+            return 0;
+        }
     }
 }
