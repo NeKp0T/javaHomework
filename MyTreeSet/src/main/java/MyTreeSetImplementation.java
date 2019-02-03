@@ -4,11 +4,12 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 
 
-class MyTreeSetImplementation<E extends Comparable<? super E>> extends AbstractSet<E>
-    implements MyTreeSet<E> {
+public class MyTreeSetImplementation<E extends Comparable<? super E>>
+        extends AbstractSet<E>
+        implements MyTreeSet<E> {
 
     static private class TreeNode<E> {
-        private E value;
+        private final E value;
         private TreeNode<E> left;
         private TreeNode<E> right;
         private TreeNode<E> up;
@@ -16,7 +17,7 @@ class MyTreeSetImplementation<E extends Comparable<? super E>> extends AbstractS
             this.value = value;
         }
 
-        public TreeNode<E> getNext() {
+        TreeNode<E> getNext() {
             if (this.right != null) {
                 return right.leftest();
             }
@@ -32,7 +33,7 @@ class MyTreeSetImplementation<E extends Comparable<? super E>> extends AbstractS
             return i.up;
         }
 
-        public TreeNode<E> getPrev() {
+        TreeNode<E> getPrev() {
             if (this.left != null) {
                 return left.rightest();
             }
@@ -74,7 +75,8 @@ class MyTreeSetImplementation<E extends Comparable<? super E>> extends AbstractS
         }
     }
 
-    private class TreeIterator implements Iterator<E> {
+    // TODO invalidation
+    public class TreeIterator implements Iterator<E> {
         private TreeNode<E> prev;
         private TreeNode<E> next;
 
@@ -124,21 +126,22 @@ class MyTreeSetImplementation<E extends Comparable<? super E>> extends AbstractS
             }
         }
 
-        public Iterator<E> descendingView() {
+        private Iterator<E> descendingView() {
             return new DescendingIterator();
         }
     }
 
-    private Comparator<? super E> comparator;
+    private final Comparator<? super E> comparator;
     private int size;
     private TreeNode<E> firstNode;
     private TreeNode<E> lastNode;
     private TreeNode<E> root;
 
     public MyTreeSetImplementation() {
-        this(Comparator.<E>naturalOrder());
+        this(Comparator.naturalOrder());
     }
 
+    @SuppressWarnings("WeakerAccess")
     public MyTreeSetImplementation(@NotNull Comparator<? super E> comparator) {
         this.comparator = comparator;
     }
@@ -149,8 +152,8 @@ class MyTreeSetImplementation<E extends Comparable<? super E>> extends AbstractS
             root = new TreeNode<>(e);
             return true;
         }
-        var adjucent = findAdjacent(e);
-        int dir = comparator.compare(e, adjucent.value);
+        var adjacent = findAdjacent(e);
+        int dir = comparator.compare(e, adjacent.value);
 
         if (dir == 0) {
             return false;
@@ -158,11 +161,11 @@ class MyTreeSetImplementation<E extends Comparable<? super E>> extends AbstractS
 
         TreeNode<E> newNode;
         if (dir < 0) {
-            adjucent.left = new TreeNode<>(e);
-            newNode = adjucent.left;
+            adjacent.left = new TreeNode<>(e);
+            newNode = adjacent.left;
         } else {
-            adjucent.right = new TreeNode<>(e);
-            newNode = adjucent.right;
+            adjacent.right = new TreeNode<>(e);
+            newNode = adjacent.right;
         }
 
         if (comparator.compare(e, firstNode.value) < 0) {
@@ -180,7 +183,7 @@ class MyTreeSetImplementation<E extends Comparable<? super E>> extends AbstractS
     }
 
     @NotNull
-    public Iterator iterator() {
+    public Iterator<E> iterator() {
         return new TreeIterator(null, firstNode);
     }
 
@@ -269,7 +272,10 @@ class MyTreeSetImplementation<E extends Comparable<? super E>> extends AbstractS
     }
 
     public boolean contains(Object o) {
-        return false;
+        if (isEmpty()) {
+            throw new NoSuchElementException();
+        }
+        return comparator.compare(findAdjacent((E) o).value, (E) o) == 0;
     }
 
     // null only if root is null
@@ -344,6 +350,7 @@ class MyTreeSetImplementation<E extends Comparable<? super E>> extends AbstractS
             return MyTreeSetImplementation.this.lower(e);
         }
 
+        @NotNull
         @Override
         public Iterator<E> iterator() {
             return MyTreeSetImplementation.this.descendingIterator();
