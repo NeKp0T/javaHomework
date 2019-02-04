@@ -11,9 +11,10 @@ import java.util.function.Supplier;
 
 class MyTreeSetBinaryTest {
 
-    MyTreeSetBinary<String> defaultSet;
+    private MyTreeSetBinary<String> defaultSet;
 
     private static String[] elements;
+    @SuppressWarnings({"OverwrittenKey", "SpellCheckingInspection"})
     private void putbcabToSet(MyTreeSet<String> set) {
         set.add("b");
         set.add("c");
@@ -326,7 +327,6 @@ class MyTreeSetBinaryTest {
     }
 
     @Test
-    @SuppressWarnings({"ResultOfMethodCallIgnored", "SuspiciousMethodCalls"})
     void containsTrash() {
         containsTrash(defaultSet);
     }
@@ -486,28 +486,31 @@ class MyTreeSetBinaryTest {
         assertEquals("z", set.lower("h"));
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     @Test
     void iteratorInvalidation() {
         var i = defaultSet.iterator();
         defaultSet.add("a");
-        assertThrows(ConcurrentModificationException.class, () -> i.next());
-        assertThrows(ConcurrentModificationException.class, () -> i.hasNext());
+        assertThrows(ConcurrentModificationException.class, i::next);
+        assertThrows(ConcurrentModificationException.class, i::hasNext);
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     @Test
     void descendingIteratorInvalidation() {
         var i = defaultSet.descendingIterator();
         defaultSet.add("a");
-        assertThrows(ConcurrentModificationException.class, () -> i.next());
-        assertThrows(ConcurrentModificationException.class, () -> i.hasNext());
+        assertThrows(ConcurrentModificationException.class, i::next);
+        assertThrows(ConcurrentModificationException.class, i::hasNext);
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     @Test
     void descendingSetIteratorInvalidation() {
         var i = defaultSet.descendingSet().iterator();
         defaultSet.add("a");
-        assertThrows(ConcurrentModificationException.class, () -> i.next());
-        assertThrows(ConcurrentModificationException.class, () -> i.hasNext());
+        assertThrows(ConcurrentModificationException.class, i::next);
+        assertThrows(ConcurrentModificationException.class, i::hasNext);
     }
 }
 

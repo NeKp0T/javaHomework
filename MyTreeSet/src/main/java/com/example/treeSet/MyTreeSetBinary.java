@@ -62,17 +62,19 @@ public class MyTreeSetBinary<E extends Comparable<? super E>>
         }
 
         // doesn't check if up == null
+        @SuppressWarnings("ConstantConditions")
         private boolean isLeftSon() {
             return up.left == this;
         }
 
         // doesn't check if up == null
+        @SuppressWarnings("ConstantConditions")
         private boolean isRightSon() {
             return up.right == this;
         }
 
         private @NotNull TreeNode<E> leftestChild() {
-            TreeNode i = this;
+            TreeNode<E> i = this;
             while (i.left != null) {
                 i = i.left;
             }
@@ -99,7 +101,7 @@ public class MyTreeSetBinary<E extends Comparable<? super E>>
         @Nullable
         private TreeNode<E> next;
 
-        private int creationVersion;
+        private final int creationVersion;
 
         TreeIterator(@Nullable TreeNode<E> prev, @Nullable TreeNode<E> next) {
             creationVersion = version;
@@ -200,8 +202,8 @@ public class MyTreeSetBinary<E extends Comparable<? super E>>
             newNode = new TreeNode<>(e);
             root = newNode;
         } else {
-            // root is not null, so findAdjucent returns not null
-            @NotNull var adjacent = findAdjacent(e);
+            // root is not null, so findAdjacent returns not null
+            @SuppressWarnings("ConstantConditions") @NotNull var adjacent = findAdjacent(e);
             @SuppressWarnings("ConstantConditions") int dir = comparator.compare(e, adjacent.value);
 
             if (dir == 0) {
@@ -316,7 +318,8 @@ public class MyTreeSetBinary<E extends Comparable<? super E>>
     }
 
     /**
-     * @return if size() is 0
+     * Checks if set is empty, that is if its's <code>size</code> is 0
+     * @return if set is empty
      */
     public boolean isEmpty() {
         return size == 0;
@@ -327,13 +330,13 @@ public class MyTreeSetBinary<E extends Comparable<? super E>>
      * {@inheritDoc}
      */
     public boolean contains(Object o) {
-        E element = (E) o;
+        @SuppressWarnings("unchecked") E element = (E) o;
         if (isEmpty()) {
             throw new NoSuchElementException();
         }
         // Will throw ClassCastError if o's type isn't successor of E
-        // not empty => findAdjucent returns not null
-        //noinspection unchecked,ConstantConditions
+        // not empty => findAdjacent returns not null
+        // noinspection ConstantConditions
         return comparator.compare(findAdjacent(element).value, element) == 0;
     }
 
@@ -368,7 +371,7 @@ public class MyTreeSetBinary<E extends Comparable<? super E>>
     }
 
     private class DescendingSetView extends AbstractSet<E>
-    implements MyTreeSet<E> {
+            implements MyTreeSet<E> {
 
         @Override
         public boolean add(E e) {
