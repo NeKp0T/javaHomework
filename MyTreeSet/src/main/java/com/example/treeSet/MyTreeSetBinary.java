@@ -5,7 +5,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 
 
-public class MyTreeSetImplementation<E extends Comparable<? super E>>
+public class MyTreeSetBinary<E extends Comparable<? super E>>
         extends AbstractSet<E>
         implements MyTreeSet<E> {
 
@@ -88,7 +88,6 @@ public class MyTreeSetImplementation<E extends Comparable<? super E>>
         }
     }
 
-    // TODO invalidation
     class TreeIterator implements Iterator<E> {
 
         @Nullable
@@ -183,11 +182,11 @@ public class MyTreeSetImplementation<E extends Comparable<? super E>>
 
     private int version;
 
-    public MyTreeSetImplementation() {
+    public MyTreeSetBinary() {
         this(Comparator.naturalOrder());
     }
 
-    public MyTreeSetImplementation(@NotNull Comparator<? super E> comparator) {
+    public MyTreeSetBinary(@NotNull Comparator<? super E> comparator) {
         this.comparator = comparator;
     }
 
@@ -368,63 +367,63 @@ public class MyTreeSetImplementation<E extends Comparable<? super E>>
 
         @Override
         public boolean add(E e) {
-            return MyTreeSetImplementation.this.add(e);
+            return MyTreeSetBinary.this.add(e);
         }
 
         @Override
         public @NotNull Iterator<E> descendingIterator() {
-            return MyTreeSetImplementation.this.iterator();
+            return MyTreeSetBinary.this.iterator();
         }
 
         @Override
         public @NotNull MyTreeSet<E> descendingSet() {
-            return MyTreeSetImplementation.this;
+            return MyTreeSetBinary.this;
         }
 
         @Override
         public @Nullable E first() {
-            return MyTreeSetImplementation.this.last();
+            return MyTreeSetBinary.this.last();
         }
 
         @Override
         public @Nullable E last() {
-            return MyTreeSetImplementation.this.first();
+            return MyTreeSetBinary.this.first();
         }
 
         @Override
         public @Nullable E lower(E e) {
-            return MyTreeSetImplementation.this.higher(e);
+            return MyTreeSetBinary.this.higher(e);
         }
 
         @Override
         public @Nullable E floor(E e) {
-            return MyTreeSetImplementation.this.ceiling(e);
+            return MyTreeSetBinary.this.ceiling(e);
         }
 
         @Override
         public @Nullable E ceiling(E e) {
-            return MyTreeSetImplementation.this.floor(e);
+            return MyTreeSetBinary.this.floor(e);
         }
 
         @Override
         public @Nullable E higher(E e) {
-            return MyTreeSetImplementation.this.lower(e);
+            return MyTreeSetBinary.this.lower(e);
         }
 
         @NotNull
         @Override
         public Iterator<E> iterator() {
-            return MyTreeSetImplementation.this.descendingIterator();
+            return MyTreeSetBinary.this.descendingIterator();
         }
 
         @Override
         public int size() {
-            return MyTreeSetImplementation.this.size();
+            return MyTreeSetBinary.this.size();
         }
 
         @Override
         public boolean contains(Object o) {
-            return MyTreeSetImplementation.this.contains(o);
+            return MyTreeSetBinary.this.contains(o);
         }
     }
 }

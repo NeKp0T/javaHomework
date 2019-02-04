@@ -3,18 +3,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
-import com.example.treeSet.MyTreeSetImplementation;
+import com.example.treeSet.MyTreeSetBinary;
 
-import java.lang.reflect.Executable;
 import java.util.*;
-import java.util.concurrent.Callable;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 
-class MyTreeSetImplementationTest {
+class MyTreeSetBinaryTest {
 
-    MyTreeSetImplementation<String> defaultSet;
+    MyTreeSetBinary<String> defaultSet;
 
     private static String[] elements;
     private void putbcabToSet(MyTreeSet<String> set) {
@@ -26,7 +23,7 @@ class MyTreeSetImplementationTest {
 
     @BeforeEach
     void init() {
-        defaultSet = new MyTreeSetImplementation<>();
+        defaultSet = new MyTreeSetBinary<>();
         elements = new String[]{"a", "b", "c"};
     }
 
@@ -344,20 +341,20 @@ class MyTreeSetImplementationTest {
     @Test
     void differentComparatorTests() {
         elements = new String[]{"c", "b", "a"};
-        runMostTests(() -> new MyTreeSetImplementation<>(Comparator.reverseOrder()));
-        descendingFloorCeilEtc(() -> (new MyTreeSetImplementation<String>()).descendingSet());
+        runMostTests(() -> new MyTreeSetBinary<>(Comparator.reverseOrder()));
+        descendingFloorCeilEtc(() -> (new MyTreeSetBinary<String>()).descendingSet());
     }
 
     @Test
     void descendingSet() {
         elements = new String[]{"c", "b", "a"};
-        runMostTests(() -> (new MyTreeSetImplementation<String>()).descendingSet());
-        descendingFloorCeilEtc(() -> (new MyTreeSetImplementation<String>()).descendingSet());
+        runMostTests(() -> (new MyTreeSetBinary<String>()).descendingSet());
+        descendingFloorCeilEtc(() -> (new MyTreeSetBinary<String>()).descendingSet());
     }
 
     @Test
     void descendingSetSquared() {
-        runMostTests(() -> (new MyTreeSetImplementation<String>()).descendingSet().descendingSet());
+        runMostTests(() -> (new MyTreeSetBinary<String>()).descendingSet().descendingSet());
     }
 
     void runMostTests(Supplier<MyTreeSet<String>> setGenerator) {
