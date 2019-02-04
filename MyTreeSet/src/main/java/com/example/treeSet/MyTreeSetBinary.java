@@ -5,6 +5,10 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 
 
+/**
+ * Implements <code>MyTreeSet<E></code> interface using unbalanced binary tree.
+ * @param <E> a type of set elements
+ */
 public class MyTreeSetBinary<E extends Comparable<? super E>>
         extends AbstractSet<E>
         implements MyTreeSet<E> {
@@ -311,16 +315,16 @@ public class MyTreeSetBinary<E extends Comparable<? super E>>
         return TreeNode.getValueOrNull(node);
     }
 
+    /**
+     * @return if size() is 0
+     */
     public boolean isEmpty() {
         return size == 0;
     }
 
 
     /**
-     * // TODO
-     * @throws ClassCastException
-     * @param o
-     * @return
+     * {@inheritDoc}
      */
     public boolean contains(Object o) {
         E element = (E) o;
@@ -332,6 +336,7 @@ public class MyTreeSetBinary<E extends Comparable<? super E>>
         //noinspection unchecked,ConstantConditions
         return comparator.compare(findAdjacent(element).value, element) == 0;
     }
+
 
     // null only if root is null
     // returns position of e if it is present,
