@@ -488,5 +488,29 @@ class MyTreeSetImplementationTest {
         set.add("z");
         assertEquals("z", set.lower("h"));
     }
+
+    @Test
+    void iteratorInvalidation() {
+        var i = defaultSet.iterator();
+        defaultSet.add("a");
+        assertThrows(ConcurrentModificationException.class, () -> i.next());
+        assertThrows(ConcurrentModificationException.class, () -> i.hasNext());
+    }
+
+    @Test
+    void descendingIteratorInvalidation() {
+        var i = defaultSet.descendingIterator();
+        defaultSet.add("a");
+        assertThrows(ConcurrentModificationException.class, () -> i.next());
+        assertThrows(ConcurrentModificationException.class, () -> i.hasNext());
+    }
+
+    @Test
+    void descendingSetIteratorInvalidation() {
+        var i = defaultSet.descendingSet().iterator();
+        defaultSet.add("a");
+        assertThrows(ConcurrentModificationException.class, () -> i.next());
+        assertThrows(ConcurrentModificationException.class, () -> i.hasNext());
+    }
 }
 

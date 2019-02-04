@@ -90,23 +90,36 @@ public class MyTreeSetImplementation<E extends Comparable<? super E>>
 
     // TODO invalidation
     class TreeIterator implements Iterator<E> {
+
         @Nullable
         private TreeNode<E> prev;
         @Nullable
         private TreeNode<E> next;
 
-        private TreeIterator(@Nullable TreeNode<E> prev, @Nullable TreeNode<E> next) {
+        private int creationVersion;
+
+        TreeIterator(@Nullable TreeNode<E> prev, @Nullable TreeNode<E> next) {
+            creationVersion = version;
             this.prev = prev;
             this.next = next;
         }
 
+        // throws a ConcurrentModificationException if collection was modified since iterator creation
+        private void checkConcurrentModification() {
+            if (version > creationVersion) {
+                throw new ConcurrentModificationException();
+            }
+        }
+
         @Override
         public boolean hasNext() {
+            checkConcurrentModification();
             return next != null;
         }
 
         @Override
         public @NotNull E next() {
+            checkConcurrentModification();
             if (!hasNext()) {
                 throw new NoSuchElementException();
             }
@@ -120,11 +133,13 @@ public class MyTreeSetImplementation<E extends Comparable<? super E>>
 
         @SuppressWarnings("WeakerAccess")
         public boolean hasPrevious() {
+            checkConcurrentModification();
             return prev != null;
         }
 
         @SuppressWarnings("WeakerAccess")
         public @NotNull E previous() {
+            checkConcurrentModification();
             if (!hasPrevious()) {
                 throw new NoSuchElementException();
             }
@@ -158,12 +173,15 @@ public class MyTreeSetImplementation<E extends Comparable<? super E>>
     @NotNull
     private final Comparator<? super E> comparator;
     private int size;
+
     @Nullable
     private TreeNode<E> firstNode;
     @Nullable
     private TreeNode<E> lastNode;
     @Nullable
     private TreeNode<E> root;
+
+    private int version;
 
     public MyTreeSetImplementation() {
         this(Comparator.naturalOrder());
@@ -205,6 +223,7 @@ public class MyTreeSetImplementation<E extends Comparable<? super E>>
         }
 
         size++;
+        version++;
         return true;
     }
 
