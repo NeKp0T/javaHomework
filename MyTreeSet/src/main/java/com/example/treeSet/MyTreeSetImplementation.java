@@ -348,6 +348,11 @@ public class MyTreeSetImplementation<E extends Comparable<? super E>>
     implements MyTreeSet<E> {
 
         @Override
+        public boolean add(E e) {
+            return MyTreeSetImplementation.this.add(e);
+        }
+
+        @Override
         public @NotNull Iterator<E> descendingIterator() {
             return MyTreeSetImplementation.this.iterator();
         }
@@ -395,7 +400,12 @@ public class MyTreeSetImplementation<E extends Comparable<? super E>>
 
         @Override
         public int size() {
-            return 0;
+            return MyTreeSetImplementation.this.size();
+        }
+
+        @Override
+        public boolean contains(Object o) {
+            return MyTreeSetImplementation.this.contains(o);
         }
     }
 }

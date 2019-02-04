@@ -5,14 +5,18 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import com.example.treeSet.MyTreeSetImplementation;
 
+import java.lang.reflect.Executable;
 import java.util.*;
+import java.util.concurrent.Callable;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 
 class MyTreeSetImplementationTest {
 
     MyTreeSetImplementation<String> defaultSet;
 
-    private static String[] elements =  new String[]{"a", "b", "c"};
+    private static String[] elements;
     private void putbcabToSet(MyTreeSet<String> set) {
         set.add("b");
         set.add("c");
@@ -23,6 +27,7 @@ class MyTreeSetImplementationTest {
     @BeforeEach
     void init() {
         defaultSet = new MyTreeSetImplementation<>();
+        elements = new String[]{"a", "b", "c"};
     }
 
     @Test
@@ -81,6 +86,17 @@ class MyTreeSetImplementationTest {
     void sizeCollisions(MyTreeSet<String> set) {
         putbcabToSet(set);
         assertEquals(3, set.size());
+    }
+
+    @Test
+    void isEmptyTrue() {
+        assertTrue(defaultSet.isEmpty());
+    }
+
+    @Test
+    void isEmptyFalse() {
+        defaultSet.add("a");
+        assertFalse(defaultSet.isEmpty());
     }
 
     @Test
@@ -289,17 +305,6 @@ class MyTreeSetImplementationTest {
     }
 
     @Test
-    void isEmpty() {
-        isEmpty(defaultSet);
-    }
-
-    void isEmpty(MyTreeSet<String> set) {
-        assertTrue(set.isEmpty());
-        set.add("a");
-        assertFalse(set.isEmpty());
-    }
-
-    @Test
     void containsTrue() {
         containsTrue(defaultSet);
     }
@@ -336,18 +341,152 @@ class MyTreeSetImplementationTest {
     }
 
 
-//    @Test
-//    void differentComparatorTests() {
-//        elements = new String[]{"c","b","a"};
-////        var set = new MyTreeSetImplementation<String>(Comparator.reverseOrder());
-//        addTrue(new MyTreeSetImplementation<String>(Comparator.reverseOrder()));
-//        addFalse(new MyTreeSetImplementation<String>(Comparator.reverseOrder()));
-//    }
-//
-//
-//    @Test
-//    void descendingSet() {
-////        elements = new String[]{"c","b","a"};
-//        assertFalse(true);
-//    }
+    @Test
+    void differentComparatorTests() {
+        elements = new String[]{"c", "b", "a"};
+        runMostTests(() -> new MyTreeSetImplementation<>(Comparator.reverseOrder()));
+        descendingFloorCeilEtc(() -> (new MyTreeSetImplementation<String>()).descendingSet());
+    }
+
+    @Test
+    void descendingSet() {
+        elements = new String[]{"c", "b", "a"};
+        runMostTests(() -> (new MyTreeSetImplementation<String>()).descendingSet());
+        descendingFloorCeilEtc(() -> (new MyTreeSetImplementation<String>()).descendingSet());
+    }
+
+    @Test
+    void descendingSetSquared() {
+        runMostTests(() -> (new MyTreeSetImplementation<String>()).descendingSet().descendingSet());
+    }
+
+    void runMostTests(Supplier<MyTreeSet<String>> setGenerator) {
+        addComplicated(setGenerator.get());
+        addFalse(setGenerator.get());
+        addTrue(setGenerator.get());
+//        ceiling(setGenerator.get());
+//        ceilingGap(setGenerator.get());
+//        ceilingLower(setGenerator.get());
+//        ceilingNull(setGenerator.get());
+        containsFalse(setGenerator.get());
+        containsTrash(setGenerator.get());
+        containsTrue(setGenerator.get());
+        descendingIterator(setGenerator.get());
+        first(setGenerator.get());
+//        floor(setGenerator.get());
+//        floorGap(setGenerator.get());
+//        floorGreater(setGenerator.get());
+//        floorNull(setGenerator.get());
+//        higher(setGenerator.get());
+//        higherGap(setGenerator.get());
+//        higherLower(setGenerator.get());
+//        higherNull(setGenerator.get());
+        iteratorNextAndHasNext(setGenerator.get());
+        last(setGenerator.get());
+//        lower(setGenerator.get());
+//        lowerGreater(setGenerator.get());
+//        lowerNull(setGenerator.get());
+        sizeBasic(setGenerator.get());
+        sizeCollisions(setGenerator.get());
+        sizeCollisions(setGenerator.get());
+    }
+
+    void descendingFloorCeilEtc(Supplier<MyTreeSet<String>> setGenerator) {
+        descendingHigher(setGenerator.get());
+        descendingHigherNull(setGenerator.get());
+        descendingHigherGreater(setGenerator.get());
+        descendingCeiling(setGenerator.get());
+        descendingCeilingNull(setGenerator.get());
+        descendingCeilingGreater(setGenerator.get());
+        descendingCeilingGap(setGenerator.get());
+        descendingFloor(setGenerator.get());
+        descendingFloorNull(setGenerator.get());
+        descendingFloorLower(setGenerator.get());
+        descendingFloorGap(setGenerator.get());
+        descendingLower(setGenerator.get());
+        descendingLowerNull(setGenerator.get());
+        descendingLowerLower(setGenerator.get());
+        descendingLowerGap(setGenerator.get());
+    }
+
+    void descendingHigher(MyTreeSet<String> set) {
+        putbcabToSet(set);
+        assertEquals("a", set.higher("b"));
+    }
+
+    void descendingHigherNull(MyTreeSet<String> set) {
+        putbcabToSet(set);
+        assertNull(set.higher("a"));
+    }
+
+    void descendingHigherGreater(MyTreeSet<String> set) {
+        putbcabToSet(set);
+        assertEquals("c", set.higher("z"));
+    }
+
+    void descendingCeiling(MyTreeSet<String> set) {
+        putbcabToSet(set);
+        assertEquals("b", set.ceiling("b"));
+    }
+
+    void descendingCeilingNull(MyTreeSet<String> set) {
+        putbcabToSet(set);
+        assertNull(set.ceiling(""));
+    }
+
+    void descendingCeilingGreater(MyTreeSet<String> set) {
+        putbcabToSet(set);
+        assertEquals("c", set.ceiling("z"));
+    }
+
+    void descendingCeilingGap(MyTreeSet<String> set) {
+        putbcabToSet(set);
+        set.add("z");
+        assertEquals("c", set.ceiling("h"));
+    }
+
+    void descendingFloor(MyTreeSet<String> set) {
+        putbcabToSet(set);
+        assertEquals("b", set.floor("b"));
+    }
+
+    void descendingFloorNull(MyTreeSet<String> set) {
+        putbcabToSet(set);
+        assertNull(set.floor("d"));
+    }
+
+    void descendingFloorLower(MyTreeSet<String> set) {
+        putbcabToSet(set);
+        assertEquals("a", set.floor(""));
+    }
+
+    void descendingFloorGap(MyTreeSet<String> set) {
+        putbcabToSet(set);
+        set.add("z");
+        assertEquals("z", set.floor("h"));
+    }
+
+    void descendingLower(MyTreeSet<String> set) {
+        putbcabToSet(set);
+        assertEquals("c", set.lower("b"));
+    }
+
+    void descendingLowerNull(MyTreeSet<String> set) {
+        putbcabToSet(set);
+        assertNull(set.lower("c"));
+    }
+
+    void descendingLowerLower(MyTreeSet<String> set) {
+        set.add("b");
+        set.add("d");
+        set.add("e");
+        assertEquals("b", set.lower(""));
+    }
+
+    void descendingLowerGap(MyTreeSet<String> set) {
+        putbcabToSet(set);
+        set.add("z");
+        assertEquals("z", set.lower("h"));
+    }
 }
+
