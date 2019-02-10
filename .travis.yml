@@ -7,6 +7,6 @@ env:
  - PROJECT_DIR=hw1-HashTable
  - PROJECT_DIR=trie
 # - PROJECT_DIR=MyTreeSet
- - PROJECT_DIR=SmartList
+# - PROJECT_DIR=SmartList
 script: cd $PROJECT_DIR && if [[ -f gradlew ]] ; then ./gradlew check; else mvn test; fi;
 
