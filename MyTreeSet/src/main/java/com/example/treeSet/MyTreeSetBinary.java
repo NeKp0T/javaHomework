@@ -9,7 +9,7 @@ import java.util.*;
  * Implements <code>MyTreeSet<E></code> interface using unbalanced binary tree.
  * @param <E> a type of set elements
  */
-public class MyTreeSetBinary<E extends Comparable<? super E>>
+public class MyTreeSetBinary<E>
         extends AbstractSet<E>
         implements MyTreeSet<E> {
 
@@ -94,7 +94,7 @@ public class MyTreeSetBinary<E extends Comparable<? super E>>
         }
     }
 
-    class TreeIterator implements Iterator<E> {
+    private class TreeIterator implements Iterator<E> {
 
         @Nullable
         private TreeNode<E> prev;
@@ -188,14 +188,23 @@ public class MyTreeSetBinary<E extends Comparable<? super E>>
 
     private int version;
 
-    public MyTreeSetBinary() {
-        this(Comparator.naturalOrder());
+    public <T extends Comparable<? super T>>
+    MyTreeSetBinary() {
+        this((o1, o2) -> {
+            //noinspection unchecked
+            Comparable<? super E> comparable = (Comparable<? super E>) o1;
+            return comparable.compareTo(o2);
+        });
     }
 
     public MyTreeSetBinary(@NotNull Comparator<? super E> comparator) {
         this.comparator = comparator;
     }
 
+    @Override
+    /**
+     * {@inheritDoc}
+     */
     public boolean add(E e) {
         TreeNode<E> newNode;
         if (root == null) {
@@ -204,13 +213,13 @@ public class MyTreeSetBinary<E extends Comparable<? super E>>
         } else {
             // root is not null, so findAdjacent returns not null
             @SuppressWarnings("ConstantConditions") @NotNull var adjacent = findAdjacent(e);
-            @SuppressWarnings("ConstantConditions") int dir = comparator.compare(e, adjacent.value);
+            @SuppressWarnings("ConstantConditions") int direction = comparator.compare(e, adjacent.value);
 
-            if (dir == 0) {
+            if (direction == 0) {
                 return false;
             }
 
-            if (dir < 0) {
+            if (direction < 0) {
                 adjacent.left = new TreeNode<>(e);
                 newNode = adjacent.left;
             } else {
@@ -274,8 +283,8 @@ public class MyTreeSetBinary<E extends Comparable<? super E>>
         if (node == null) {
             return null;
         }
-        int dir = comparator.compare(node.value, e);
-        if (!(dir < 0)) {
+        int direction = comparator.compare(node.value, e);
+        if (!(direction < 0)) {
             node = node.getPrev();
         }
         return TreeNode.getValueOrNull(node);
@@ -286,8 +295,8 @@ public class MyTreeSetBinary<E extends Comparable<? super E>>
         if (node == null) {
             return null;
         }
-        int dir = comparator.compare(node.value, e);
-        if (!(dir <= 0)) {
+        int direction = comparator.compare(node.value, e);
+        if (!(direction <= 0)) {
             node = node.getPrev();
         }
         return TreeNode.getValueOrNull(node);
@@ -298,8 +307,8 @@ public class MyTreeSetBinary<E extends Comparable<? super E>>
         if (node == null) {
             return null;
         }
-        int dir = comparator.compare(node.value, e);
-        if (!(dir >= 0)) {
+        int direction = comparator.compare(node.value, e);
+        if (!(direction >= 0)) {
             node = node.getNext();
         }
         return TreeNode.getValueOrNull(node);
@@ -310,8 +319,8 @@ public class MyTreeSetBinary<E extends Comparable<? super E>>
         if (node == null) {
             return null;
         }
-        int dir = comparator.compare(node.value, e);
-        if (!(dir > 0)) {
+        int direction = comparator.compare(node.value, e);
+        if (!(direction > 0)) {
             node = node.getNext();
         }
         return TreeNode.getValueOrNull(node);
@@ -350,17 +359,17 @@ public class MyTreeSetBinary<E extends Comparable<? super E>>
         }
         TreeNode<E> i = root;
         while (true) {
-            int dir = comparator.compare(i.value, e);
-            if (dir == 0) {
+            int direction = comparator.compare(i.value, e);
+            if (direction == 0) {
                 return i;
             }
-            if (dir > 0) {
+            if (direction > 0) {
                 if (i.left == null) {
                     return i;
                 } else {
                     i = i.left;
                 }
-            } else { // dir < 0
+            } else { // direction < 0
                 if (i.right == null) {
                     return i;
                 } else {

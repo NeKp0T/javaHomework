@@ -1,9 +1,8 @@
-import com.example.treeSet.MyTreeSet;
+package com.example.treeSet;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
-
-import com.example.treeSet.MyTreeSetBinary;
 
 import java.util.*;
 import java.util.function.Supplier;
@@ -15,7 +14,7 @@ class MyTreeSetBinaryTest {
 
     private static String[] elements;
     @SuppressWarnings({"OverwrittenKey", "SpellCheckingInspection"})
-    private void putbcabToSet(MyTreeSet<String> set) {
+    private void putLowercaseBcabToSet(MyTreeSet<String> set) {
         set.add("b");
         set.add("c");
         set.add("a");
@@ -82,7 +81,7 @@ class MyTreeSetBinaryTest {
     }
 
     void sizeCollisions(MyTreeSet<String> set) {
-        putbcabToSet(set);
+        putLowercaseBcabToSet(set);
         assertEquals(3, set.size());
     }
 
@@ -103,7 +102,7 @@ class MyTreeSetBinaryTest {
     }
 
     void iteratorNextAndHasNext(MyTreeSet<String> set) {
-        putbcabToSet(set);
+        putLowercaseBcabToSet(set);
         var iterator = set.iterator();
         for (int i = 0; i < 3; i++) {
             assertTrue(iterator.hasNext());
@@ -118,7 +117,7 @@ class MyTreeSetBinaryTest {
     }
 
     void descendingIterator(MyTreeSet<String> set) {
-        putbcabToSet(set);
+        putLowercaseBcabToSet(set);
         var iterator = set.descendingIterator();
         for (int i = 2; i >= 0; i--) {
             assertTrue(iterator.hasNext());
@@ -133,7 +132,7 @@ class MyTreeSetBinaryTest {
     }
 
     void first(MyTreeSet<String> set) {
-        putbcabToSet(set);
+        putLowercaseBcabToSet(set);
         assertEquals(elements[0], set.first());
     }
 
@@ -143,7 +142,7 @@ class MyTreeSetBinaryTest {
     }
 
     void last(MyTreeSet<String> set) {
-        putbcabToSet(set);
+        putLowercaseBcabToSet(set);
         assertEquals(elements[elements.length - 1], set.last());
     }
 
@@ -153,7 +152,7 @@ class MyTreeSetBinaryTest {
     }
 
     void lower(MyTreeSet<String> set) {
-        putbcabToSet(set);
+        putLowercaseBcabToSet(set);
         assertEquals("a", set.lower("b"));
     }
 
@@ -163,7 +162,7 @@ class MyTreeSetBinaryTest {
     }
 
     void lowerNull(MyTreeSet<String> set) {
-        putbcabToSet(set);
+        putLowercaseBcabToSet(set);
         assertNull(set.lower("a"));
     }
 
@@ -173,7 +172,7 @@ class MyTreeSetBinaryTest {
     }
 
     void lowerGreater(MyTreeSet<String> set) {
-        putbcabToSet(set);
+        putLowercaseBcabToSet(set);
         assertEquals("c", set.lower("z"));
     }
 
@@ -183,7 +182,7 @@ class MyTreeSetBinaryTest {
     }
 
     void floor(MyTreeSet<String> set) {
-        putbcabToSet(set);
+        putLowercaseBcabToSet(set);
         assertEquals("b", set.floor("b"));
     }
 
@@ -193,7 +192,7 @@ class MyTreeSetBinaryTest {
     }
 
     void floorNull(MyTreeSet<String> set) {
-        putbcabToSet(set);
+        putLowercaseBcabToSet(set);
         assertNull(set.floor(""));
     }
 
@@ -203,7 +202,7 @@ class MyTreeSetBinaryTest {
     }
 
     void floorGreater(MyTreeSet<String> set) {
-        putbcabToSet(set);
+        putLowercaseBcabToSet(set);
         assertEquals("c", set.floor("z"));
     }
 
@@ -213,7 +212,7 @@ class MyTreeSetBinaryTest {
     }
 
     void floorGap(MyTreeSet<String> set) {
-        putbcabToSet(set);
+        putLowercaseBcabToSet(set);
         set.add("z");
         assertEquals("c", set.floor("h"));
     }
@@ -224,7 +223,7 @@ class MyTreeSetBinaryTest {
     }
 
     void ceiling(MyTreeSet<String> set) {
-        putbcabToSet(set);
+        putLowercaseBcabToSet(set);
         assertEquals("b", set.ceiling("b"));
     }
 
@@ -234,7 +233,7 @@ class MyTreeSetBinaryTest {
     }
 
     void ceilingNull(MyTreeSet<String> set) {
-        putbcabToSet(set);
+        putLowercaseBcabToSet(set);
         assertNull(set.ceiling("d"));
     }
 
@@ -244,7 +243,7 @@ class MyTreeSetBinaryTest {
     }
 
     void ceilingLower(MyTreeSet<String> set) {
-        putbcabToSet(set);
+        putLowercaseBcabToSet(set);
         assertEquals("a", set.ceiling(""));
     }
 
@@ -254,7 +253,7 @@ class MyTreeSetBinaryTest {
     }
 
     void ceilingGap(MyTreeSet<String> set) {
-        putbcabToSet(set);
+        putLowercaseBcabToSet(set);
         set.add("z");
         assertEquals("z", set.ceiling("h"));
     }
@@ -265,7 +264,7 @@ class MyTreeSetBinaryTest {
     }
 
     void higher(MyTreeSet<String> set) {
-        putbcabToSet(set);
+        putLowercaseBcabToSet(set);
         assertEquals("c", set.higher("b"));
     }
 
@@ -275,7 +274,7 @@ class MyTreeSetBinaryTest {
     }
 
     void higherNull(MyTreeSet<String> set) {
-        putbcabToSet(set);
+        putLowercaseBcabToSet(set);
         assertNull(set.higher("c"));
     }
 
@@ -297,7 +296,7 @@ class MyTreeSetBinaryTest {
     }
 
     void higherGap(MyTreeSet<String> set) {
-        putbcabToSet(set);
+        putLowercaseBcabToSet(set);
         set.add("z");
         assertEquals("z", set.higher("h"));
     }
@@ -308,7 +307,7 @@ class MyTreeSetBinaryTest {
     }
 
     void containsTrue(MyTreeSet<String> set) {
-        putbcabToSet(set);
+        putLowercaseBcabToSet(set);
         assertTrue(set.contains("a"));
         assertTrue(set.contains("b"));
         assertTrue(set.contains("c"));
@@ -320,7 +319,7 @@ class MyTreeSetBinaryTest {
     }
 
     void containsFalse(MyTreeSet<String> set) {
-        putbcabToSet(set);
+        putLowercaseBcabToSet(set);
         assertFalse(set.contains("q"));
         assertFalse(set.contains("w"));
         assertFalse(set.contains("e"));
@@ -333,7 +332,7 @@ class MyTreeSetBinaryTest {
 
     @SuppressWarnings({"ResultOfMethodCallIgnored", "SuspiciousMethodCalls"})
     void containsTrash(MyTreeSet<String> set) {
-        putbcabToSet(set);
+        putLowercaseBcabToSet(set);
         assertThrows(ClassCastException.class, () -> set.contains(2));
     }
 
@@ -407,69 +406,69 @@ class MyTreeSetBinaryTest {
     }
 
     void descendingHigher(MyTreeSet<String> set) {
-        putbcabToSet(set);
+        putLowercaseBcabToSet(set);
         assertEquals("a", set.higher("b"));
     }
 
     void descendingHigherNull(MyTreeSet<String> set) {
-        putbcabToSet(set);
+        putLowercaseBcabToSet(set);
         assertNull(set.higher("a"));
     }
 
     void descendingHigherGreater(MyTreeSet<String> set) {
-        putbcabToSet(set);
+        putLowercaseBcabToSet(set);
         assertEquals("c", set.higher("z"));
     }
 
     void descendingCeiling(MyTreeSet<String> set) {
-        putbcabToSet(set);
+        putLowercaseBcabToSet(set);
         assertEquals("b", set.ceiling("b"));
     }
 
     void descendingCeilingNull(MyTreeSet<String> set) {
-        putbcabToSet(set);
+        putLowercaseBcabToSet(set);
         assertNull(set.ceiling(""));
     }
 
     void descendingCeilingGreater(MyTreeSet<String> set) {
-        putbcabToSet(set);
+        putLowercaseBcabToSet(set);
         assertEquals("c", set.ceiling("z"));
     }
 
     void descendingCeilingGap(MyTreeSet<String> set) {
-        putbcabToSet(set);
+        putLowercaseBcabToSet(set);
         set.add("z");
         assertEquals("c", set.ceiling("h"));
     }
 
     void descendingFloor(MyTreeSet<String> set) {
-        putbcabToSet(set);
+        putLowercaseBcabToSet(set);
         assertEquals("b", set.floor("b"));
     }
 
     void descendingFloorNull(MyTreeSet<String> set) {
-        putbcabToSet(set);
+        putLowercaseBcabToSet(set);
         assertNull(set.floor("d"));
     }
 
     void descendingFloorLower(MyTreeSet<String> set) {
-        putbcabToSet(set);
+        putLowercaseBcabToSet(set);
         assertEquals("a", set.floor(""));
     }
 
     void descendingFloorGap(MyTreeSet<String> set) {
-        putbcabToSet(set);
+        putLowercaseBcabToSet(set);
         set.add("z");
         assertEquals("z", set.floor("h"));
     }
 
     void descendingLower(MyTreeSet<String> set) {
-        putbcabToSet(set);
+        putLowercaseBcabToSet(set);
         assertEquals("c", set.lower("b"));
     }
 
     void descendingLowerNull(MyTreeSet<String> set) {
-        putbcabToSet(set);
+        putLowercaseBcabToSet(set);
         assertNull(set.lower("c"));
     }
 
@@ -481,7 +480,7 @@ class MyTreeSetBinaryTest {
     }
 
     void descendingLowerGap(MyTreeSet<String> set) {
-        putbcabToSet(set);
+        putLowercaseBcabToSet(set);
         set.add("z");
         assertEquals("z", set.lower("h"));
     }
