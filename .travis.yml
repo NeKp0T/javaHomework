@@ -3,11 +3,14 @@ jdk:
  - openjdk11
 os:
  - linux
-env:
- - PROJECT_DIR=trie
- - PROJECT_DIR=MyTreeSet
- - PROJECT_DIR=SmartList
-script: cd $PROJECT_DIR && ./gradlew check
-env:
- - PROJECT_DIR=hw1-HashTable
-script: cd $PROJECT_DIR && mvn test
+jobs:
+  include:
+    env:
+      - PROJECT_DIR=trie
+      - PROJECT_DIR=MyTreeSet
+      - PROJECT_DIR=SmartList
+    script: cd $PROJECT_DIR && ./gradlew check
+   - # i have no idea whats going on
+    env:
+     - PROJECT_DIR=hw1-HashTable
+    script: cd $PROJECT_DIR && mvn test
