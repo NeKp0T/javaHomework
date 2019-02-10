@@ -136,14 +136,14 @@ public class MyTreeSetBinary<E>
             return prev.value;
         }
 
+
         @SuppressWarnings("WeakerAccess")
         public boolean hasPrevious() {
             checkConcurrentModification();
             return prev != null;
         }
 
-        @SuppressWarnings("WeakerAccess")
-        public @NotNull E previous() {
+        private @NotNull E previous() {
             checkConcurrentModification();
             if (!hasPrevious()) {
                 throw new NoSuchElementException();
@@ -188,7 +188,6 @@ public class MyTreeSetBinary<E>
 
     private int version;
 
-    public <T extends Comparable<? super T>>
     MyTreeSetBinary() {
         this((o1, o2) -> {
             //noinspection unchecked
@@ -197,14 +196,17 @@ public class MyTreeSetBinary<E>
         });
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public MyTreeSetBinary(@NotNull Comparator<? super E> comparator) {
         this.comparator = comparator;
     }
 
-    @Override
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean add(E e) {
         TreeNode<E> newNode;
         if (root == null) {
@@ -241,25 +243,45 @@ public class MyTreeSetBinary<E>
         return true;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public int size() {
         return size;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @NotNull
+    @Override
     public Iterator<E> iterator() {
         return new TreeIterator(null, firstNode);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @NotNull
+    @Override
     public Iterator<E> descendingIterator() {
         return new TreeIterator(lastNode, null).descendingView();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @NotNull
+    @Override
     public MyTreeSet<E> descendingSet() {
         return new DescendingSetView();
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public @NotNull E first() {
         if (isEmpty()) {
             throw new NoSuchElementException();
@@ -269,6 +291,10 @@ public class MyTreeSetBinary<E>
         return firstNode.value;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public @NotNull E last() {
         if (isEmpty()) {
             throw new NoSuchElementException();
@@ -278,6 +304,10 @@ public class MyTreeSetBinary<E>
         return lastNode.value;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public @Nullable E lower(E e) {
         var node = findAdjacent(e);
         if (node == null) {
@@ -290,6 +320,10 @@ public class MyTreeSetBinary<E>
         return TreeNode.getValueOrNull(node);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public @Nullable E floor(E e) {
         var node = findAdjacent(e);
         if (node == null) {
@@ -302,6 +336,10 @@ public class MyTreeSetBinary<E>
         return TreeNode.getValueOrNull(node);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public @Nullable E ceiling(E e) {
         var node = findAdjacent(e);
         if (node == null) {
@@ -314,6 +352,10 @@ public class MyTreeSetBinary<E>
         return TreeNode.getValueOrNull(node);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public @Nullable E higher(E e) {
         var node = findAdjacent(e);
         if (node == null) {
@@ -327,9 +369,9 @@ public class MyTreeSetBinary<E>
     }
 
     /**
-     * Checks if set is empty, that is if its's <code>size</code> is 0
-     * @return if set is empty
+     * {@inheritDoc}
      */
+    @Override
     public boolean isEmpty() {
         return size == 0;
     }
@@ -338,6 +380,7 @@ public class MyTreeSetBinary<E>
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean contains(Object o) {
         @SuppressWarnings("unchecked") E element = (E) o;
         if (isEmpty()) {
