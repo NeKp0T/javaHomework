@@ -9,12 +9,22 @@ class PhoneNumber {
     public PhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
     }
+
+    @Override
+    public String toString() {
+        return phoneNumber;
+    }
 }
 
 class Name {
     public final String name;
     public Name(String name) {
         this.name = name;
+    }
+
+    @Override
+    public String toString() {
+        return name;
     }
 }
 
@@ -33,6 +43,11 @@ class Entry {
         this.id = id;
         this.name = name;
         this.phoneNumber = phoneNumber;
+    }
+
+    @Override
+    public String toString() {
+        return String.valueOf(id) + " | " + name.toString() + " | " + phoneNumber.toString();
     }
 }
 
@@ -168,22 +183,22 @@ class DBController implements AutoCloseable {
         return selectByQuery(query, "crutch");
     }
 
-    public boolean deleteById(int id) throws SQLException {
-        String query = "DELETE * FROM " + CROSS_TABLE + " WHERE id = ?;";
+    public int deleteById(int id) throws SQLException {
+        String query = "DELETE FROM " + CROSS_TABLE + " WHERE id = ?;";
         var prepared = connection.prepareStatement(query);
         prepared.setInt(1, id);
-        return prepared.executeUpdate() > 0;
+        return prepared.executeUpdate();
     }
 
     public int deleteByName(String name) throws SQLException {
-        String query = "DELETE * FROM " + CROSS_TABLE + " WHERE nameId = ?;";
+        String query = "DELETE FROM " + CROSS_TABLE + " WHERE nameId = ?;";
         var prepared = connection.prepareStatement(query);
         prepared.setInt(1, getNameId(name));
         return prepared.executeUpdate();
     }
 
     public int deleteByPhone(String phone) throws SQLException {
-        String query = "DELETE * FROM " + CROSS_TABLE + " WHERE phoneId = ?;";
+        String query = "DELETE FROM " + CROSS_TABLE + " WHERE phoneId = ?;";
         var prepared = connection.prepareStatement(query);
         prepared.setInt(1, getPhoneId(phone));
         return prepared.executeUpdate();
@@ -201,7 +216,7 @@ class DBController implements AutoCloseable {
     /**
      * @return if any entry was updated.
      */
-    public boolean updateName(String name, String phone, String newName) throws SQLException {
+    public int updateName(String name, String phone, String newName) throws SQLException {
         insertName(newName);
         String query = "UPDATE " + CROSS_TABLE + " SET "
                 + "nameId = ? \n"
@@ -215,13 +230,13 @@ class DBController implements AutoCloseable {
         prepared.setInt(2, nameId);
         prepared.setInt(3, phoneId);
 
-        return prepared.executeUpdate() > 0;
+        return prepared.executeUpdate();
     }
 
     /**
      * @return if any entry was updated.
      */
-    public boolean updatePhone(String name, String phone, String newPhone) throws SQLException {
+    public int updatePhone(String name, String phone, String newPhone) throws SQLException {
         insertPhone(newPhone);
         String query = "UPDATE " + CROSS_TABLE + " SET "
                 + "phoneId = ? \n"
@@ -235,7 +250,7 @@ class DBController implements AutoCloseable {
         prepared.setInt(2, nameId);
         prepared.setInt(3, phoneId);
 
-        return prepared.executeUpdate() > 0;
+        return prepared.executeUpdate();
     }
 
     @Override
@@ -246,13 +261,30 @@ class DBController implements AutoCloseable {
 
 public class Main {
 
-    private static final String USAGE = "Wrong arguments"; // TODO
+    private static final String USAGE = "[-f databaseFile | -s sqliteConnectionString | -m]\n" +
+            "Program uses sqlite and nothing is guaranteed if passed connection string uses different database system";
     private static final String DEFAULT_DB_NAME = "Phonebook.db";
     private static final String WELCOME_MESSAGE = "Print \".help\" for usage hints.";
+    private static final String HELP_MESSAGE = "[COMMAND] [ARGUMENTS...]\n" +
+            "Command and each argument take one whole line.\n" +
+//            "Commands that modify phonebook show number of modified entries.\n" +
+//              ^ they showed executeUpdate result, but it seems it isn't what I thought it is
+            "\n" +
+            "List of commands:\n" +
+            "help                   display this message\n" +
+            "[0, exit]              exit\n" +
+            "[1, add] name phone    add new entry\n" +
+            "[2, findn] name        find all entries with given name\n" +
+            "[3, findp] phone       find all entries with given phone\n" +
+            "[4, del] name phone    delete given entry\n" +
+            "[5, un] name phone newName     update name in given entry \n" +
+            "[6, up] name phone newPhone    update phone in given entry \n" +
+            "[7, show]              show all entries\n" +
+            "[8, di] id             delete entry by id\n" +
+            "[9, dn] name           delete entries with given name\n" +
+            "[10, dp]  phone        delete entries with given phone\n";
 
     private enum DBType {DEFAULT, BY_FILE, BY_CONNECT_STRING, IN_MEMORY, ERROR}
-
-    ;
 
     private static class ConnectState {
         public final DBType type;
@@ -279,6 +311,12 @@ public class Main {
                 s = null;
             }
         }
+    }
+
+    private static void printlnDeleted(int deleted) {
+        System.out.print("deleted ");
+        System.out.print(deleted);
+        System.out.print(" entries\n");
     }
 
     public static void main(String[] args) {
@@ -318,41 +356,68 @@ public class Main {
             while (!exit) {
                 System.out.print("> ");
                 String inputLine = scanner.nextLine();
+                if ("0".equals(inputLine) || "exit".equals(inputLine)) {
+                    exit = true;
 
-                if (inputLine == "1") {
+                } else if ("1".equals(inputLine) || "add".equals(inputLine)) {
                     String name = scanner.nextLine();
                     String phone = scanner.nextLine();
                     db.addEntry(name, phone);
 
-                } else if (inputLine == "2") {
+                } else if ("2".equals(inputLine) || "findn".equals(inputLine)) {
                     String name = scanner.nextLine();
                     var entries = db.findByName(name);
                     for (Entry i : entries) {
                         System.out.print(i.id);
-                        System.out.println(" " + i.phoneNumber);
+                        System.out.println(" | " + i.phoneNumber);
                     }
 
-                } else if (inputLine == "3") {
+                } else if ("3".equals(inputLine) || "findp".equals(inputLine)) {
                     String phone = scanner.nextLine();
                     var entries = db.findByPhone(phone);
                     for (Entry i : entries) {
                         System.out.print(i.id);
-                        System.out.println(" " + i.name);
+                        System.out.println(" | " + i.name);
                     }
 
-                } else if (inputLine == "4") {
+                } else if ("4".equals(inputLine) || "del".equals(inputLine)) {
                     String name = scanner.nextLine();
                     String phone = scanner.nextLine();
-                    int deleted = db.deleteByNamePhone(name, phone);
-                    System.out.print("deleted ");
-                    System.out.print(deleted);
-                    System.out.print(" entries\n");
-                    
-                } else if (inputLine == "5") {
-                } else if (inputLine == "6") {
-                } else if (inputLine == "7") {
+                    db.deleteByNamePhone(name, phone);
+
+                } else if ("5".equals(inputLine) || "un".equals(inputLine)) {
+                    String name = scanner.nextLine();
+                    String phone = scanner.nextLine();
+                    String newName = scanner.nextLine();
+                    db.updateName(name, phone, newName);
+
+                } else if ("6".equals(inputLine) || "up".equals(inputLine)) {
+                    String name = scanner.nextLine();
+                    String phone = scanner.nextLine();
+                    String newPhone = scanner.nextLine();
+                    db.updatePhone(name, phone, newPhone);
+
+                } else if ("7".equals(inputLine) || "show".equals(inputLine)) {
+                    var entries = db.selectAll();
+                    for (Entry i : entries) {
+                        System.out.println(i.toString());
+                    }
+                } else if ("8".equals(inputLine) || "di".equals(inputLine)) {
+                    Integer id = Integer.valueOf(scanner.nextLine());
+                    db.deleteById(id);
+
+                } else if ("9".equals(inputLine) || "dn".equals(inputLine)) {
+                    String name = scanner.nextLine();
+                    db.deleteByName(name);
+
+                } else if ("10".equals(inputLine) || "dp".equals(inputLine)) {
+                    String phone = scanner.nextLine();
+                    db.deleteByPhone(phone);
+
+                } else if ("help".equals(inputLine)) {
+                    System.out.println(HELP_MESSAGE);
                 } else {
-                    //TODO
+                    System.out.println("Incorrect usage. Type \"help\" for usage.");
                 }
             }
 
