@@ -1,8 +1,363 @@
 package com.example.phonebook;
 
-class DBController {
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.Scanner;
+
+class PhoneNumber {
+    public final String phoneNumber;
+    public PhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+}
+
+class Name {
+    public final String name;
+    public Name(String name) {
+        this.name = name;
+    }
+}
+
+class Entry {
+    public final Name name;
+    public final PhoneNumber phoneNumber;
+    public final int id;
+
+    public Entry(int id, String nameString, String phoneNumberString) {
+        this.id = id;
+        name = new Name(nameString);
+        phoneNumber = new PhoneNumber(phoneNumberString);
+    }
+
+    public Entry(int id, Name name, PhoneNumber phoneNumber) {
+        this.id = id;
+        this.name = name;
+        this.phoneNumber = phoneNumber;
+    }
+}
+
+class DBController implements AutoCloseable {
+    static final String NAMES_TABLE = "NamesT";
+    static final String PHONES_TABLE = "Phones";
+    static final String CROSS_TABLE = "Phonebook";
+
+    private final Connection connection;
+
+    public DBController(String connectionString) throws SQLException {
+        connection = DriverManager.getConnection(connectionString);
+        String createNamesTableQuery = "CREATE TABLE IF NOT EXISTS " + NAMES_TABLE + " (\n"
+                + " id integer PRIMARY KEY,\n"
+                + " name text NOT NULL UNIQUE \n"
+                + ");";
+        connection.createStatement().execute(createNamesTableQuery);
+        String createPhoneTableQuery = "CREATE TABLE IF NOT EXISTS " + PHONES_TABLE + " (\n"
+                + " id integer PRIMARY KEY,\n"
+                + " phone text NOT NULL UNIQUE\n"
+                + ");";
+        connection.createStatement().executeUpdate(createPhoneTableQuery);
+        String createCrossTableQuery = "CREATE TABLE IF NOT EXISTS " + CROSS_TABLE + " (\n"
+                + " id integer PRIMARY KEY,\n"
+                + " nameId integer,\n"
+                + " phoneId integer\n"
+                + ");";
+        connection.createStatement().executeUpdate(createCrossTableQuery);
+    }
+
+    private boolean insertName(String name) throws SQLException {
+        String addEntryQuery = "INSERT OR IGNORE INTO " + NAMES_TABLE + " ('name') VALUES (?);";
+        var preparedStatement = connection.prepareStatement(addEntryQuery);
+        preparedStatement.setString(1, name);
+
+        return preparedStatement.executeUpdate() > 0;
+    }
+
+    private boolean insertPhone(String phone) throws SQLException {
+        String addEntryQuery = "INSERT OR IGNORE INTO " + PHONES_TABLE + " (phone) VALUES (?);";
+        var preparedStatement = connection.prepareStatement(addEntryQuery);
+        preparedStatement.setString(1, phone);
+
+        return preparedStatement.executeUpdate() > 0;
+    }
+
+    /*
+       Returns id of given name in NAMES_TABLE, or -1 if given namesis not present.
+     */
+    private int getNameId(String name) throws SQLException {
+        String query = "SELECT id FROM " + NAMES_TABLE + " WHERE name = ?";
+        var preparedStatement = connection.prepareStatement(query);
+        preparedStatement.setString(1, name);
+
+        ResultSet set = preparedStatement.executeQuery();
+        if (set.next()) {
+            return set.getInt(1);
+        } else {
+            return -1;
+        }
+    }
+
+    /*
+       Returns id of given phone in PHONES_TABLE, or -1 if given phone is not present.
+     */
+    private int getPhoneId(String phone) throws SQLException {
+        String query = "SELECT id FROM " + PHONES_TABLE + " WHERE phone = ?";
+        var preparedStatement = connection.prepareStatement(query);
+        preparedStatement.setString(1, phone);
+
+        ResultSet set = preparedStatement.executeQuery();
+        if (set.next()) {
+            return set.getInt(1);
+        } else {
+            return -1;
+        }
+    }
+
+    /* Returns id of new entry */
+    public int addEntry(String name, String phone) throws SQLException {
+        insertPhone(phone);
+        insertName(name);
+
+        int nameId = getNameId(name);
+        int phoneId = getPhoneId(phone);
+
+        String addEntryQuery = "INSERT INTO " + CROSS_TABLE + "(nameId, phoneId) VALUES(?,?);";
+        var preparedStatement = connection.prepareStatement(addEntryQuery);
+        preparedStatement.setInt(1, nameId);
+        preparedStatement.setInt(2, phoneId);
+        preparedStatement.executeUpdate();
+
+        ResultSet keys = preparedStatement.getGeneratedKeys();
+        if (keys.next()) {
+            return keys.getInt(1); // generated id
+        } else {
+            throw new SQLException("Add entry succeeded, but, no ID obtained.");
+        }
+    }
+
+    private ArrayList<Entry> selectByQuery(String query, String parameter) throws SQLException {
+        var prepared = connection.prepareStatement(query);
+        prepared.setString(1, parameter);
+        ResultSet result = prepared.executeQuery();
+
+        var entries =  new ArrayList<Entry>();
+        while (result.next()) {
+            entries.add(new Entry(result.getInt(1),
+                    result.getString(2),
+                    result.getString("phone")));
+        }
+        return entries;
+    }
+
+    public ArrayList<Entry> findByName(String name) throws SQLException {
+        String query = "SELECT Phonebook.id, NamesT.name, Phones.phone FROM "
+                + " " + NAMES_TABLE + ", " + PHONES_TABLE + ", " + CROSS_TABLE
+                + " WHERE NamesT.name = ? AND NamesT.id = Phonebook.NameId AND Phones.id = Phonebook.PhoneId;";
+        return selectByQuery(query, name);
+    }
+
+    public ArrayList<Entry> findByPhone(String phoneNumber) throws SQLException {
+        String query = "SELECT Phonebook.id, NamesT.name, Phones.phone FROM "
+                + " " + NAMES_TABLE + ", " + PHONES_TABLE + ", " + CROSS_TABLE
+                + " WHERE Phones.phone = ? AND NamesT.id = Phonebook.NameId AND Phones.id = Phonebook.PhoneId;";
+        return selectByQuery(query, phoneNumber);
+    }
+
+    public ArrayList<Entry> selectAll() throws SQLException {
+        String query = "SELECT Phonebook.id, NamesT.name, Phones.phone FROM "
+                + " " + NAMES_TABLE + ", " + PHONES_TABLE + ", " + CROSS_TABLE
+                + " WHERE ? = 'crutch' AND NamesT.id = Phonebook.NameId AND Phones.id = Phonebook.PhoneId;";
+        return selectByQuery(query, "crutch");
+    }
+
+    public boolean deleteById(int id) throws SQLException {
+        String query = "DELETE * FROM " + CROSS_TABLE + " WHERE id = ?;";
+        var prepared = connection.prepareStatement(query);
+        prepared.setInt(1, id);
+        return prepared.executeUpdate() > 0;
+    }
+
+    public int deleteByName(String name) throws SQLException {
+        String query = "DELETE * FROM " + CROSS_TABLE + " WHERE nameId = ?;";
+        var prepared = connection.prepareStatement(query);
+        prepared.setInt(1, getNameId(name));
+        return prepared.executeUpdate();
+    }
+
+    public int deleteByPhone(String phone) throws SQLException {
+        String query = "DELETE * FROM " + CROSS_TABLE + " WHERE phoneId = ?;";
+        var prepared = connection.prepareStatement(query);
+        prepared.setInt(1, getPhoneId(phone));
+        return prepared.executeUpdate();
+    }
+
+    public int deleteByNamePhone(String name, String phone) throws SQLException {
+        String query = "DELETE FROM " + CROSS_TABLE + " WHERE NameId = ? AND PhoneId = ?;";
+        var prepared = connection.prepareStatement(query);
+        // works well even if getNameId returns -1
+        prepared.setInt(1, getNameId(name));
+        prepared.setInt(2, getPhoneId(phone));
+        return prepared.executeUpdate();
+    }
+
+    /**
+     * @return if any entry was updated.
+     */
+    public boolean updateName(String name, String phone, String newName) throws SQLException {
+        insertName(newName);
+        String query = "UPDATE " + CROSS_TABLE + " SET "
+                + "nameId = ? \n"
+                + "WHERE nameId = ? AND phoneId = ?;";
+        var prepared = connection.prepareStatement(query);
+
+        int nameId = getNameId(name);
+        int phoneId = getPhoneId(phone);
+        int newNameId = getNameId(newName);
+        prepared.setInt(1, newNameId);
+        prepared.setInt(2, nameId);
+        prepared.setInt(3, phoneId);
+
+        return prepared.executeUpdate() > 0;
+    }
+
+    /**
+     * @return if any entry was updated.
+     */
+    public boolean updatePhone(String name, String phone, String newPhone) throws SQLException {
+        insertPhone(newPhone);
+        String query = "UPDATE " + CROSS_TABLE + " SET "
+                + "phoneId = ? \n"
+                + "WHERE nameId = ? AND phoneId = ?;";
+        var prepared = connection.prepareStatement(query);
+
+        int nameId = getNameId(name);
+        int phoneId = getPhoneId(phone);
+        int newPhoneId = getPhoneId(newPhone);
+        prepared.setInt(1, newPhoneId);
+        prepared.setInt(2, nameId);
+        prepared.setInt(3, phoneId);
+
+        return prepared.executeUpdate() > 0;
+    }
+
+    @Override
+    public void close() throws Exception {
+        connection.close();
+    }
 }
 
 public class Main {
 
+    private static final String USAGE = "Wrong arguments"; // TODO
+    private static final String DEFAULT_DB_NAME = "Phonebook.db";
+    private static final String WELCOME_MESSAGE = "Print \".help\" for usage hints.";
+
+    private enum DBType {DEFAULT, BY_FILE, BY_CONNECT_STRING, IN_MEMORY, ERROR}
+
+    ;
+
+    private static class ConnectState {
+        public final DBType type;
+        public final String s;
+
+        ConnectState(String[] args) {
+            if (args.length == 0) {
+                type = DBType.DEFAULT;
+                s = null;
+            } else if ("-m".equals(args[0])) {
+                type = DBType.IN_MEMORY;
+                s = null;
+            } else if (args.length == 1) {
+                type = DBType.ERROR;
+                s = null;
+            } else if ("-f".equals(args[0])) {
+                type = DBType.BY_FILE;
+                s = args[1];
+            } else if ("-s".equals(args[0])) {
+                type = DBType.BY_CONNECT_STRING;
+                s = args[1];
+            } else {
+                type = DBType.ERROR;
+                s = null;
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+        var state = new ConnectState(args);
+        String connectString;
+
+        switch (state.type) {
+            case BY_FILE:
+                System.out.println("Will use database in file " + state.s + ".");
+                connectString = "jdbc:sqlite:" + state.s;
+                break;
+            case BY_CONNECT_STRING:
+                System.out.println("Will use database by connect string " + state.s + ".");
+                connectString = state.s;
+                break;
+            case IN_MEMORY:
+                System.out.println("Will use a transient in-memory database.");
+                connectString = "jdbc:sqlite::memory";
+                break;
+            case ERROR:
+                System.out.println(USAGE);
+                return;
+            case DEFAULT:
+                System.out.println("No database specified, " + DEFAULT_DB_NAME + " (in file) will be used");
+                connectString = "jdbc:sqlite:" + DEFAULT_DB_NAME;
+                break;
+        }
+
+
+        try (var db = new DBController("jdbc:sqlite:./s.db")) {
+            System.out.println("Succesfully connected.");
+            System.out.println(WELCOME_MESSAGE);
+
+            var scanner = new Scanner(System.in);
+
+            boolean exit = false;
+            while (!exit) {
+                System.out.print("> ");
+                String inputLine = scanner.nextLine();
+
+                if (inputLine == "1") {
+                    String name = scanner.nextLine();
+                    String phone = scanner.nextLine();
+                    db.addEntry(name, phone);
+
+                } else if (inputLine == "2") {
+                    String name = scanner.nextLine();
+                    var entries = db.findByName(name);
+                    for (Entry i : entries) {
+                        System.out.print(i.id);
+                        System.out.println(" " + i.phoneNumber);
+                    }
+
+                } else if (inputLine == "3") {
+                    String phone = scanner.nextLine();
+                    var entries = db.findByPhone(phone);
+                    for (Entry i : entries) {
+                        System.out.print(i.id);
+                        System.out.println(" " + i.name);
+                    }
+
+                } else if (inputLine == "4") {
+                    String name = scanner.nextLine();
+                    String phone = scanner.nextLine();
+                    int deleted = db.deleteByNamePhone(name, phone);
+                    System.out.print("deleted ");
+                    System.out.print(deleted);
+                    System.out.print(" entries\n");
+                    
+                } else if (inputLine == "5") {
+                } else if (inputLine == "6") {
+                } else if (inputLine == "7") {
+                } else {
+                    //TODO
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }
