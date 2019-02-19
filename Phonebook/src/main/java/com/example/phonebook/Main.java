@@ -1,5 +1,7 @@
 package com.example.phonebook;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -30,10 +32,14 @@ final class Entry {
     }
 }
 
+/**
+ * Implements queries to database needed by application as methods with self-explaining names.
+ */
+@NotNull
 class DBController implements AutoCloseable {
-    static final String NAMES_TABLE = "NamesT";
-    static final String PHONES_TABLE = "Phones";
-    static final String CROSS_TABLE = "Phonebook";
+    private static final String NAMES_TABLE = "Names";
+    private static final String PHONES_TABLE = "Phones";
+    private static final String CROSS_TABLE = "Phonebook";
 
     private final Connection connection;
 
@@ -57,20 +63,20 @@ class DBController implements AutoCloseable {
         connection.createStatement().executeUpdate(createCrossTableQuery);
     }
 
-    private boolean insertName(String name) throws SQLException {
+    private void insertName(String name) throws SQLException {
         String addEntryQuery = "INSERT OR IGNORE INTO " + NAMES_TABLE + " ('name') VALUES (?);";
         var preparedStatement = connection.prepareStatement(addEntryQuery);
         preparedStatement.setString(1, name);
 
-        return preparedStatement.executeUpdate() > 0;
+        preparedStatement.executeUpdate();
     }
 
-    private boolean insertPhone(String phone) throws SQLException {
+    private void insertPhone(String phone) throws SQLException {
         String addEntryQuery = "INSERT OR IGNORE INTO " + PHONES_TABLE + " (phone) VALUES (?);";
         var preparedStatement = connection.prepareStatement(addEntryQuery);
         preparedStatement.setString(1, phone);
 
-        return preparedStatement.executeUpdate() > 0;
+        preparedStatement.executeUpdate();
     }
 
     private int getIntFromQuery(String parameter, String query) throws SQLException {
@@ -85,23 +91,16 @@ class DBController implements AutoCloseable {
         }
     }
 
-    /*
-       Returns id of given name in NAMES_TABLE, or -1 if given namesis not present.
-     */
     private int getNameId(String name) throws SQLException {
         String query = "SELECT id FROM " + NAMES_TABLE + " WHERE name = ?";
         return getIntFromQuery(name, query);
     }
 
-    /*
-       Returns id of given phone in PHONES_TABLE, or -1 if given phone is not present.
-     */
     private int getPhoneId(String phone) throws SQLException {
         String query = "SELECT id FROM " + PHONES_TABLE + " WHERE phone = ?";
         return getIntFromQuery(phone, query);
     }
 
-    /* Returns id of new entry */
     public int addEntry(String name, String phone) throws SQLException {
         insertPhone(phone);
         insertName(name);
@@ -158,40 +157,41 @@ class DBController implements AutoCloseable {
         return selectByQuery(query, "crutch");
     }
 
-    public int deleteById(int id) throws SQLException {
+
+    public void deleteById(int id) throws SQLException {
         String query = "DELETE FROM " + CROSS_TABLE + " WHERE id = ?;";
         var prepared = connection.prepareStatement(query);
         prepared.setInt(1, id);
-        return prepared.executeUpdate();
+        prepared.executeUpdate();
     }
 
-    public int deleteByName(String name) throws SQLException {
+    public void deleteByName(String name) throws SQLException {
         String query = "DELETE FROM " + CROSS_TABLE + " WHERE nameId = ?;";
         var prepared = connection.prepareStatement(query);
         prepared.setInt(1, getNameId(name));
-        return prepared.executeUpdate();
+        prepared.executeUpdate();
     }
 
-    public int deleteByPhone(String phone) throws SQLException {
+    public void deleteByPhone(String phone) throws SQLException {
         String query = "DELETE FROM " + CROSS_TABLE + " WHERE phoneId = ?;";
         var prepared = connection.prepareStatement(query);
         prepared.setInt(1, getPhoneId(phone));
-        return prepared.executeUpdate();
+        prepared.executeUpdate();
     }
 
-    public int deleteByNamePhone(String name, String phone) throws SQLException {
+    public void deleteByNamePhone(String name, String phone) throws SQLException {
         String query = "DELETE FROM " + CROSS_TABLE + " WHERE NameId = ? AND PhoneId = ?;";
         var prepared = connection.prepareStatement(query);
         // works well even if getNameId returns -1
         prepared.setInt(1, getNameId(name));
         prepared.setInt(2, getPhoneId(phone));
-        return prepared.executeUpdate();
+        prepared.executeUpdate();
     }
 
     /**
      * @return if any entry was updated.
      */
-    public int updateName(String name, String phone, String newName) throws SQLException {
+    public void updateName(String name, String phone, String newName) throws SQLException {
         insertName(newName);
         String query = "UPDATE " + CROSS_TABLE + " SET "
                 + "nameId = ? \n"
@@ -205,13 +205,13 @@ class DBController implements AutoCloseable {
         prepared.setInt(2, nameId);
         prepared.setInt(3, phoneId);
 
-        return prepared.executeUpdate();
+        prepared.executeUpdate();
     }
 
     /**
      * @return if any entry was updated.
      */
-    public int updatePhone(String name, String phone, String newPhone) throws SQLException {
+    public void updatePhone(String name, String phone, String newPhone) throws SQLException {
         insertPhone(newPhone);
         String query = "UPDATE " + CROSS_TABLE + " SET "
                 + "phoneId = ? \n"
@@ -225,7 +225,7 @@ class DBController implements AutoCloseable {
         prepared.setInt(2, nameId);
         prepared.setInt(3, phoneId);
 
-        return prepared.executeUpdate();
+        prepared.executeUpdate();
     }
 
     @Override
@@ -234,14 +234,17 @@ class DBController implements AutoCloseable {
     }
 }
 
+/**
+ * Minimalistic console application for storing pairs (Name, Phone number) in sqlite database/.
+ */
 public class Main {
 
-    static Scanner scanner = new Scanner(System.in);
+    private static final Scanner SCANNER = new Scanner(System.in);
 
     private static final String USAGE = "[-f databaseFile | -s sqliteConnectionString | -m]\n" +
             "Program uses sqlite and nothing is guaranteed if passed connection string uses different database system";
     private static final String DEFAULT_DB_NAME = "Phonebook.db";
-    private static final String WELCOME_MESSAGE = "Print \".help\" for usage hints.";
+    private static final String WELCOME_MESSAGE = "Print \"help\" for usage hints.";
     private static final String HELP_MESSAGE = "[COMMAND] [ARGUMENTS...]\n" +
             "Command and each argument take one whole line.\n" +
 //            "Commands that modify phonebook show number of modified entries.\n" +
@@ -290,15 +293,9 @@ public class Main {
         }
     }
 
-    private static void printlnDeleted(int deleted) {
-        System.out.print("deleted ");
-        System.out.print(deleted);
-        System.out.print(" entries\n");
-    }
-
     public static void main(String[] args) {
         var state = new ConnectState(args);
-        String connectString;
+        String connectString = null; // it will be initialized in switch
 
         switch (state.type) {
             case BY_FILE:
@@ -323,24 +320,24 @@ public class Main {
         }
 
 
-        try (var db = new DBController("jdbc:sqlite:./s.db")) {
-            System.out.println("Succesfully connected.");
+        try (var db = new DBController(connectString)) {
+            System.out.println("Successfully connected.");
             System.out.println(WELCOME_MESSAGE);
 
             boolean exit = false;
             while (!exit) {
                 System.out.print("> ");
-                String inputLine = scanner.nextLine();
+                String inputLine = SCANNER.nextLine();
                 if ("0".equals(inputLine) || "exit".equals(inputLine)) {
                     exit = true;
 
                 } else if ("1".equals(inputLine) || "add".equals(inputLine)) {
-                    String name = scanner.nextLine();
-                    String phone = scanner.nextLine();
+                    String name = SCANNER.nextLine();
+                    String phone = SCANNER.nextLine();
                     db.addEntry(name, phone);
 
                 } else if ("2".equals(inputLine) || "findn".equals(inputLine)) {
-                    String name = scanner.nextLine();
+                    String name = SCANNER.nextLine();
                     var entries = db.findByName(name);
                     for (Entry i : entries) {
                         System.out.print(i.id);
@@ -348,7 +345,7 @@ public class Main {
                     }
 
                 } else if ("3".equals(inputLine) || "findp".equals(inputLine)) {
-                    String phone = scanner.nextLine();
+                    String phone = SCANNER.nextLine();
                     var entries = db.findByPhone(phone);
                     for (Entry i : entries) {
                         System.out.print(i.id);
@@ -356,20 +353,20 @@ public class Main {
                     }
 
                 } else if ("4".equals(inputLine) || "del".equals(inputLine)) {
-                    String name = scanner.nextLine();
-                    String phone = scanner.nextLine();
+                    String name = SCANNER.nextLine();
+                    String phone = SCANNER.nextLine();
                     db.deleteByNamePhone(name, phone);
 
                 } else if ("5".equals(inputLine) || "un".equals(inputLine)) {
-                    String name = scanner.nextLine();
-                    String phone = scanner.nextLine();
-                    String newName = scanner.nextLine();
+                    String name = SCANNER.nextLine();
+                    String phone = SCANNER.nextLine();
+                    String newName = SCANNER.nextLine();
                     db.updateName(name, phone, newName);
 
                 } else if ("6".equals(inputLine) || "up".equals(inputLine)) {
-                    String name = scanner.nextLine();
-                    String phone = scanner.nextLine();
-                    String newPhone = scanner.nextLine();
+                    String name = SCANNER.nextLine();
+                    String phone = SCANNER.nextLine();
+                    String newPhone = SCANNER.nextLine();
                     db.updatePhone(name, phone, newPhone);
 
                 } else if ("7".equals(inputLine) || "show".equals(inputLine)) {
@@ -378,26 +375,28 @@ public class Main {
                         System.out.println(i.toString());
                     }
                 } else if ("8".equals(inputLine) || "di".equals(inputLine)) {
-                    Integer id = Integer.valueOf(scanner.nextLine());
+                    int id = Integer.parseInt(SCANNER.nextLine());
                     db.deleteById(id);
 
                 } else if ("9".equals(inputLine) || "dn".equals(inputLine)) {
-                    String name = scanner.nextLine();
+                    String name = SCANNER.nextLine();
                     db.deleteByName(name);
 
                 } else if ("10".equals(inputLine) || "dp".equals(inputLine)) {
-                    String phone = scanner.nextLine();
+                    String phone = SCANNER.nextLine();
                     db.deleteByPhone(phone);
 
                 } else if ("help".equals(inputLine)) {
                     System.out.println(HELP_MESSAGE);
                 } else {
-                    System.out.println("Incorrect usage. Type \"help\" for usage.");
+                    System.out.println("Incorrect usage. Type \"help\" for usage hints.");
                 }
             }
 
         } catch (Exception e) {
             e.printStackTrace();
+            System.out.println("This shouldn't have happen ¯\\_(ツ)_/¯ ");
+            System.out.println("Maybe database is broken, or maybe it's a bug");
         }
     }
 }
