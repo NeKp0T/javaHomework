@@ -8,21 +8,11 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 
-public class DBControllerTest {
+public class PhonebookDatabaseControllerTest {
 
-    DBController db;
+    PhonebookDatabaseController db;
 
-    @BeforeEach
-    void initDB() throws SQLException {
-        db = new DBController("jdbc:sqlite:"); // temporary database
-    }
-
-    @AfterEach
-    void destroyDB() throws Exception {
-        db.close();
-    }
-
-    private static final Entry[] initialEntries = {
+    private static final Entry[] INITIAL_ENTRIES = {
             new Entry(1, "aaa", "000"),
             new Entry(2, "aaa", "000"),
             new Entry(3, "aaa", "111"),
@@ -34,8 +24,18 @@ public class DBControllerTest {
             new Entry(7, "ccc", "404")
     };
 
+    @BeforeEach
+    void initDB() throws SQLException {
+        db = new PhonebookDatabaseController("jdbc:sqlite:"); // temporary database
+    }
+
+    @AfterEach
+    void destroyDB() throws Exception {
+        db.close();
+    }
+
     private void addSomeToDB() throws SQLException {
-        for (Entry i : initialEntries) {
+        for (Entry i : INITIAL_ENTRIES) {
             db.addEntry(i.name, i.phone);
         }
     }
@@ -64,7 +64,7 @@ public class DBControllerTest {
         ArrayList<Entry> entries = db.findByName("aaa");
 
         assertEquals(
-                new ArrayList<>(Arrays.stream(initialEntries)
+                new ArrayList<>(Arrays.stream(INITIAL_ENTRIES)
                         .filter(x -> "aaa".equals(x.name))
                         .collect(Collectors.toList())),
                 entries);
@@ -75,7 +75,7 @@ public class DBControllerTest {
         addSomeToDB();
         ArrayList<Entry> entries = db.findByPhone("000");
         assertEquals(
-                new ArrayList<>(Arrays.stream(initialEntries)
+                new ArrayList<>(Arrays.stream(INITIAL_ENTRIES)
                             .filter(x -> "000".equals(x.phone))
                             .collect(Collectors.toList())),
                 entries);
@@ -84,7 +84,7 @@ public class DBControllerTest {
     @Test
     void selectAllTest() throws SQLException {
         addSomeToDB();
-        assertEquals(new ArrayList<Entry>(Arrays.asList(initialEntries)), db.selectAll());
+        assertEquals(new ArrayList<Entry>(Arrays.asList(INITIAL_ENTRIES)), db.selectAll());
     }
 
     @Test
@@ -93,7 +93,7 @@ public class DBControllerTest {
         db.deleteById(3);
         ArrayList<Entry> entries = db.selectAll();
         assertEquals(
-                new ArrayList<>(Arrays.stream(initialEntries)
+                new ArrayList<>(Arrays.stream(INITIAL_ENTRIES)
                         .filter(x -> x.id != 3)
                         .collect(Collectors.toList())),
                 entries);
@@ -105,7 +105,7 @@ public class DBControllerTest {
         db.deleteByName("bbb");
         ArrayList<Entry> entries = db.selectAll();
         assertEquals(
-                new ArrayList<>(Arrays.stream(initialEntries)
+                new ArrayList<>(Arrays.stream(INITIAL_ENTRIES)
                         .filter(x -> !"bbb".equals(x.name))
                         .collect(Collectors.toList())),
                 entries);
@@ -117,7 +117,7 @@ public class DBControllerTest {
         db.deleteByPhone("000");
         ArrayList<Entry> entries = db.selectAll();
         assertEquals(
-                new ArrayList<>(Arrays.stream(initialEntries)
+                new ArrayList<>(Arrays.stream(INITIAL_ENTRIES)
                         .filter(x -> !"000".equals(x.phone))
                         .collect(Collectors.toList())),
                 entries);
@@ -129,7 +129,7 @@ public class DBControllerTest {
         db.deleteByNamePhone("bbb", "404");
         ArrayList<Entry> entries = db.selectAll();
         assertEquals(
-                new ArrayList<>(Arrays.stream(initialEntries)
+                new ArrayList<>(Arrays.stream(INITIAL_ENTRIES)
                         .filter(x ->  !"bbb".equals(x.name) || !"404".equals(x.phone))
                         .collect(Collectors.toList())),
                 entries);
@@ -141,7 +141,7 @@ public class DBControllerTest {
         db.deleteByNamePhone("aaa", "000");
         ArrayList<Entry> entries = db.selectAll();
         assertEquals(
-                new ArrayList<>(Arrays.stream(initialEntries)
+                new ArrayList<>(Arrays.stream(INITIAL_ENTRIES)
                         .filter(x ->  !"aaa".equals(x.name) || !"000".equals(x.phone))
                         .collect(Collectors.toList())),
                 entries);
@@ -153,7 +153,7 @@ public class DBControllerTest {
         db.updateName("ccc", "000", "aaa");
         ArrayList<Entry> entries = db.selectAll();
         assertEquals(
-                new ArrayList<>(Arrays.stream(initialEntries)
+                new ArrayList<>(Arrays.stream(INITIAL_ENTRIES)
                         .map(x -> {
                             if ("ccc".equals(x.name) && "000".equals(x.phone)) {
                                 return new Entry(x.id, "aaa", x.phone);
@@ -170,7 +170,7 @@ public class DBControllerTest {
         db.updatePhone("ccc", "000", "123");
         ArrayList<Entry> entries = db.selectAll();
         assertEquals(
-                new ArrayList<>(Arrays.stream(initialEntries)
+                new ArrayList<>(Arrays.stream(INITIAL_ENTRIES)
                         .map(x -> {
                             if ("ccc".equals(x.name) && "000".equals(x.phone)) {
                                 return new Entry(x.id, x.name, "123");

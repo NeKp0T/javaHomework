@@ -6,6 +6,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+// tuple of name, phone and id.
 final class Entry {
     public final String name;
     public final String phone;
@@ -21,7 +22,7 @@ final class Entry {
     public boolean equals(Object obj) {
         if (obj instanceof Entry) {
             Entry that = (Entry) obj;
-            return name.equals(that.name) && phone.equals(that.phone);
+            return name.equals(that.name) && phone.equals(that.phone) && id == that.id;
         }
         return super.equals(obj);
     }
@@ -36,14 +37,14 @@ final class Entry {
  * Implements queries to database needed by application as methods with self-explaining names.
  */
 @NotNull
-class DBController implements AutoCloseable {
+class PhonebookDatabaseController implements AutoCloseable {
     private static final String NAMES_TABLE = "Names";
     private static final String PHONES_TABLE = "Phones";
     private static final String CROSS_TABLE = "Phonebook";
 
     private final Connection connection;
 
-    public DBController(String connectionString) throws SQLException {
+    public PhonebookDatabaseController(String connectionString) throws SQLException {
         connection = DriverManager.getConnection(connectionString);
         String createNamesTableQuery = "CREATE TABLE IF NOT EXISTS " + NAMES_TABLE + " (\n"
                 + " id integer PRIMARY KEY,\n"
@@ -264,6 +265,7 @@ public class Main {
             "[9, dn] name           delete entries with given name\n" +
             "[10, dp]  phone        delete entries with given phone\n";
 
+    // types of database connection
     private enum DBType {DEFAULT, BY_FILE, BY_CONNECT_STRING, IN_MEMORY, ERROR}
 
     private static class ConnectState {
@@ -313,6 +315,7 @@ public class Main {
             case ERROR:
                 System.out.println(USAGE);
                 return;
+            default:
             case DEFAULT:
                 System.out.println("No database specified, " + DEFAULT_DB_NAME + " (in file) will be used");
                 connectString = "jdbc:sqlite:" + DEFAULT_DB_NAME;
@@ -320,7 +323,7 @@ public class Main {
         }
 
 
-        try (var db = new DBController(connectString)) {
+        try (var db = new PhonebookDatabaseController(connectString)) {
             System.out.println("Successfully connected.");
             System.out.println(WELCOME_MESSAGE);
 
