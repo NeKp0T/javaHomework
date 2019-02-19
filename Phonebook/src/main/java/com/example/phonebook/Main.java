@@ -79,6 +79,10 @@ class DBController implements AutoCloseable {
         preparedStatement.executeUpdate();
     }
 
+    /*
+     Executes one preparedStatement with given parameter and query.
+     Created only to evade copy paste for next two methods
+      */
     private int getIntFromQuery(String parameter, String query) throws SQLException {
         var preparedStatement = connection.prepareStatement(query);
         preparedStatement.setString(1, parameter);
@@ -101,6 +105,7 @@ class DBController implements AutoCloseable {
         return getIntFromQuery(phone, query);
     }
 
+    // returns newly created entry id
     public int addEntry(String name, String phone) throws SQLException {
         insertPhone(phone);
         insertName(name);
@@ -122,6 +127,7 @@ class DBController implements AutoCloseable {
         }
     }
 
+    // query should be parametrized by one parameter
     private ArrayList<Entry> selectByQuery(String query, String parameter) throws SQLException {
         var prepared = connection.prepareStatement(query);
         prepared.setString(1, parameter);
@@ -154,7 +160,7 @@ class DBController implements AutoCloseable {
         String query = "SELECT " + CROSS_TABLE + ".id, " + NAMES_TABLE + ".name, " + PHONES_TABLE + ".phone FROM "
                 + " " + NAMES_TABLE + ", " + PHONES_TABLE + ", " + CROSS_TABLE
                 + " WHERE ? = 'crutch' AND " + NAMES_TABLE + ".id = " + CROSS_TABLE + ".NameId AND " + PHONES_TABLE + ".id = " + CROSS_TABLE + ".PhoneId;";
-        return selectByQuery(query, "crutch");
+        return selectByQuery(query, "crutch"); // eeh its better than creating another method
     }
 
 
@@ -188,9 +194,6 @@ class DBController implements AutoCloseable {
         prepared.executeUpdate();
     }
 
-    /**
-     * @return if any entry was updated.
-     */
     public void updateName(String name, String phone, String newName) throws SQLException {
         insertName(newName);
         String query = "UPDATE " + CROSS_TABLE + " SET "
@@ -208,9 +211,6 @@ class DBController implements AutoCloseable {
         prepared.executeUpdate();
     }
 
-    /**
-     * @return if any entry was updated.
-     */
     public void updatePhone(String name, String phone, String newPhone) throws SQLException {
         insertPhone(newPhone);
         String query = "UPDATE " + CROSS_TABLE + " SET "
