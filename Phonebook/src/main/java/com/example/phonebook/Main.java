@@ -4,50 +4,29 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-class PhoneNumber {
-    public final String phoneNumber;
-    public PhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
-    }
-
-    @Override
-    public String toString() {
-        return phoneNumber;
-    }
-}
-
-class Name {
+final class Entry {
     public final String name;
-    public Name(String name) {
-        this.name = name;
-    }
-
-    @Override
-    public String toString() {
-        return name;
-    }
-}
-
-class Entry {
-    public final Name name;
-    public final PhoneNumber phoneNumber;
+    public final String phone;
     public final int id;
 
     public Entry(int id, String nameString, String phoneNumberString) {
         this.id = id;
-        name = new Name(nameString);
-        phoneNumber = new PhoneNumber(phoneNumberString);
+        name = nameString;
+        phone = phoneNumberString;
     }
 
-    public Entry(int id, Name name, PhoneNumber phoneNumber) {
-        this.id = id;
-        this.name = name;
-        this.phoneNumber = phoneNumber;
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Entry) {
+            Entry that = (Entry) obj;
+            return name.equals(that.name) && phone.equals(that.phone);
+        }
+        return super.equals(obj);
     }
 
     @Override
     public String toString() {
-        return String.valueOf(id) + " | " + name.toString() + " | " + phoneNumber.toString();
+        return id + " | " + name + " | " + phone;
     }
 }
 
@@ -94,13 +73,9 @@ class DBController implements AutoCloseable {
         return preparedStatement.executeUpdate() > 0;
     }
 
-    /*
-       Returns id of given name in NAMES_TABLE, or -1 if given namesis not present.
-     */
-    private int getNameId(String name) throws SQLException {
-        String query = "SELECT id FROM " + NAMES_TABLE + " WHERE name = ?";
+    private int getIntFromQuery(String parameter, String query) throws SQLException {
         var preparedStatement = connection.prepareStatement(query);
-        preparedStatement.setString(1, name);
+        preparedStatement.setString(1, parameter);
 
         ResultSet set = preparedStatement.executeQuery();
         if (set.next()) {
@@ -111,19 +86,19 @@ class DBController implements AutoCloseable {
     }
 
     /*
+       Returns id of given name in NAMES_TABLE, or -1 if given namesis not present.
+     */
+    private int getNameId(String name) throws SQLException {
+        String query = "SELECT id FROM " + NAMES_TABLE + " WHERE name = ?";
+        return getIntFromQuery(name, query);
+    }
+
+    /*
        Returns id of given phone in PHONES_TABLE, or -1 if given phone is not present.
      */
     private int getPhoneId(String phone) throws SQLException {
         String query = "SELECT id FROM " + PHONES_TABLE + " WHERE phone = ?";
-        var preparedStatement = connection.prepareStatement(query);
-        preparedStatement.setString(1, phone);
-
-        ResultSet set = preparedStatement.executeQuery();
-        if (set.next()) {
-            return set.getInt(1);
-        } else {
-            return -1;
-        }
+        return getIntFromQuery(phone, query);
     }
 
     /* Returns id of new entry */
@@ -163,23 +138,23 @@ class DBController implements AutoCloseable {
     }
 
     public ArrayList<Entry> findByName(String name) throws SQLException {
-        String query = "SELECT Phonebook.id, NamesT.name, Phones.phone FROM "
+        String query = "SELECT " + CROSS_TABLE + ".id, " + NAMES_TABLE + ".name, " + PHONES_TABLE + ".phone FROM "
                 + " " + NAMES_TABLE + ", " + PHONES_TABLE + ", " + CROSS_TABLE
-                + " WHERE NamesT.name = ? AND NamesT.id = Phonebook.NameId AND Phones.id = Phonebook.PhoneId;";
+                + " WHERE " + NAMES_TABLE + ".name = ? AND " + NAMES_TABLE + ".id = " + CROSS_TABLE + ".NameId AND " + PHONES_TABLE + ".id = " + CROSS_TABLE + ".PhoneId;";
         return selectByQuery(query, name);
     }
 
     public ArrayList<Entry> findByPhone(String phoneNumber) throws SQLException {
-        String query = "SELECT Phonebook.id, NamesT.name, Phones.phone FROM "
+        String query = "SELECT " + CROSS_TABLE + ".id, " + NAMES_TABLE + ".name, " + PHONES_TABLE + ".phone FROM "
                 + " " + NAMES_TABLE + ", " + PHONES_TABLE + ", " + CROSS_TABLE
-                + " WHERE Phones.phone = ? AND NamesT.id = Phonebook.NameId AND Phones.id = Phonebook.PhoneId;";
+                + " WHERE " + PHONES_TABLE + ".phone = ? AND " + NAMES_TABLE + ".id = " + CROSS_TABLE + ".NameId AND " + PHONES_TABLE + ".id = " + CROSS_TABLE + ".PhoneId;";
         return selectByQuery(query, phoneNumber);
     }
 
     public ArrayList<Entry> selectAll() throws SQLException {
-        String query = "SELECT Phonebook.id, NamesT.name, Phones.phone FROM "
+        String query = "SELECT " + CROSS_TABLE + ".id, " + NAMES_TABLE + ".name, " + PHONES_TABLE + ".phone FROM "
                 + " " + NAMES_TABLE + ", " + PHONES_TABLE + ", " + CROSS_TABLE
-                + " WHERE ? = 'crutch' AND NamesT.id = Phonebook.NameId AND Phones.id = Phonebook.PhoneId;";
+                + " WHERE ? = 'crutch' AND " + NAMES_TABLE + ".id = " + CROSS_TABLE + ".NameId AND " + PHONES_TABLE + ".id = " + CROSS_TABLE + ".PhoneId;";
         return selectByQuery(query, "crutch");
     }
 
@@ -260,6 +235,8 @@ class DBController implements AutoCloseable {
 }
 
 public class Main {
+
+    static Scanner scanner = new Scanner(System.in);
 
     private static final String USAGE = "[-f databaseFile | -s sqliteConnectionString | -m]\n" +
             "Program uses sqlite and nothing is guaranteed if passed connection string uses different database system";
@@ -350,8 +327,6 @@ public class Main {
             System.out.println("Succesfully connected.");
             System.out.println(WELCOME_MESSAGE);
 
-            var scanner = new Scanner(System.in);
-
             boolean exit = false;
             while (!exit) {
                 System.out.print("> ");
@@ -369,7 +344,7 @@ public class Main {
                     var entries = db.findByName(name);
                     for (Entry i : entries) {
                         System.out.print(i.id);
-                        System.out.println(" | " + i.phoneNumber);
+                        System.out.println(" | " + i.phone);
                     }
 
                 } else if ("3".equals(inputLine) || "findp".equals(inputLine)) {
