@@ -1,6 +1,7 @@
 package com.example.reflector;
 
 import java.io.*;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
@@ -53,6 +54,7 @@ public class Reflector {
 
             writeFields();
             writeMethods();
+            writeConstructors();
             writeSubclasses();
 
             tabCount--;
@@ -60,20 +62,25 @@ public class Reflector {
         }
 
         private void writeClassNameLine() throws IOException {
-            writeTabs();
             writeLn(printedClass.getName());
             writeLn(printedClass.getCanonicalName());
             writeLn(printedClass.getPackageName());
             writeLn(printedClass.getSimpleName());
             writeLn(printedClass.getTypeName());
             writeLn(printedClass.toString());
-            writeLn(printedClass.toGenericString() + " {");
+            writeLn(printedClass.toGenericString()
+                    .replace(printedClass.getName(),
+                             printedClass.getSimpleName())
+                    + " {");
         }
 
         private void writeFields() throws IOException {
             Field[] fields = printedClass.getDeclaredFields();
             for (Field i : fields) {
-                writeLn(i.toGenericString() + ";");
+                writeLn(i.toGenericString()
+                        .replaceAll("\\$",
+                                ".")
+                        + ";");
             }
             writeLn("");
         }
@@ -87,10 +94,26 @@ public class Reflector {
         }
 
 
+        private void writeConstructors() throws IOException {
+            Constructor<?>[] constructors = printedClass.getDeclaredConstructors();
+            for (Constructor<?> i : constructors) {
+                writeLn(i.toGenericString()
+                        .replaceAll("\\$",
+                                ".")
+                        + " {");
+                writeLn("}");
+            }
+            writeLn("");
+        }
+
+
         private void writeMethods() throws IOException {
             Method[] methods = printedClass.getDeclaredMethods();
             for (Method i : methods) {
-                writeLn(i.toGenericString() + "{");
+                writeLn(i.toGenericString()
+                        .replaceAll("\\$",
+                                ".")
+                        + " {");
                 writeLn("\tthrow new NotImplementedException();"); // TODO write smth else?
                 writeLn("}");
             }
@@ -111,11 +134,14 @@ public class Reflector {
         T bob;
         T Kek;
 
-        Kek Kek() {
+        com.example.reflector.Reflector.Kek Kek() {
             return null;
         }
         <Y> void keklol(Y y, T t) {
 
         }
+        Reflector nw() { return null; }
+
+        private Kek() {}
     }
 }
