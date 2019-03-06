@@ -10,14 +10,18 @@ import java.util.List;
 public class Reflector {
     public static void printStructure(Class<?> someClass) throws IOException {
         try (var writer = new BufferedWriter(new FileWriter(someClass.getName() + ".java"))) {
-            ReflectorPrinter.printStructure(someClass, writer, 0);
+            printStructure(someClass, writer);
         }
     }
 
-    public static void actuallyPrintStructure(Class<?> someClass) throws IOException {
+    public static void printStructureToConsole(Class<?> someClass) throws IOException {
         try (var writer = new PrintWriter(System.out)) {
-            ReflectorPrinter.printStructure(someClass, writer, 0);
+            printStructure(someClass, writer);
         }
+    }
+
+    public static void printStructure(Class<?> someClass, Writer writer) throws IOException {
+        ReflectorPrinter.printStructure(someClass, writer, 0);
     }
 
     private static class ReflectorPrinter {
@@ -147,13 +151,16 @@ public class Reflector {
             Type[] exceptionTypes = executable.getGenericExceptionTypes();
             if (exceptionTypes.length != 0) {
                 writer.write("throws ");
-                for (Type exceptionType : exceptionTypes) {
+                for (int i = 0; i < exceptionTypes.length; i++) {
+                    Type exceptionType = exceptionTypes[i];
                     writeType(exceptionType);
-                    writer.write(", ");
+                    if (i + 1 < exceptionTypes.length) {
+                        writer.write(", ");
+                    }
                 }
             }
 
-            writer.write(" {\n");
+            writer.write("{\n");
             tabCount++;
             writeLn("throw new UnsupportedOperationException();");
             tabCount--;
@@ -177,6 +184,7 @@ public class Reflector {
                 writeModifiers(method.getModifiers());
                 writeType(method.getGenericReturnType());
                 writer.append(" ");
+                writer.write(method.getName());
                 writeArgumentsExceptionsAndBody(method);
             }
             writeLn("");
@@ -185,14 +193,14 @@ public class Reflector {
 
     public static void main(String[] args) {
         try {
-            actuallyPrintStructure(Reflector.class);
+            printStructureToConsole(Kek.class);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
 
-    static private class Kek<T> {
+    private static class Kek<T> {
         T bob;
         T Kek;
         int I;
