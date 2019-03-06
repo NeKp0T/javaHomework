@@ -16,7 +16,7 @@ public class TestInjector {
     @Test
     public void injectorShouldInitializeClassWithoutDependencies()
             throws Exception {
-        Object object = Injector.initialize("task.testClasses.ClassWithoutDependencies", Collections.emptyList());
+        Object object = Injector.initialize("com.example.cv2.testClasses.ClassWithoutDependencies", Collections.emptyList());
         assertTrue(object instanceof ClassWithoutDependencies);
     }
 
@@ -24,8 +24,8 @@ public class TestInjector {
     public void injectorShouldInitializeClassWithOneClassDependency()
             throws Exception {
         Object object = Injector.initialize(
-                "task.testClasses.ClassWithOneClassDependency",
-                Collections.singletonList("task.testClasses.ClassWithoutDependencies")
+                "com.example.cv2.testClasses.ClassWithOneClassDependency",
+                Collections.singletonList("com.example.cv2.testClasses.ClassWithoutDependencies")
         );
         assertTrue(object instanceof ClassWithOneClassDependency);
         ClassWithOneClassDependency instance = (ClassWithOneClassDependency) object;
@@ -36,8 +36,8 @@ public class TestInjector {
     public void injectorShouldInitializeClassWithOneInterfaceDependency()
             throws Exception {
         Object object = Injector.initialize(
-                "task.testClasses.ClassWithOneInterfaceDependency",
-                Collections.singletonList("task.testClasses.InterfaceImpl")
+                "com.example.cv2.testClasses.ClassWithOneInterfaceDependency",
+                Collections.singletonList("com.example.cv2.testClasses.InterfaceImpl")
         );
         assertTrue(object instanceof ClassWithOneInterfaceDependency);
         ClassWithOneInterfaceDependency instance = (ClassWithOneInterfaceDependency) object;
