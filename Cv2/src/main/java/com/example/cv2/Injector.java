@@ -47,7 +47,7 @@ public class Injector {
                 if (implementationClass != null) {
                     throw new AmbiguousImplementationException();
                 }
-                implementationClass = requiredClass;
+                implementationClass = possibleClass;
             }
         }
 
