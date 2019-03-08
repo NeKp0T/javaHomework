@@ -188,6 +188,7 @@ public class Reflector {
             sortMembers(constructors);
             for (Constructor<?> i : constructors) {
                 writeModifiers(i.getModifiers());
+                writeTypeParameters(i);
                 writer.write(printedClass.getSimpleName());
                 writeArgumentsExceptionsAndBody(i);
             }
@@ -199,12 +200,30 @@ public class Reflector {
             sortMembers(methods);
             for (Method method : methods) {
                 writeModifiers(method.getModifiers());
+                writeTypeParameters(method);
                 writeType(method.getGenericReturnType());
                 writer.append(" ");
                 writer.write(method.getName());
                 writeArgumentsExceptionsAndBody(method);
             }
             writeLn("");
+        }
+
+        private void writeTypeParameters(Executable executable) throws IOException {
+            TypeVariable[] typeVariables = executable.getTypeParameters();
+
+            if (typeVariables.length == 0) {
+                return;
+            }
+
+            writer.write("<");
+            for (int i = 0; i < typeVariables.length; i++) {
+                writer.write(typeVariables[i].getName());
+                if (i + 1 < typeVariables.length) {
+                    writer.write(", ");
+                }
+            }
+            writer.write("> ");
         }
     }
 

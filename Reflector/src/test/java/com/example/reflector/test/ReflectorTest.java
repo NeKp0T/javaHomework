@@ -88,7 +88,29 @@ public class ReflectorTest {
                 "    ClassWithMethodsWithArguments(int arg0, char arg1, java.lang.String arg2) {\n" +
                 "        throw new UnsupportedOperationException();\n" +
                 "    }\n" +
-                "}"; // TODO make them have one thing so order wouldnt matter
+                "}";
         assertPrintsCorrectly(correct, ClassWithMethodsWithArguments.class);
+    }
+
+    @Test
+    void printGenericMethods() throws IOException {
+        String correct = "public class ClassWithGenericMethods {\n" +
+                "    <T> T aMethod(T arg0) {\n" +
+                "        throw new UnsupportedOperationException();\n" +
+                "    }\n" +
+                "    <W> W bMethod(W[] arg0) {\n" +
+                "        throw new UnsupportedOperationException();\n" +
+                "    }\n" +
+                "    <U> U cMethod(java.util.Set<? extends U> arg0, java.util.Set<? super U> arg1) {\n" +
+                "        throw new UnsupportedOperationException();\n" +
+                "    }\n" +
+                "    <X, Y> void dMethod(X[] arg0, Y arg1) {\n" +
+                "        throw new UnsupportedOperationException();\n" +
+                "    }\n" +
+                "    <Z> ClassWithGenericMethods(Z arg0) {\n" +
+                "        throw new UnsupportedOperationException();\n" +
+                "    }\n" +
+                "}\n";
+        assertPrintsCorrectly(correct, ClassWithGenericMethods.class);
     }
 }
