@@ -1,51 +1,14 @@
-package com.example.reflector;
+package com.example.reflector.test;
 
+import com.example.reflector.Reflector;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.Arrays;
-import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
-
-class ClassWithFields {
-    int intField;
-    java.lang.String stringField;
-    java.lang.String[] stringArr;
-    char[] charArr;
-}
-
-class ClassWithMethodsWithoutArguments {
-    void voidFunc() {
-        throw new UnsupportedOperationException();
-    }
-    String stringFunc() {
-        throw new UnsupportedOperationException();
-    }
-    ClassWithMethodsWithoutArguments() {
-        throw new UnsupportedOperationException();
-    }
-}
-
-class ClassWithMethodsWithArguments {
-    void voidFuncFromInt(int arg0) {
-        throw new UnsupportedOperationException();
-    }
-    java.lang.String stringFuncFromString(java.lang.String arg0) {
-        throw new UnsupportedOperationException();
-    }
-    java.lang.Integer multipleArguments(java.lang.String arg0, java.lang.Integer arg1, char arg2) {
-        throw new UnsupportedOperationException();
-    }
-    ClassWithMethodsWithArguments() {
-        throw new UnsupportedOperationException();
-    }
-    ClassWithMethodsWithArguments(int arg0, char arg1, java.lang.String arg2) {
-        throw new UnsupportedOperationException();
-    }
-}
 
 public class ReflectorTest {
 
@@ -80,10 +43,10 @@ public class ReflectorTest {
     @Test
     void printFieldsTest() throws IOException {
         String correct = "class ClassWithFields {\n" +
-                "\tint intField;\n" +
-                "\tjava.lang.String stringField;\n" +
-                "\tjava.lang.String[] stringArr;\n" +
                 "\tchar[] charArr;\n" +
+                "\tint intField;\n" +
+                "\tjava.lang.String[] stringArr;\n" +
+                "\tjava.lang.String stringField;\n" +
                 "\tClassWithFields() {\n" +
                 "\t\tthrow new UnsupportedOperationException();\n" +
                 "\t}\n" +
@@ -94,10 +57,10 @@ public class ReflectorTest {
     @Test
     void printMethodsWithoutArguments() throws IOException {
         String correct = "class ClassWithMethodsWithoutArguments {\n" +
-                "    void voidFunc() {\n" +
+                "    java.lang.String stringFunc() {\n" +
                 "        throw new UnsupportedOperationException();\n" +
                 "    }\n" +
-                "    java.lang.String stringFunc() {\n" +
+                "    void voidFunc() {\n" +
                 "        throw new UnsupportedOperationException();\n" +
                 "    }\n" +
                 "    ClassWithMethodsWithoutArguments() {\n" +
@@ -110,13 +73,13 @@ public class ReflectorTest {
     @Test
     void printMethodsWithArguments() throws IOException {
         String correct = "class ClassWithMethodsWithArguments {\n" +
-                "    void voidFuncFromInt(int arg0) {\n" +
+                "    java.lang.Integer multipleArguments(java.lang.String arg0, java.lang.Integer arg1, char arg2) {\n" +
                 "        throw new UnsupportedOperationException();\n" +
                 "    }\n" +
                 "    java.lang.String stringFuncFromString(java.lang.String arg0) {\n" +
                 "        throw new UnsupportedOperationException();\n" +
                 "    }\n" +
-                "    java.lang.Integer multipleArguments(java.lang.String arg0, java.lang.Integer arg1, char arg2) {\n" +
+                "    void voidFuncFromInt(int arg0) {\n" +
                 "        throw new UnsupportedOperationException();\n" +
                 "    }\n" +
                 "    ClassWithMethodsWithArguments() {\n" +

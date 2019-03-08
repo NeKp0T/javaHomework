@@ -2,11 +2,14 @@ package com.example.reflector;
 
 import java.io.*;
 import java.lang.reflect.*;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 
 // TODO SecurityException
-// TODO deal with arrays, intefaces, etc
+// TODO deal with arrays, interfaces, etc
+// TODO docs
 public class Reflector {
     public static void printStructure(Class<?> someClass) throws IOException {
         try (var writer = new BufferedWriter(new FileWriter(someClass.getName() + ".java"))) {
@@ -53,39 +56,40 @@ public class Reflector {
 
         private void writeModifiers(int modifiers) throws IOException {
             writeTabs();
-            if ((modifiers & Modifier.PUBLIC) != 0) {
+            if (Modifier.isPublic(modifiers)) {
                 writer.write("public ");
             }
-            if ((modifiers & Modifier.PROTECTED) != 0) {
+            if (Modifier.isProtected(modifiers)) {
                 writer.write("protected ");
             }
-            if ((modifiers & Modifier.PRIVATE) != 0) {
+            if (Modifier.isPrivate(modifiers)) {
                 writer.write("private ");
             }
-            if ((modifiers & Modifier.ABSTRACT) != 0) {
+            if (Modifier.isAbstract(modifiers)) {
                 writer.write("abstract ");
             }
-            if ((modifiers & Modifier.STATIC) != 0) {
+            if (Modifier.isStatic(modifiers)) {
                 writer.write("static ");
             }
-            if ((modifiers & Modifier.FINAL) != 0) {
+            if (Modifier.isFinal(modifiers)) {
                 writer.write("final ");
             }
-            if ((modifiers & Modifier.TRANSIENT) != 0) {
+            if (Modifier.isTransient(modifiers)) {
                 writer.write("transient ");
             }
-            if ((modifiers & Modifier.VOLATILE) != 0) {
+            if (Modifier.isVolatile(modifiers)) {
                 writer.write("volatile ");
             }
-            if ((modifiers & Modifier.SYNCHRONIZED) != 0) {
+            if (Modifier.isSynchronized(modifiers)) {
                 writer.write("synchronised ");
             }
-            if ((modifiers & Modifier.NATIVE) != 0) {
+            if (Modifier.isNative(modifiers)) {
                 writer.write("native ");
             }
-            if ((modifiers & Modifier.STRICT) != 0) {
+            if (Modifier.isStrict(modifiers)) {
                 writer.write("strictfp ");
             }
+
         }
 
         private void writeStructure() throws IOException {
@@ -102,7 +106,7 @@ public class Reflector {
         }
 
         private void writeClassNameLine() throws IOException {
-            writeLn(printedClass.toGenericString()
+            writeLn(printedClass.toGenericString() // TODO rewrite without cheating
                     .replace(printedClass.getName(),
                              printedClass.getSimpleName())
                     + " {");
@@ -114,6 +118,7 @@ public class Reflector {
 
         private void writeFields() throws IOException {
             Field[] fields = printedClass.getDeclaredFields();
+            sortMembers(fields);
             for (Field field : fields) {
                 if (field.isSynthetic()) {
                     continue;
@@ -135,7 +140,7 @@ public class Reflector {
             writeLn("");
         }
 
-        private void writeArgumentsExceptionsAndBody(Executable executable) throws IOException {
+        private void writeArguments(Executable executable) throws IOException {
             writer.write("(");
             Type[] argumentTypes = executable.getGenericParameterTypes();
 //                TypeVariable<Method>[] typeParameters = executable.getTypeParameters();
@@ -148,6 +153,9 @@ public class Reflector {
             }
             writer.write(") ");
 
+        }
+
+        private void writeExceptions(Executable executable) throws IOException {
             Type[] exceptionTypes = executable.getGenericExceptionTypes();
             if (exceptionTypes.length != 0) {
                 writer.write("throws ");
@@ -159,7 +167,9 @@ public class Reflector {
                     }
                 }
             }
+        }
 
+        private void writeDefaultFunctionBody() throws IOException {
             writer.write("{\n");
             tabCount++;
             writeLn("throw new UnsupportedOperationException();");
@@ -167,8 +177,15 @@ public class Reflector {
             writeLn("}\n");
         }
 
+        private void writeArgumentsExceptionsAndBody(Executable executable) throws IOException {
+            writeArguments(executable);
+            writeExceptions(executable);
+            writeDefaultFunctionBody();
+        }
+
         private void writeConstructors() throws IOException {
             Constructor<?>[] constructors = printedClass.getDeclaredConstructors();
+            sortMembers(constructors);
             for (Constructor<?> i : constructors) {
                 writeModifiers(i.getModifiers());
                 writer.write(printedClass.getSimpleName());
@@ -177,9 +194,9 @@ public class Reflector {
             writeLn("");
         }
 
-
         private void writeMethods() throws IOException { // TODO varargs?
             Method[] methods = printedClass.getDeclaredMethods();
+            sortMembers(methods);
             for (Method method : methods) {
                 writeModifiers(method.getModifiers());
                 writeType(method.getGenericReturnType());
@@ -190,6 +207,12 @@ public class Reflector {
             writeLn("");
         }
     }
+
+    private static void sortMembers(Member[] fields) {
+        Arrays.sort(fields, Comparator.comparing(Member::getName));
+    }
+
+    // ---------------------------------------------
 
     public static void main(String[] args) {
         try {
@@ -207,7 +230,7 @@ public class Reflector {
         String sss;
         Kek<Kek<String>> rec;
 
-        com.example.reflector.Reflector.Kek Kek() {
+        Reflector.Kek Kek() {
             return null;
         }
         <Y> void keklol(Y y, T t) {
