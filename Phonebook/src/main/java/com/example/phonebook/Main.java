@@ -1,4 +1,4 @@
-package com.example.phonebook;
+7package com.example.phonebook;
 
 import java.util.Scanner;
 
@@ -9,7 +9,7 @@ public class Main {
 
     private static final Scanner SCANNER = new Scanner(System.in);
 
-    private static final String USAGE = "[-f databaseFile | -s sqliteConnectionString | -m]\n" +
+    private static final String USAGE = "[-f databaseFile | -databaseLocation sqliteConnectionString | -m]\n" +
             "Program uses sqlite and nothing is guaranteed if passed connection string uses different database system";
     private static final String DEFAULT_DB_NAME = "Phonebook.db";
     private static final String WELCOME_MESSAGE = "Print \"help\" for usage hints.";
@@ -33,62 +33,104 @@ public class Main {
             "[10, dp]  phone        delete entries with given phone\n";
 
     // types of database connection
-    private enum DBType {DEFAULT, BY_FILE, BY_CONNECT_STRING, IN_MEMORY, ERROR}
+    private enum DBType {
+        DEFAULT {
+            @Override
+            public String getConnectString(String databaseLocation) {
+                return "jdbc:sqlite:" + DEFAULT_DB_NAME;
+            }
+            @Override
+            public String getConnectMessage(String databaseLocation) {
+                return "No database specified, " + DEFAULT_DB_NAME + " (in file) will be used";
+            }
+        },
+        BY_FILE {
+            @Override
+            public String getConnectString(String databaseLocation) {
+                return "jdbc:sqlite:" + databaseLocation;
+            }
+            @Override
+            public String getConnectMessage(String databaseLocation) {
+                return "Will use database in file " + databaseLocation + ".";
+            }
+        },
+        BY_CONNECT_STRING {
+            @Override
+            public String getConnectString(String databaseLocation) {
+                return databaseLocation;
+            }
+            @Override
+            public String getConnectMessage(String databaseLocation) {
+                return "Will use database by connect string " + databaseLocation + ".";
+            }
+        },
+        IN_MEMORY {
+            @Override
+            public String getConnectString(String databaseLocation) {
+                return "jdbc:sqlite::memory";
+            }
+            @Override
+            public String getConnectMessage(String databaseLocation) {
+                return "Will use a transient in-memory database.";
+            }
+        },
+        ERROR {
+            @Override
+            public String getConnectString(String databaseLocation) {
+                return null;
+            }
+            @Override
+            public String getConnectMessage(String databaseLocation) {
+                return USAGE;
+            }
+        };
+
+        public abstract String getConnectString(String databaseLocation);
+        public abstract String getConnectMessage(String databaseLocation);
+    }
 
     private static class ConnectState {
         public final DBType type;
-        public final String s;
+        public final String databaseLocation;
 
         ConnectState(String[] args) {
             if (args.length == 0) {
                 type = DBType.DEFAULT;
-                s = null;
+                databaseLocation = null;
             } else if ("-m".equals(args[0])) {
                 type = DBType.IN_MEMORY;
-                s = null;
+                databaseLocation = null;
             } else if (args.length == 1) {
                 type = DBType.ERROR;
-                s = null;
+                databaseLocation = null;
             } else if ("-f".equals(args[0])) {
                 type = DBType.BY_FILE;
-                s = args[1];
-            } else if ("-s".equals(args[0])) {
+                databaseLocation = args[1];
+            } else if ("-databaseLocation".equals(args[0])) {
                 type = DBType.BY_CONNECT_STRING;
-                s = args[1];
+                databaseLocation = args[1];
             } else {
                 type = DBType.ERROR;
-                s = null;
+                databaseLocation = null;
             }
+        }
+
+        String getConnectString() {
+            return type.getConnectString(databaseLocation);
+        }
+        String getConnectMessage() {
+            return type.getConnectMessage(databaseLocation);
         }
     }
 
     public static void main(String[] args) {
         var state = new ConnectState(args);
-        String connectString = null; // it will be initialized in switch
+        String connectString = state.getConnectString();
+        System.out.println(state.getConnectMessage());
 
-        switch (state.type) {
-            case BY_FILE:
-                System.out.println("Will use database in file " + state.s + ".");
-                connectString = "jdbc:sqlite:" + state.s;
-                break;
-            case BY_CONNECT_STRING:
-                System.out.println("Will use database by connect string " + state.s + ".");
-                connectString = state.s;
-                break;
-            case IN_MEMORY:
-                System.out.println("Will use a transient in-memory database.");
-                connectString = "jdbc:sqlite::memory";
-                break;
-            case ERROR:
-                System.out.println(USAGE);
-                return;
-            default:
-            case DEFAULT:
-                System.out.println("No database specified, " + DEFAULT_DB_NAME + " (in file) will be used");
-                connectString = "jdbc:sqlite:" + DEFAULT_DB_NAME;
-                break;
+        if (state.type == DBType.ERROR) {
+            return;
         }
-
 
         try (var db = new PhonebookDatabaseController(connectString)) {
             System.out.println("Successfully connected.");

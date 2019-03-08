@@ -168,6 +168,7 @@ class PhonebookDatabaseController implements AutoCloseable {
         var prepared = connection.prepareStatement(query);
         prepared.setInt(1, id);
         prepared.executeUpdate();
+        deleteUnused();
     }
 
     /**
@@ -179,6 +180,7 @@ class PhonebookDatabaseController implements AutoCloseable {
         var prepared = connection.prepareStatement(query);
         prepared.setInt(1, getNameId(name));
         prepared.executeUpdate();
+        deleteUnused();
     }
 
     /**
@@ -190,6 +192,7 @@ class PhonebookDatabaseController implements AutoCloseable {
         var prepared = connection.prepareStatement(query);
         prepared.setInt(1, getPhoneId(phone));
         prepared.executeUpdate();
+        deleteUnused();
     }
 
     /**
@@ -203,6 +206,7 @@ class PhonebookDatabaseController implements AutoCloseable {
         prepared.setInt(1, getNameId(name));
         prepared.setInt(2, getPhoneId(phone));
         prepared.executeUpdate();
+        deleteUnused();
     }
 
     /**
@@ -227,6 +231,7 @@ class PhonebookDatabaseController implements AutoCloseable {
         prepared.setInt(3, phoneId);
 
         prepared.executeUpdate();
+        deleteUnused();
     }
 
     /**
@@ -251,6 +256,19 @@ class PhonebookDatabaseController implements AutoCloseable {
         prepared.setInt(3, phoneId);
 
         prepared.executeUpdate();
+        deleteUnused();
+    }
+
+
+    /**
+     * Deletes unused names and phones from corresponding tables
+     * @throws SQLException if SQL error occurs
+     */
+    private void deleteUnused() throws SQLException {
+        String queryNames = "DELETE FROM " + NAMES_TABLE + " WHERE id NOT IN (SELECT nameId FROM " + CROSS_TABLE + ")";
+        String queryPhones = "DELETE FROM " + PHONES_TABLE + " WHERE id NOT IN (SELECT phoneId FROM " + CROSS_TABLE + ")";
+        connection.createStatement().execute(queryNames);
+        connection.createStatement().execute(queryPhones);
     }
 
     @Override
