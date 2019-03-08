@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 
 public class PhonebookDatabaseControllerTest {
 
-    PhonebookDatabaseController db;
+    private PhonebookDatabaseController db;
 
     private static final Entry[] INITIAL_ENTRIES = {
             new Entry(1, "aaa", "000"),
