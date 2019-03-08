@@ -1,4 +1,4 @@
-7package com.example.phonebook;
+package com.example.phonebook;
 
 import java.util.Scanner;
 
