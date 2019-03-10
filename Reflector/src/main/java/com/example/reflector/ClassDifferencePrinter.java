@@ -113,7 +113,7 @@ public class ClassDifferencePrinter extends AbstractReflectorPrinter {
      * {@inheritDoc}
      */
     @Override
-    protected void processSubclasses() throws IOException {
+    protected void processSubclasses() {
         // do nothing
     }
 
@@ -226,12 +226,12 @@ public class ClassDifferencePrinter extends AbstractReflectorPrinter {
      * If two executables with the same name from different streams are deemed equal by provided comparator,
      * they are not printed.
      *
-     * @param processedClassStream
-     * @param otherClassStream
-     * @param compare
-     * @param print
-     * @param <T>
-     * @throws IOException
+     * @param processedClassStream first stream to take executables from
+     * @param otherClassStream second stream to take executables from
+     * @param compare predicate to check if executables are close enough to not write them.
+     *                It may not take name in comparision because they get sorted by name beforehand
+     * @param print function that prints executables
+     * @param <T> actual type of executables 
      */
     private <T extends Executable> void printChangingExecutables(Stream<T> processedClassStream, Stream<T> otherClassStream, BiPredicate<T, T> compare, Consumer<T> print) throws IOException {
         Map<String, List<T>> processedClassMethodsSet = processedClassStream
