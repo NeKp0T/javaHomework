@@ -13,7 +13,7 @@ public class ClassWithGenericMethods {
     <X, Y> void dMethod(X[] arg0, Y arg1) {
         throw new UnsupportedOperationException();
     }
-    <Z> ClassWithGenericMethods(Z arg0) {
+    <Z extends String> ClassWithGenericMethods(Z arg0) {
         throw new UnsupportedOperationException();
     }
 }

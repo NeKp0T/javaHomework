@@ -8,7 +8,6 @@ import javax.tools.*;
 import java.io.*;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.sql.Ref;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
@@ -118,7 +117,7 @@ public class ReflectorTest {
                 "    <X, Y> void dMethod(X[] arg0, Y arg1) {\n" +
                 "        throw new UnsupportedOperationException();\n" +
                 "    }\n" +
-                "    <Z> ClassWithGenericMethods(Z arg0) {\n" +
+                "    <Z extends String> ClassWithGenericMethods(Z arg0) {\n" +
                 "        throw new UnsupportedOperationException();\n" +
                 "    }\n" +
                 "}\n";
@@ -333,18 +332,5 @@ public class ReflectorTest {
         sourceFile.deleteOnExit();
         File binaryFile   = new File("/tmp/" + className + ".class");
         binaryFile.delete();
-    }
-
-
-    static class T1 {
-        <T> void f(T t) {}
-    }
-    static class T2 {
-        <T> void f(T t) {}
-    }
-
-    @Test
-    void ff() throws IOException {
-        Reflector.printDifferenceToConsole(T1.class, T2.class);
     }
 }

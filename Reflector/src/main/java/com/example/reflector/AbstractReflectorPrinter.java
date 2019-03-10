@@ -189,12 +189,31 @@ abstract class AbstractReflectorPrinter {
 
         writer.write("<");
         for (int i = 0; i < typeVariables.length; i++) {
-            writer.write(typeVariables[i].getName());
+            writeTypeParameter(typeVariables[i]);
             if (i + 1 < typeVariables.length) {
                 writer.write(", ");
             }
         }
         writer.write("> ");
+    }
+
+    void writeTypeParameter(TypeVariable type) throws IOException {
+        writer.write(type.toString());
+
+        List<Type> bounds = List.of(type.getBounds())
+                .stream()
+                .filter(boundType -> !boundType.getTypeName().equals("java.lang.Object"))
+                .collect(Collectors.toList());
+
+        if (bounds.size()> 0) {
+            writer.write(" extends ");
+            Iterator<Type> iterator = bounds.iterator();
+            writeType(iterator.next());
+            while (iterator.hasNext()) {
+                writer.write(" & ");
+                writeType(iterator.next());
+            }
+        }
     }
 
     /**
@@ -219,22 +238,7 @@ abstract class AbstractReflectorPrinter {
 
             for (int i = 0; i < typeParameters.length; i++) {
                 TypeVariable<Class<T>> type = typeParameters[i];
-                writer.write(type.toString());
-
-                List<Type> bounds = List.of(type.getBounds())
-                        .stream()
-                        .filter(boundType -> !boundType.getTypeName().equals("java.lang.Object"))
-                        .collect(Collectors.toList());
-
-                if (bounds.size()> 0) {
-                    writer.write(" extends ");
-                    Iterator<Type> iterator = bounds.iterator();
-                    writeType(iterator.next());
-                    while (iterator.hasNext()) {
-                        writer.write(" & ");
-                        writeType(iterator.next());
-                    }
-                }
+                writeTypeParameter(type);
                 if (i + 1 < typeParameters.length) {
                     writer.write(", ");
                 }
