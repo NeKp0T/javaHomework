@@ -6,16 +6,26 @@ import java.lang.reflect.*;
 
 class ClassStructurePrinter extends AbstractReflectorPrinter {
 
+    /**
+     * Writes given class to given writer in a way it could be declared.
+     */
     public static void writeClass(Class<?> someClass, Writer writer) throws IOException {
         new ClassStructurePrinter(someClass, writer, 0).process();
     }
 
+    /**
+     * Constructs new instance with given parameters
+     * @param tabCount count of tabs to put before each line
+     */
     protected ClassStructurePrinter(Class<?> someClass, Writer writer, int tabCount) {
         this.writer = writer;
         this.processedClass = someClass;
         this.tabCount = tabCount;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected void processFields() throws IOException {
         Field[] fields = processedClass.getDeclaredFields();
@@ -29,6 +39,9 @@ class ClassStructurePrinter extends AbstractReflectorPrinter {
         writeLn("");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected void processMethods() throws IOException {
         Method[] methods = processedClass.getDeclaredMethods();
@@ -39,6 +52,9 @@ class ClassStructurePrinter extends AbstractReflectorPrinter {
         writeLn("");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected void processConstructors() throws IOException {
         Constructor<?>[] constructors = processedClass.getDeclaredConstructors();
@@ -49,6 +65,9 @@ class ClassStructurePrinter extends AbstractReflectorPrinter {
         writeLn("");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected void processSubclasses() throws IOException {
         Class<?>[] subclasses = processedClass.getDeclaredClasses();
@@ -58,13 +77,16 @@ class ClassStructurePrinter extends AbstractReflectorPrinter {
         writeLn("");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected void processClassNameLine() throws IOException {
         writeClassName(processedClass);
         writer.write(" {\n");
     }
 
-    public void processSubclass(Class<?> someClass) throws IOException {
+    protected void processSubclass(Class<?> someClass) throws IOException {
         new ClassStructurePrinter(someClass, writer, tabCount).process();
 
     }

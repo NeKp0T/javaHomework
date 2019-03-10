@@ -16,6 +16,10 @@ import java.util.stream.Stream;
 public class ClassDifferencePrinter extends AbstractReflectorPrinter {
     private final Class<?> otherClass;
 
+    /**
+     * Writes differences between provided two classes in human-readable form into provided writer
+     * @throws IOException if exception occurs during writing
+     */
     public static void writeClassesDifference(Class<?> oneClass, Class<?> otherClass, Writer writer) throws IOException {
         new ClassDifferencePrinter(oneClass, otherClass, writer, 0).process();
     }
@@ -27,6 +31,9 @@ public class ClassDifferencePrinter extends AbstractReflectorPrinter {
         this.tabCount = tabCount;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected void processClassNameLine() throws IOException {
         writer.write("<");
@@ -37,6 +44,9 @@ public class ClassDifferencePrinter extends AbstractReflectorPrinter {
         writer.write(" {\n");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected void processFields() throws IOException {
         Map<String, Field> processedClassFieldsSet = getAllFieldsStream(processedClass)
@@ -75,6 +85,9 @@ public class ClassDifferencePrinter extends AbstractReflectorPrinter {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected void processConstructors() throws IOException {
         List<Constructor> correspondingOtherClassMethods = List.of(otherClass.getConstructors());
@@ -96,11 +109,17 @@ public class ClassDifferencePrinter extends AbstractReflectorPrinter {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected void processSubclasses() throws IOException {
         // do nothing
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected void processMethods() throws IOException {
         try {
@@ -120,7 +139,11 @@ public class ClassDifferencePrinter extends AbstractReflectorPrinter {
         }
     }
 
-    private static <T, U> void removeSimilar(List<T> listToRemove, List<U> listToLookUp, BiPredicate<T, U> predicate) {
+    /**
+     * Removes from first list objects, which form at least one pair
+     * satisfying predicate with any object from second list
+     */
+    private static <T, U> void removeSimilar(List<T> listToRemove, List<U> listToLookUp, BiPredicate<? super T, ? super U> predicate) {
         listToRemove
                 .removeIf(
                         objectToRemove -> listToLookUp.stream()
@@ -147,23 +170,37 @@ public class ClassDifferencePrinter extends AbstractReflectorPrinter {
         writer.write("\n");
     }
 
-    // doesn't take name in comparision
-    private boolean fieldsEquals(Field processedClassField, Field otherClassField) {
+    /**
+     * Determines if two fields from two compared classes are not different enough to print them both.
+     * Doesn't take name in comparision
+     */
+    private static boolean fieldsEquals(Field processedClassField, Field otherClassField) {
         return processedClassField.getModifiers() == otherClassField.getModifiers()
                 && processedClassField.getGenericType().equals(otherClassField.getGenericType()); // looks like it's working
     }
 
+    /**
+     * Determines if two methods from two compared classes are not different enough to print them both.
+     * Doesn't take name in comparision
+     */
     private static boolean methodsEquals(Method oneMethod, Method otherMethod) {
         return oneMethod.getGenericReturnType().equals(otherMethod.getGenericReturnType()) // looks like it's working
                 && executableEquals(oneMethod, otherMethod);
     }
 
+    /**
+     * Determines if two executables from two compared classes are not different enough to print them both.
+     * Doesn't take name in comparision
+     */
     private static boolean executableEquals(Executable oneExecutable, Executable otherExecutable) {
         return oneExecutable.getModifiers() == otherExecutable.getModifiers()
                 && Arrays.equals(oneExecutable.getGenericParameterTypes(), otherExecutable.getGenericParameterTypes())
                 && Arrays.equals(oneExecutable.getGenericExceptionTypes(), otherExecutable.getGenericExceptionTypes());
     }
 
+    /**
+     * Returns stream of all methods provided by class.
+     */
     private static Stream<Method> getAllMethodsStream(Class<?> someClass) {
         Stream<Method> allMethodsStream = Stream.empty();
         for (Class<?> superClass = someClass; superClass != Object.class; superClass = superClass.getSuperclass()) {
@@ -172,6 +209,9 @@ public class ClassDifferencePrinter extends AbstractReflectorPrinter {
         return allMethodsStream;
     }
 
+    /**
+     * Returns stream of all fields contained in provided class.
+     */
     private Stream<Field> getAllFieldsStream(Class<?> someClass) {
         Stream<Field> allFieldsStream = Stream.empty();
         for (Class<?> superClass = someClass; superClass != Object.class; superClass = superClass.getSuperclass()) {
@@ -180,6 +220,19 @@ public class ClassDifferencePrinter extends AbstractReflectorPrinter {
         return allFieldsStream;
     }
 
+    /**
+     * Prints executables from streams with provided <code>Consumer</code>,
+     * each preceded with arrow pointed in the direction of stream it was taken from.
+     * If two executables with the same name from different streams are deemed equal by provided comparator,
+     * they are not printed.
+     *
+     * @param processedClassStream
+     * @param otherClassStream
+     * @param compare
+     * @param print
+     * @param <T>
+     * @throws IOException
+     */
     private <T extends Executable> void printChangingExecutables(Stream<T> processedClassStream, Stream<T> otherClassStream, BiPredicate<T, T> compare, Consumer<T> print) throws IOException {
         Map<String, List<T>> processedClassMethodsSet = processedClassStream
                 .collect(Collectors.groupingBy(Executable::getName));

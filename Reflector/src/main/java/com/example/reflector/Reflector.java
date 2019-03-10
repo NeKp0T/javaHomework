@@ -1,74 +1,66 @@
 package com.example.reflector;
 
 import java.io.*;
-import java.util.List;
 
-
-// TODO SecurityException
-// TODO deal with arrays, interfaces, etc
-// TODO docs
+/**
+ * Class provides methods for presenting some information about runtime classes
+ * in human-readable form.
+ * Ignores annotations.
+ * Interfaces and enums are not supported and may cause undefined behavior.
+ */
 public class Reflector {
+    /**
+     * Prints possible implementation of provided class into file ProvidedClassName.java.
+     * @param someClass class to print
+     * @throws IOException if exception happens while writing
+     */
     public static void printStructure(Class<?> someClass) throws IOException {
         try (var writer = new BufferedWriter(new FileWriter(someClass.getName() + ".java"))) {
             printStructure(someClass, writer);
         }
     }
 
+    /**
+     * Prints possible implementation of provided class to <code>System.out</code>.
+     * @param someClass class to print
+     * @throws IOException if exception happens while writing
+     */
     public static void printStructureToConsole(Class<?> someClass) throws IOException {
         var writer = new PrintWriter(System.out);
         printStructure(someClass, writer);
         writer.flush();
     }
 
+    /**
+     * Prints possible implementation of provided class to provided <code>Writer</code>.
+     * @param someClass class to print
+     * @Param writer <code>Writer</code> to write to
+     * @throws IOException if exception happens while writing
+     */
+    public static void printStructure(Class<?> someClass, Writer writer) throws IOException {
+        ClassStructurePrinter.writeClass(someClass, writer);
+    }
+
+    /**
+     * Prints differences in methods and fields of provided classes to <class>System.out</class>.
+     * @param someClass first class
+     * @param otherClass second class
+     * @throws IOException if exception happens while writing
+     */
     public static void printDifferenceToConsole(Class<?> someClass, Class<?> otherClass) throws IOException {
         var writer = new PrintWriter(System.out);
         printDifference(someClass, otherClass, writer);
         writer.flush();
     }
 
-    public static void printStructure(Class<?> someClass, Writer writer) throws IOException {
-        ClassStructurePrinter.writeClass(someClass, writer);
-    }
-
+    /**
+     * Prints differences in methods and fields of provided classes into provided <code>Writer</code>.
+     * @param someClass first class
+     * @param otherClass second class
+     * @param writer <code>Writer</code> to write to
+     * @throws IOException if exception happens while writing
+     */
     public static void printDifference(Class<?> someClass, Class<?> otherClass, Writer writer) throws IOException {
         ClassDifferencePrinter.writeClassesDifference(someClass, otherClass, writer);
-    }
-
-    // ---------------------------------------------
-
-    public static void main(String[] args) {
-        try {
-            printStructureToConsole(Kek.class);
-//            printDifferenceToConsole(ClassWithFields.class, DifferentClassWithFields.class);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-
-    private static class Kek<T> {
-        T bob;
-        T Kek;
-        int I;
-        String sss;
-        Kek<Kek<String>> rec;
-
-        Reflector.Kek Kek() {
-            return null;
-        }
-        <Y> void keklol(Y y, T t) {
-
-        }
-        <Z> Z ww(Z z) {
-            return z;
-        }
-        Kek<Integer> oof() { return null; }
-        Reflector nw() { return null; }
-
-        String constant() { return "bob!"; }
-
-        void bounds(List<? extends String> l1, List<? super String> l2) {}
-
-        private Kek() {}
     }
 }

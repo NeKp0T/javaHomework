@@ -135,6 +135,27 @@ public class ReflectorTest {
     }
 
     @Test
+    void printInnerNestedClasses() throws IOException {
+        String correct = "public class ClassWithInnerAndNestedClasses {\n" +
+                "\tpublic ClassWithInnerAndNestedClasses() {\n" +
+                "\t\tthrow new UnsupportedOperationException();\n" +
+                "\t}\n" +
+                "\tpublic class NestedClass {\n" +
+                "\t\tpublic NestedClass(com.example.reflector.test.ClassWithInnerAndNestedClasses arg0) {\n" +
+                "\t\t\tthrow new UnsupportedOperationException();\n" +
+                "\t\t}\n" +
+                "\t}\n" +
+                "\tstatic class InnerClass {\n" +
+                "\t\tInnerClass() {\n" +
+                "\t\t\tthrow new UnsupportedOperationException();\n" +
+                "\t\t}\n" +
+                "\t}\n" +
+                "}\n";
+
+        assertPrintsCorrectly(correct, ClassWithInnerAndNestedClasses.class);
+    }
+
+    @Test
     void printFieldsDifference() throws IOException {
         String correct = "<class ClassWithFields {\n" +
                 ">class DifferentClassWithFields {\n" +

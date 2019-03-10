@@ -19,6 +19,9 @@ abstract class AbstractReflectorPrinter {
     Writer writer;
     int tabCount;
 
+    /**
+     * Main method, that starts class processing.
+     */
     protected void process() throws IOException {
         processClassNameLine();
         tabCount++;
@@ -32,25 +35,51 @@ abstract class AbstractReflectorPrinter {
         writeLn("}");
     }
 
+    /**
+     * Processes whole line with class declaration.
+     */
     protected abstract void processClassNameLine() throws IOException;
 
+    /**
+     * Processes all class fields
+     */
     abstract protected void processFields() throws IOException;
 
+    /**
+     * Processes all class constructors
+     */
     abstract protected void processConstructors() throws IOException;
 
+    /**
+     * Processes all class subclasses
+     */
     abstract protected void processSubclasses() throws IOException;
 
+    /**
+     * Processes all class methods
+     */
+    abstract protected void processMethods() throws IOException;
+
+    /**
+     * Writes tabs into <code>writer</code> according to remembered tabCount
+     */
     protected void writeTabs() throws IOException {
         for (int i = 0; i < tabCount; i++) {
             writer.append('\t');
         }
     }
 
+    /**
+     * Writes one line with tabs
+     */
     protected void writeLn(String string) throws IOException {
         writeTabs();
         writer.write(string + "\n");
     }
 
+    /**
+     * Writes given modifiers in correct order with spaces between and one space after
+     */
     protected void writeModifiers(int modifiers) throws IOException {
         writeTabs();
         if (Modifier.isPublic(modifiers)) {
@@ -89,10 +118,16 @@ abstract class AbstractReflectorPrinter {
 
     }
 
+    /**
+     * Writes type name
+     */
     protected void writeType(Type type) throws IOException {
         writer.write(type.getTypeName().replaceAll("\\$", "."));
     }
 
+    /**
+     * Writes executable's arguments with brackets
+     */
     protected void writeArguments(Executable executable) throws IOException {
         writer.write("(");
         Type[] argumentTypes = executable.getGenericParameterTypes();
@@ -108,6 +143,9 @@ abstract class AbstractReflectorPrinter {
 
     }
 
+    /**
+     * Writes executable's exceptions
+     */
     protected void writeExceptions(Executable executable) throws IOException {
         Type[] exceptionTypes = executable.getGenericExceptionTypes();
         if (exceptionTypes.length != 0) {
@@ -122,6 +160,9 @@ abstract class AbstractReflectorPrinter {
         }
     }
 
+    /**
+     * Writes function body, that throws <code>UnsupportedOperationException</code>
+     */
     protected void writeDefaultFunctionBody() throws IOException {
         writer.write("{\n");
         tabCount++;
@@ -130,13 +171,14 @@ abstract class AbstractReflectorPrinter {
         writeLn("}\n");
     }
 
+    /**
+     * Literally calls methods mentioned in it's name.
+     */
     protected void writeArgumentsExceptionsAndBody(Executable executable) throws IOException {
         writeArguments(executable);
         writeExceptions(executable);
         writeDefaultFunctionBody();
     }
-
-    abstract protected void processMethods() throws IOException;
 
     protected void writeTypeParameters(Executable executable) throws IOException {
         TypeVariable[] typeVariables = executable.getTypeParameters();
@@ -154,11 +196,17 @@ abstract class AbstractReflectorPrinter {
         }
         writer.write("> ");
     }
-    
+
+    /**
+     * Sorts methods by their name
+     */
     protected void sortMembers(Member[] members) {
         Arrays.sort(members, Comparator.comparing(Member::getName));
     }
 
+    /**
+     * Writes class declaration line without opening '{'
+     */
     protected <T> void writeClassName(Class<T> someClass) throws IOException {
         //writeTabs();
         writeModifiers(someClass.getModifiers());
@@ -201,6 +249,9 @@ abstract class AbstractReflectorPrinter {
         }
     }
 
+    /**
+     * Writes field declaration including ';'
+     */
     protected void writeField(Field field) throws IOException {
         writeModifiers(field.getModifiers());
         writeType(field.getGenericType());
