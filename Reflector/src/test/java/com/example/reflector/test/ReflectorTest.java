@@ -8,6 +8,7 @@ import javax.tools.*;
 import java.io.*;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.sql.Ref;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
@@ -255,11 +256,11 @@ public class ReflectorTest {
                 "\n" +
                 "<\tvoid f(U arg0, V arg1) \n" +
                 "\n" +
-                "<|\tT genericMethodA(T arg0) \n" +
-                ">|\tT genericMethodA(T arg0) \n" +
+                "<|\t<T> T genericMethodA(T arg0) \n" +
+                ">|\t<T> T genericMethodA(T arg0) \n" +
                 "\n" +
-                "<|\tT genericMethodB(T arg0) \n" +
-                ">|\tW genericMethodB(W arg0) \n" +
+                "<|\t<T> T genericMethodB(T arg0) \n" +
+                ">|\t<W> W genericMethodB(W arg0) \n" +
                 "\n" +
                 "<|\tvoid genericMethodD(java.util.Set<? extends java.lang.String> arg0) \n" +
                 ">|\tvoid genericMethodD(java.util.Set<?> arg0) \n" +
@@ -334,4 +335,16 @@ public class ReflectorTest {
         binaryFile.delete();
     }
 
+
+    static class T1 {
+        <T> void f(T t) {}
+    }
+    static class T2 {
+        <T> void f(T t) {}
+    }
+
+    @Test
+    void ff() throws IOException {
+        Reflector.printDifferenceToConsole(T1.class, T2.class);
+    }
 }

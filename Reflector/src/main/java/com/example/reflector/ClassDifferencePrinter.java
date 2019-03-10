@@ -153,6 +153,7 @@ public class ClassDifferencePrinter extends AbstractReflectorPrinter {
 
     private void writeMethod(Method method) throws IOException {
         writeModifiers(method.getModifiers());
+        writeTypeParameters(method);
         writeType(method.getGenericReturnType());
         writer.write(" ");
         writer.write(method.getName());
