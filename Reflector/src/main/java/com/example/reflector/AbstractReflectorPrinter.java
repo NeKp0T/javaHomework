@@ -52,7 +52,7 @@ abstract class AbstractReflectorPrinter {
         writer.write(string + "\n");
     }
 
-    protected void writeModifiers(int modifiers) throws IOException {
+    protected void writeModifiers(int modifiers) throws IOException { // TODO test
         writeTabs();
         if (Modifier.isPublic(modifiers)) {
             writer.write("public ");
@@ -160,4 +160,18 @@ abstract class AbstractReflectorPrinter {
         Arrays.sort(fields, Comparator.comparing(Member::getName));
     }
 
+    protected void writeClassName(Class<?> someClass) throws IOException {
+        writeTabs();
+        writer.write(processedClass.toGenericString() // TODO rewrite without cheating
+                .replace(processedClass.getName(),
+                        processedClass.getSimpleName()));
+    }
+
+    protected void writeField(Field field) throws IOException {
+        writeModifiers(field.getModifiers());
+        writeType(field.getGenericType());
+        writer.append(" ");
+        writer.write(field.getName());
+        writer.write(";\n");
+    }
 }

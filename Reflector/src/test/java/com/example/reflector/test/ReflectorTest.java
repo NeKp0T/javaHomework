@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class ReflectorTest {
 
-    StringWriter writer;
+    private StringWriter writer;
 
     @BeforeEach
     void initWriter() {
@@ -26,7 +26,7 @@ public class ReflectorTest {
                 .toArray();
         var nonBlankLines2 = actual.lines().filter(s -> !s.isBlank()).toArray();
 
-        for (int i = 0; i < nonBlankLines1.length; i++) {
+        for (int i = 0; i < nonBlankLines1.length && i < nonBlankLines2.length; i++) {
             if (!nonBlankLines1[i].equals(nonBlankLines2[i])) {
                 System.out.println("-" + nonBlankLines1[i]);
                 System.out.println("+" + nonBlankLines2[i]); // TODO remove?
@@ -35,8 +35,14 @@ public class ReflectorTest {
         return Arrays.equals(nonBlankLines1, nonBlankLines2);
     }
 
+    // TODO rename testedClass
     private void assertPrintsCorrectly(String correct, Class<?> testedClass) throws IOException {
         Reflector.printStructure(testedClass, writer);
+        assertTrue(compareSkippingEmptyLines(correct, writer.toString()));
+    }
+
+    private void assertPrintsDifferenceCorrectly(String correct, Class<?> testedClass, Class<?> otherClass) throws IOException {
+        Reflector.printDifference(testedClass, otherClass, writer);
         assertTrue(compareSkippingEmptyLines(correct, writer.toString()));
     }
 
@@ -112,5 +118,31 @@ public class ReflectorTest {
                 "    }\n" +
                 "}\n";
         assertPrintsCorrectly(correct, ClassWithGenericMethods.class);
+    }
+
+    @Test
+    void printFieldsDifference() throws IOException {
+        String correct = "<class ClassWithFields {\n" +
+                ">class ClassWithFields {\n" +
+                "<\tint intField;\n" +
+                "\n" +
+                "<\tjava.lang.String[] stringArr;\n" +
+                "\n" +
+                "<|\tjava.lang.String stringField;\n" +
+                ">|\tjava.lang.Integer stringField;\n" +
+                "\n" +
+                ">\tint differentIntField;\n" +
+                "\n" +
+                ">\tlong newField;\n" +
+                "\n" +
+                "}"; // TODO
+        assertPrintsDifferenceCorrectly(correct, ClassWithFields.class, DifferentClassWithFields.class);
+    }
+
+    @Test
+    void printMethodsDifference() throws IOException {
+        Reflector.printDifferenceToConsole(ClassWithMethodsWithArguments.class, DifferentClassWithMethodsWithArguments.class);
+//        String correct = "\nx\nx\nx\nx\nx\nx\nx\nx\nx\nx\nx\nx\nx\n";
+//        assertPrintsDifferenceCorrectly(correct, ClassWithMethodsWithArguments.class, DifferentClassWithMethodsWithArguments.class);
     }
 }
