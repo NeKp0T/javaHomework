@@ -4,9 +4,14 @@ import com.example.reflector.Reflector;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
-import java.io.StringWriter;
+import javax.tools.*;
+import java.io.*;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -29,13 +34,12 @@ public class ReflectorTest {
         for (int i = 0; i < nonBlankLines1.length && i < nonBlankLines2.length; i++) {
             if (!nonBlankLines1[i].equals(nonBlankLines2[i])) {
                 System.out.println("-" + nonBlankLines1[i]);
-                System.out.println("+" + nonBlankLines2[i]); // TODO remove?
+                System.out.println("+" + nonBlankLines2[i]);
             }
         }
         return Arrays.equals(nonBlankLines1, nonBlankLines2);
     }
 
-    // TODO rename testedClass
     private void assertPrintsCorrectly(String correct, Class<?> testedClass) throws IOException {
         Reflector.printStructure(testedClass, writer);
         assertTrue(compareSkippingEmptyLines(correct, writer.toString()));
@@ -121,6 +125,16 @@ public class ReflectorTest {
     }
 
     @Test
+    void printClassWithSuperclass() throws IOException {
+        String correct = "public class ClassWithSuperclass1 extends com.example.reflector.test.ClassSuperclass1 {\n" +
+                "\tpublic ClassWithSuperclass1() {\n" +
+                "\t\tthrow new UnsupportedOperationException();\n" +
+                "\t}\n" +
+                "}";
+        assertPrintsCorrectly(correct, ClassWithSuperclass1.class);
+    }
+
+    @Test
     void printFieldsDifference() throws IOException {
         String correct = "<class ClassWithFields {\n" +
                 ">class DifferentClassWithFields {\n" +
@@ -135,7 +149,7 @@ public class ReflectorTest {
                 "\n" +
                 ">\tlong newField;\n" +
                 "\n" +
-                "}"; // TODO
+                "}";
         assertPrintsDifferenceCorrectly(correct, ClassWithFields.class, DifferentClassWithFields.class);
     }
 
@@ -177,5 +191,125 @@ public class ReflectorTest {
         assertPrintsDifferenceCorrectly(correct, ClassMultipleMethodsWithSameNameDifference1.class, ClassMultipleMethodsWithSameNameDifference2.class);
     }
 
-//  Reflector.printDifferenceToConsole(1.class, 2.class);
+    @Test
+    void printsGenericClassParametersCorrectly() throws IOException {
+        String correct = "public class ClassWithGenerics1<U, V extends java.awt.print.Printable & java.lang.Iterable<java.lang.Integer>, X extends U> {\n" +
+                "\tU fieldA;\n" +
+                "\t\n" +
+                "\tvoid f(U arg0, V arg1) {\n" +
+                "\t\tthrow new UnsupportedOperationException();\n" +
+                "\t}\n" +
+                "\n" +
+                "\t<T> T genericMethodA(T arg0) {\n" +
+                "\t\tthrow new UnsupportedOperationException();\n" +
+                "\t}\n" +
+                "\n" +
+                "\t<T> T genericMethodB(T arg0) {\n" +
+                "\t\tthrow new UnsupportedOperationException();\n" +
+                "\t}\n" +
+                "\n" +
+                "\tvoid genericMethodC(java.util.Set<?> arg0) {\n" +
+                "\t\tthrow new UnsupportedOperationException();\n" +
+                "\t}\n" +
+                "\n" +
+                "\tvoid genericMethodD(java.util.Set<? extends java.lang.String> arg0) {\n" +
+                "\t\tthrow new UnsupportedOperationException();\n" +
+                "\t}\n" +
+                "\n" +
+                "\t\n" +
+                "\tpublic ClassWithGenerics1() {\n" +
+                "\t\tthrow new UnsupportedOperationException();\n" +
+                "\t}\n" +
+                "}";
+        assertPrintsCorrectly(correct, ClassWithGenerics1.class);
+    }
+
+    @Test
+    void genericAndWildcardDifference() throws IOException {
+
+        String correct = "<public class ClassWithGenerics1<U, V extends java.awt.print.Printable & java.lang.Iterable<java.lang.Integer>, X extends U> {\n" +
+                ">public class ClassWithGenerics2<U, V extends U> {\n" +
+                "<|\tU fieldA;\n" +
+                ">|\tU fieldA;\n" +
+                "\n" +
+                "<\tvoid f(U arg0, V arg1) \n" +
+                "\n" +
+                "<|\tT genericMethodA(T arg0) \n" +
+                ">|\tT genericMethodA(T arg0) \n" +
+                "\n" +
+                "<|\tT genericMethodB(T arg0) \n" +
+                ">|\tW genericMethodB(W arg0) \n" +
+                "\n" +
+                "<|\tvoid genericMethodD(java.util.Set<? extends java.lang.String> arg0) \n" +
+                ">|\tvoid genericMethodD(java.util.Set<?> arg0) \n" +
+                "\n" +
+                "}";
+        assertPrintsDifferenceCorrectly(correct, ClassWithGenerics1.class, ClassWithGenerics2.class);
+    }
+
+    @Test
+    void printDiffOfClassesWithSuperclasses() throws IOException {
+        StringWriter writerSuper = new StringWriter();
+        StringWriter writerExtends = new StringWriter();
+        Reflector.printDifference(ClassSuperclass1.class, ClassSuperclass2.class, writerSuper);
+        Reflector.printDifference(ClassWithSuperclass1.class, ClassWithSuperclass2.class, writerExtends);
+
+        String superDifference = writerSuper.toString();
+        String extendsDifference = writerExtends.toString();
+        Stream<String> s1 = superDifference.lines().skip(2);
+        Stream<String> s2 = extendsDifference.lines().skip(2);
+
+        Iterator<String> iterator1 = s1.iterator(), iterator2 = s2.iterator();
+        while(iterator1.hasNext() && iterator2.hasNext())
+            assertEquals(iterator1.next(), iterator2.next());
+        assert !iterator1.hasNext() && !iterator2.hasNext();
+    }
+
+    @Test
+    void printCompileAndDiffTests() throws IOException, ClassNotFoundException {
+        printCompileAndDiff(ClassWithFields.class);
+        printCompileAndDiff(ClassWithMethodsWithArguments.class);
+        printCompileAndDiff(ClassWithGenericMethods.class);
+        printCompileAndDiff(ClassMultipleMethodsWithSameNameDifference1.class);
+        printCompileAndDiff(ClassSuperclass1.class);
+    }
+
+    void printCompileAndDiff(Class classToTest) throws IOException, ClassNotFoundException {
+        String className = classToTest.getSimpleName();
+        File sourceFile   = new File("/tmp/" + className + ".java");
+        try (FileWriter writer = new FileWriter(sourceFile)) {
+            Reflector.printStructure(classToTest, writer);
+        }
+
+        JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+        StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null, null);
+
+        fileManager.setLocation(StandardLocation.CLASS_OUTPUT,
+                Collections.singletonList(new File("/tmp")));
+
+        compiler.getTask(null,
+                fileManager,
+                null,
+                null,
+                null,
+                fileManager.getJavaFileObjectsFromFiles(Collections.singletonList(sourceFile)))
+                .call();
+        fileManager.close();
+
+        ClassLoader classLoader = new URLClassLoader(new URL[]{new URL("file:///tmp/")});
+        Class loadedClass = classLoader.loadClass(className);
+
+        var compareToLoadedWriter = new StringWriter();
+        var compareToItselfWriter = new StringWriter();
+
+        Reflector.printDifference(classToTest, loadedClass, compareToLoadedWriter);
+        Reflector.printDifference(classToTest, loadedClass, compareToItselfWriter);
+
+        assertEquals(compareToItselfWriter.toString(), compareToLoadedWriter.toString());
+
+        sourceFile.deleteOnExit();
+        File binaryFile   = new File("/tmp/" + className + ".class");
+        binaryFile.delete();
+    }
+
 }

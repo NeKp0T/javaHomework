@@ -5,22 +5,19 @@ import java.io.Writer;
 import java.lang.reflect.*;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
+import java.util.stream.Collectors;
 
+
+/**
+ * Abstract superclass for classes, that write information about specific class into specific writer.
+ * Provides some methods for writing information about classes, and default realization of some logic.
+ */
 abstract class AbstractReflectorPrinter {
     Class<?> processedClass;
     Writer writer;
     int tabCount;
-
-    // TODO delete
-//    protected abstract void processConstructor(Constructor constructor) throws IOException;
-//
-//    protected abstract void processMethod(Method method) throws IOException;
-//
-    protected abstract void processClassNameLine() throws IOException;
-//
-//    protected abstract void processField(Field field) throws IOException;
-//
-//    protected abstract void processSubclass(Class<?> i) throws IOException;
 
     protected void process() throws IOException {
         processClassNameLine();
@@ -34,6 +31,8 @@ abstract class AbstractReflectorPrinter {
         tabCount--;
         writeLn("}");
     }
+
+    protected abstract void processClassNameLine() throws IOException;
 
     abstract protected void processFields() throws IOException;
 
@@ -52,7 +51,7 @@ abstract class AbstractReflectorPrinter {
         writer.write(string + "\n");
     }
 
-    protected void writeModifiers(int modifiers) throws IOException { // TODO test
+    protected void writeModifiers(int modifiers) throws IOException {
         writeTabs();
         if (Modifier.isPublic(modifiers)) {
             writer.write("public ");
@@ -156,15 +155,50 @@ abstract class AbstractReflectorPrinter {
         writer.write("> ");
     }
     
-    protected void sortMembers(Member[] fields) {
-        Arrays.sort(fields, Comparator.comparing(Member::getName));
+    protected void sortMembers(Member[] members) {
+        Arrays.sort(members, Comparator.comparing(Member::getName));
     }
 
-    protected void writeClassName(Class<?> someClass) throws IOException {
-        writeTabs();
-        writer.write(someClass.toGenericString() // TODO rewrite without cheating
-                .replace(someClass.getName(),
-                        someClass.getSimpleName()));
+    protected <T> void writeClassName(Class<T> someClass) throws IOException {
+        //writeTabs();
+        writeModifiers(someClass.getModifiers());
+        writer.write("class ");
+        writer.write(someClass.getSimpleName());
+
+        TypeVariable<Class<T>>[] typeParameters = someClass.getTypeParameters();
+        if (typeParameters.length != 0) {
+            writer.write("<");
+
+            for (int i = 0; i < typeParameters.length; i++) {
+                TypeVariable<Class<T>> type = typeParameters[i];
+                writer.write(type.toString());
+
+                List<Type> bounds = List.of(type.getBounds())
+                        .stream()
+                        .filter(boundType -> !boundType.getTypeName().equals("java.lang.Object"))
+                        .collect(Collectors.toList());
+
+                if (bounds.size()> 0) {
+                    writer.write(" extends ");
+                    Iterator<Type> iterator = bounds.iterator();
+                    writeType(iterator.next());
+                    while (iterator.hasNext()) {
+                        writer.write(" & ");
+                        writeType(iterator.next());
+                    }
+                }
+                if (i + 1 < typeParameters.length) {
+                    writer.write(", ");
+                }
+            }
+
+
+            writer.write(">");
+        }
+
+        if (someClass.getSuperclass() != Object.class) {
+            writer.write(" extends " + someClass.getSuperclass().getName());
+        }
     }
 
     protected void writeField(Field field) throws IOException {

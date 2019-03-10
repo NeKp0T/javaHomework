@@ -14,13 +14,13 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class ClassDifferencePrinter extends AbstractReflectorPrinter {
-    Class<?> otherClass;
+    private final Class<?> otherClass;
 
     public static void writeClassesDifference(Class<?> oneClass, Class<?> otherClass, Writer writer) throws IOException {
         new ClassDifferencePrinter(oneClass, otherClass, writer, 0).process();
     }
 
-    protected ClassDifferencePrinter(Class<?> oneClass, Class<?> otherClass, Writer writer, int tabCount) {
+    protected ClassDifferencePrinter(Class<?> oneClass, Class<?> otherClass, Writer writer, @SuppressWarnings("SameParameterValue") int tabCount) {
         this.writer = writer;
         processedClass = oneClass;
         this.otherClass = otherClass;
@@ -150,11 +150,11 @@ public class ClassDifferencePrinter extends AbstractReflectorPrinter {
     // doesn't take name in comparision
     private boolean fieldsEquals(Field processedClassField, Field otherClassField) {
         return processedClassField.getModifiers() == otherClassField.getModifiers()
-                && processedClassField.getGenericType().equals(otherClassField.getGenericType()); // TODO is it ok?
+                && processedClassField.getGenericType().equals(otherClassField.getGenericType()); // looks like it's working
     }
 
     private static boolean methodsEquals(Method oneMethod, Method otherMethod) {
-        return oneMethod.getGenericReturnType().equals(otherMethod.getGenericReturnType()) // TODO ?? and in executableExuals too too
+        return oneMethod.getGenericReturnType().equals(otherMethod.getGenericReturnType()) // looks like it's working
                 && executableEquals(oneMethod, otherMethod);
     }
 
@@ -233,7 +233,7 @@ public class ClassDifferencePrinter extends AbstractReflectorPrinter {
     }
 
     static private class IOExceptionButRuntime extends RuntimeException {
-        private IOException actualException;
+        final public IOException actualException;
         public IOExceptionButRuntime(IOException exception) {
             actualException = exception;
         }

@@ -30,7 +30,7 @@ class ClassStructurePrinter extends AbstractReflectorPrinter {
     }
 
     @Override
-    protected void processMethods() throws IOException { // TODO varargs?
+    protected void processMethods() throws IOException {
         Method[] methods = processedClass.getDeclaredMethods();
         sortMembers(methods);
         for (Method method : methods) {
