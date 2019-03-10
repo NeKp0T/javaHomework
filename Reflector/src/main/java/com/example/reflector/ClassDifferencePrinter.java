@@ -8,6 +8,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.function.BiPredicate;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -18,20 +19,6 @@ public class ClassDifferencePrinter extends AbstractReflectorPrinter {
     public static void writeClassesDifference(Class<?> oneClass, Class<?> otherClass, Writer writer) throws IOException {
         new ClassDifferencePrinter(oneClass, otherClass, writer, 0).process();
     }
-
-//    @Override TODO superclass
-//    protected void process() throws IOException {
-//        processClassNameLine();
-//        tabCount++;
-//
-//        processFields();
-//        processMethods();
-//        processConstructors();
-//        processSubclasses();
-//
-//        tabCount--;
-//        writeLn("}");
-//    }
 
     protected ClassDifferencePrinter(Class<?> oneClass, Class<?> otherClass, Writer writer, int tabCount) {
         this.writer = writer;
@@ -52,13 +39,13 @@ public class ClassDifferencePrinter extends AbstractReflectorPrinter {
 
     @Override
     protected void processFields() throws IOException {
-        Map<String, Field> processedClassFieldsSet = Stream.of(processedClass.getDeclaredFields())
+        Map<String, Field> processedClassFieldsSet = getAllFieldsStream(processedClass)
                 .collect(Collectors.toMap(Field::getName, Function.identity()));
-        Map<String, Field> otherClassFieldsSet = Stream.of(otherClass.getDeclaredFields())
+        Map<String, Field> otherClassFieldsSet = getAllFieldsStream(otherClass)
                 .collect(Collectors.toMap(Field::getName, Function.identity()));
 
 
-        Field[] processedClassFields = processedClass.getDeclaredFields();
+        Field[] processedClassFields = processedClassFieldsSet.values().toArray(Field[]::new);
         sortMembers(processedClassFields);
         for (Field processedClassField : processedClassFields) {
             if (otherClassFieldsSet.containsKey(processedClassField.getName())) {
@@ -77,7 +64,7 @@ public class ClassDifferencePrinter extends AbstractReflectorPrinter {
             }
         }
 
-        Field[] otherClassFields = otherClass.getDeclaredFields();
+        Field[] otherClassFields = otherClassFieldsSet.values().toArray(Field[]::new);
         sortMembers(otherClassFields);
         for (Field otherClassField : otherClassFields) {
             if (!processedClassFieldsSet.containsKey(otherClassField.getName())) {
@@ -90,7 +77,23 @@ public class ClassDifferencePrinter extends AbstractReflectorPrinter {
 
     @Override
     protected void processConstructors() throws IOException {
-        // TODO
+        List<Constructor> correspondingOtherClassMethods = List.of(otherClass.getConstructors());
+        List<Constructor> correspondingProcessedClassMethods = List.of(processedClass.getConstructors());
+
+        List<Constructor> uniqueOtherClassMethods = new ArrayList<>(correspondingOtherClassMethods);
+        List<Constructor> uniqueProcessedClassMethods = new ArrayList<>(correspondingProcessedClassMethods);
+
+        removeSimilar(uniqueProcessedClassMethods, correspondingOtherClassMethods, ClassDifferencePrinter::executableEquals);
+        removeSimilar(uniqueOtherClassMethods, correspondingProcessedClassMethods, ClassDifferencePrinter::executableEquals);
+
+        for (Constructor processedClassMethod : uniqueProcessedClassMethods) {
+            writer.write("<|");
+            writeConstructor(processedClassMethod);
+        }
+        for (Constructor otherClassMethod : uniqueOtherClassMethods) {
+            writer.write(">|");
+            writeConstructor(otherClassMethod);
+        }
     }
 
     @Override
@@ -100,56 +103,20 @@ public class ClassDifferencePrinter extends AbstractReflectorPrinter {
 
     @Override
     protected void processMethods() throws IOException {
-        Map<String, List<Method>> processedClassMethodsSet = Stream.of(processedClass.getDeclaredMethods())
-                .collect(Collectors.groupingBy(Method::getName));
-
-        Map<String, List<Method>> otherClassMethodsSet = Stream.of(otherClass.getDeclaredMethods())
-                .collect(Collectors.groupingBy(Method::getName));
-
-
-        String[] processedClassMethodNames = processedClassMethodsSet.keySet().toArray(String[]::new);
-        Arrays.sort(processedClassMethodNames);
-
-        for (String processedClassMethodName : processedClassMethodNames) {
-            if (otherClassMethodsSet.containsKey(processedClassMethodName)) {
-                List<Method> correspondingOtherClassMethods = otherClassMethodsSet.get(processedClassMethodName);
-                List<Method> correspondingProcessedClassMethods = processedClassMethodsSet.get(processedClassMethodName);
-
-                List<Method> uniqueOtherClassMethods = new ArrayList<>();
-                List<Method> uniqueProcessedClassMethods = new ArrayList<>();
-                uniqueOtherClassMethods.addAll(correspondingOtherClassMethods);
-                uniqueProcessedClassMethods.addAll(correspondingProcessedClassMethods);
-
-                removeSimilar(uniqueProcessedClassMethods, correspondingOtherClassMethods, ClassDifferencePrinter::methodsEquals);
-                removeSimilar(uniqueOtherClassMethods, correspondingProcessedClassMethods, ClassDifferencePrinter::methodsEquals);
-
-                for (Method processedClassMethod : uniqueProcessedClassMethods) {
-                    writer.write("<|");
-                    writeMethod(processedClassMethod);
-                }
-                for (Method otherClassMethod : uniqueOtherClassMethods) {
-                    writer.write(">|");
-                    writeMethod(otherClassMethod);
-                }
-            } else {
-                for (Method processedClassMethod : processedClassMethodsSet.get(processedClassMethodName)) {
-                    writer.write("<");
-                    writeMethod(processedClassMethod);
-                }
-            }
-            writer.write("\n");
-        }
-
-        Map.Entry<String, List<Method>>[] otherClassMethodEntries = (Map.Entry<String, List<Method>>[]) otherClassMethodsSet.entrySet().toArray(Map.Entry[]::new);
-        Arrays.sort(otherClassMethodEntries, Comparator.comparing(Map.Entry::getKey));
-        for (Map.Entry<String, List<Method>> otherClassMethodsByNameEntry : otherClassMethodEntries) {
-            if (!processedClassMethodsSet.containsKey(otherClassMethodsByNameEntry.getKey())) {
-                for (Method otherClassMethod : otherClassMethodsByNameEntry.getValue()) {
-                    writer.write(">");
-                    writeMethod(otherClassMethod);
-                }
-                writer.write("\n");
-            }
+        try {
+            printChangingExecutables(getAllMethodsStream(processedClass),
+                    getAllMethodsStream(otherClass),
+                    ClassDifferencePrinter::methodsEquals,
+                    method -> {
+                        try {
+                            writeMethod(method);
+                        } catch (IOException e) {
+                            throw new IOExceptionButRuntime(e);
+                        }
+                    }
+            );
+        } catch (IOExceptionButRuntime e) {
+            throw e.actualException;
         }
     }
 
@@ -171,6 +138,15 @@ public class ClassDifferencePrinter extends AbstractReflectorPrinter {
         writer.write("\n");
     }
 
+    private void writeConstructor(Constructor constructor) throws IOException {
+        writeModifiers(constructor.getModifiers());
+        writer.write(" ");
+        writer.write(constructor.getName());
+        writeArguments(constructor);
+        writeExceptions(constructor);
+        writer.write("\n");
+    }
+
     // doesn't take name in comparision
     private boolean fieldsEquals(Field processedClassField, Field otherClassField) {
         return processedClassField.getModifiers() == otherClassField.getModifiers()
@@ -186,5 +162,80 @@ public class ClassDifferencePrinter extends AbstractReflectorPrinter {
         return oneExecutable.getModifiers() == otherExecutable.getModifiers()
                 && Arrays.equals(oneExecutable.getGenericParameterTypes(), otherExecutable.getGenericParameterTypes())
                 && Arrays.equals(oneExecutable.getGenericExceptionTypes(), otherExecutable.getGenericExceptionTypes());
+    }
+
+    private static Stream<Method> getAllMethodsStream(Class<?> someClass) {
+        Stream<Method> allMethodsStream = Stream.empty();
+        for (Class<?> superClass = someClass; superClass != Object.class; superClass = superClass.getSuperclass()) {
+            allMethodsStream = Stream.concat(allMethodsStream, Stream.of(superClass.getDeclaredMethods()));
+        }
+        return allMethodsStream;
+    }
+
+    private Stream<Field> getAllFieldsStream(Class<?> someClass) {
+        Stream<Field> allFieldsStream = Stream.empty();
+        for (Class<?> superClass = someClass; superClass != Object.class; superClass = superClass.getSuperclass()) {
+            allFieldsStream = Stream.concat(allFieldsStream, Stream.of(superClass.getDeclaredFields()));
+        }
+        return allFieldsStream;
+    }
+
+    private <T extends Executable> void printChangingExecutables(Stream<T> processedClassStream, Stream<T> otherClassStream, BiPredicate<T, T> compare, Consumer<T> print) throws IOException {
+        Map<String, List<T>> processedClassMethodsSet = processedClassStream
+                .collect(Collectors.groupingBy(Executable::getName));
+
+        Map<String, List<T>> otherClassMethodsSet = otherClassStream
+                .collect(Collectors.groupingBy(Executable::getName));
+
+
+        String[] processedClassMethodNames = processedClassMethodsSet.keySet().toArray(String[]::new);
+        Arrays.sort(processedClassMethodNames);
+
+        for (String processedClassMethodName : processedClassMethodNames) {
+            if (otherClassMethodsSet.containsKey(processedClassMethodName)) {
+                List<T> correspondingOtherClassMethods = otherClassMethodsSet.get(processedClassMethodName);
+                List<T> correspondingProcessedClassMethods = processedClassMethodsSet.get(processedClassMethodName);
+
+                List<T> uniqueOtherClassMethods = new ArrayList<>(correspondingOtherClassMethods);
+                List<T> uniqueProcessedClassMethods = new ArrayList<>(correspondingProcessedClassMethods);
+
+                removeSimilar(uniqueProcessedClassMethods, correspondingOtherClassMethods, compare);
+                removeSimilar(uniqueOtherClassMethods, correspondingProcessedClassMethods, compare);
+
+                for (T processedClassMethod : uniqueProcessedClassMethods) {
+                    writer.write("<|");
+                    print.accept(processedClassMethod);
+                }
+                for (T otherClassMethod : uniqueOtherClassMethods) {
+                    writer.write(">|");
+                    print.accept(otherClassMethod);
+                }
+            } else {
+                for (T processedClassMethod : processedClassMethodsSet.get(processedClassMethodName)) {
+                    writer.write("<");
+                    print.accept(processedClassMethod);
+                }
+            }
+            writer.write("\n");
+        }
+
+        Map.Entry<String, List<T>>[] otherClassMethodEntries = (Map.Entry<String, List<T>>[]) otherClassMethodsSet.entrySet().toArray(Map.Entry[]::new);
+        Arrays.sort(otherClassMethodEntries, Comparator.comparing(Map.Entry::getKey));
+        for (Map.Entry<String, List<T>> otherClassMethodsByNameEntry : otherClassMethodEntries) {
+            if (!processedClassMethodsSet.containsKey(otherClassMethodsByNameEntry.getKey())) {
+                for (T otherClassMethod : otherClassMethodsByNameEntry.getValue()) {
+                    writer.write(">");
+                    print.accept(otherClassMethod);
+                }
+                writer.write("\n");
+            }
+        }
+    }
+
+    static private class IOExceptionButRuntime extends RuntimeException {
+        private IOException actualException;
+        public IOExceptionButRuntime(IOException exception) {
+            actualException = exception;
+        }
     }
 }
