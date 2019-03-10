@@ -231,7 +231,7 @@ public class ClassDifferencePrinter extends AbstractReflectorPrinter {
      * @param compare predicate to check if executables are close enough to not write them.
      *                It may not take name in comparision because they get sorted by name beforehand
      * @param print function that prints executables
-     * @param <T> actual type of executables 
+     * @param <T> actual type of executables
      */
     private <T extends Executable> void printChangingExecutables(Stream<T> processedClassStream, Stream<T> otherClassStream, BiPredicate<T, T> compare, Consumer<T> print) throws IOException {
         Map<String, List<T>> processedClassMethodsSet = processedClassStream

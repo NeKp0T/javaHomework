@@ -280,7 +280,8 @@ public class ReflectorTest {
         Stream<String> s1 = superDifference.lines().skip(2);
         Stream<String> s2 = extendsDifference.lines().skip(2);
 
-        Iterator<String> iterator1 = s1.iterator(), iterator2 = s2.iterator();
+        Iterator<String> iterator1 = s1.iterator();
+        Iterator<String> iterator2 = s2.iterator();
         while(iterator1.hasNext() && iterator2.hasNext())
             assertEquals(iterator1.next(), iterator2.next());
         assert !iterator1.hasNext() && !iterator2.hasNext();
