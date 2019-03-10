@@ -123,7 +123,7 @@ public class ReflectorTest {
     @Test
     void printFieldsDifference() throws IOException {
         String correct = "<class ClassWithFields {\n" +
-                ">class ClassWithFields {\n" +
+                ">class DifferentClassWithFields {\n" +
                 "<\tint intField;\n" +
                 "\n" +
                 "<\tjava.lang.String[] stringArr;\n" +
@@ -141,8 +141,41 @@ public class ReflectorTest {
 
     @Test
     void printMethodsDifference() throws IOException {
-        Reflector.printDifferenceToConsole(ClassWithMethodsWithArguments.class, DifferentClassWithMethodsWithArguments.class);
-//        String correct = "\nx\nx\nx\nx\nx\nx\nx\nx\nx\nx\nx\nx\nx\n";
-//        assertPrintsDifferenceCorrectly(correct, ClassWithMethodsWithArguments.class, DifferentClassWithMethodsWithArguments.class);
+        String correct = "<public class ClassMethodDifference1 {\n" +
+                ">public class ClassMethodDifference2 {\n" +
+                "<|\tvoid changesArgumentCount(int arg0, int arg1) \n" +
+                ">|\tvoid changesArgumentCount(int arg0, int arg1, int arg2) \n" +
+                "\n" +
+                "<|\tvoid changesArgumentType(int arg0) \n" +
+                ">|\tvoid changesArgumentType(long arg0) \n" +
+                "\n" +
+                "<|\tjava.lang.String changesReturnType() \n" +
+                ">|\tjava.lang.Integer changesReturnType() \n" +
+                "\n" +
+                "<|\tpublic void changesVisibility() \n" +
+                ">|\tprivate void changesVisibility() \n" +
+                "\n" +
+                "<\tvoid presentOnlyInFirst() \n" +
+                "\n" +
+                ">\tvoid presentOnlyInSecond() \n" +
+                "\n" +
+                "}";
+        assertPrintsDifferenceCorrectly(correct, ClassMethodDifference1.class, ClassMethodDifference2.class);
     }
+
+    @Test
+    void printMethodsDifferenceWithMultipleMethodInstances() throws IOException {
+        String correct = "<public class ClassMultipleMethodsWithSameNameDifference1 {\n" +
+                ">public class ClassMultipleMethodsWithSameNameDifference2 {\n" +
+                "<|\tpublic void method(int arg0, int arg1) \n" +
+                "<|\tint method(int arg0) \n" +
+                "<|\tvoid method() \n" +
+                ">|\tprivate void method(int arg0, int arg1) \n" +
+                ">|\tlong method(int arg0) \n" +
+                ">|\tjava.lang.String method(int arg0, int arg1, int arg2, int arg3) \n" +
+                "}";
+        assertPrintsDifferenceCorrectly(correct, ClassMultipleMethodsWithSameNameDifference1.class, ClassMultipleMethodsWithSameNameDifference2.class);
+    }
+
+//  Reflector.printDifferenceToConsole(1.class, 2.class);
 }

@@ -162,9 +162,9 @@ abstract class AbstractReflectorPrinter {
 
     protected void writeClassName(Class<?> someClass) throws IOException {
         writeTabs();
-        writer.write(processedClass.toGenericString() // TODO rewrite without cheating
-                .replace(processedClass.getName(),
-                        processedClass.getSimpleName()));
+        writer.write(someClass.toGenericString() // TODO rewrite without cheating
+                .replace(someClass.getName(),
+                        someClass.getSimpleName()));
     }
 
     protected void writeField(Field field) throws IOException {
