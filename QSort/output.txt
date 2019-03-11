@@ -1,0 +1,115 @@
+Running every test 8 times to calculate average
+Random seed is 533
+
+List size: 64 = 2^6
+For 1 thread average time is: 6 ms
+For 2 thread average time is: 3 ms
+For 3 thread average time is: 5 ms
+For 4 thread average time is: 6 ms
+For 5 thread average time is: 6 ms
+For 6 thread average time is: 8 ms
+
+List size: 128 = 2^7
+For 1 thread average time is: 1 ms
+For 2 thread average time is: 3 ms
+For 3 thread average time is: 11 ms
+For 4 thread average time is: 6 ms
+For 5 thread average time is: 13 ms
+For 6 thread average time is: 33 ms
+
+List size: 256 = 2^8
+For 1 thread average time is: 1 ms
+For 2 thread average time is: 3 ms
+For 3 thread average time is: 7 ms
+For 4 thread average time is: 21 ms
+For 5 thread average time is: 8 ms
+For 6 thread average time is: 4 ms
+
+List size: 512 = 2^9
+For 1 thread average time is: 12 ms
+For 2 thread average time is: 9 ms
+For 3 thread average time is: 2 ms
+For 4 thread average time is: 3 ms
+For 5 thread average time is: 18 ms
+For 6 thread average time is: 32 ms
+
+List size: 1024 = 2^10
+For 1 thread average time is: 2 ms
+For 2 thread average time is: 2 ms
+For 3 thread average time is: 15 ms
+For 4 thread average time is: 10 ms
+For 5 thread average time is: 11 ms
+For 6 thread average time is: 7 ms
+
+List size: 2048 = 2^11
+For 1 thread average time is: 7 ms
+For 2 thread average time is: 6 ms
+For 3 thread average time is: 11 ms
+For 4 thread average time is: 16 ms
+For 5 thread average time is: 6 ms
+For 6 thread average time is: 23 ms
+
+List size: 4096 = 2^12
+For 1 thread average time is: 4 ms
+For 2 thread average time is: 7 ms
+For 3 thread average time is: 11 ms
+For 4 thread average time is: 13 ms
+For 5 thread average time is: 7 ms
+For 6 thread average time is: 29 ms
+
+List size: 8192 = 2^13
+For 1 thread average time is: 11 ms
+For 2 thread average time is: 16 ms
+For 3 thread average time is: 9 ms
+For 4 thread average time is: 8 ms
+For 5 thread average time is: 8 ms
+For 6 thread average time is: 8 ms
+
+List size: 16384 = 2^14
+For 1 thread average time is: 16 ms
+For 2 thread average time is: 12 ms
+For 3 thread average time is: 18 ms
+For 4 thread average time is: 17 ms
+For 5 thread average time is: 16 ms
+For 6 thread average time is: 18 ms
+
+List size: 32768 = 2^15
+For 1 thread average time is: 35 ms
+For 2 thread average time is: 22 ms
+For 3 thread average time is: 33 ms
+For 4 thread average time is: 34 ms
+For 5 thread average time is: 33 ms
+For 6 thread average time is: 35 ms
+
+List size: 65536 = 2^16
+For 1 thread average time is: 67 ms
+For 2 thread average time is: 46 ms
+For 3 thread average time is: 70 ms
+For 4 thread average time is: 69 ms
+For 5 thread average time is: 78 ms
+For 6 thread average time is: 76 ms
+
+List size: 131072 = 2^17
+For 1 thread average time is: 170 ms
+For 2 thread average time is: 123 ms
+For 3 thread average time is: 149 ms
+For 4 thread average time is: 159 ms
+For 5 thread average time is: 177 ms
+For 6 thread average time is: 178 ms
+
+List size: 262144 = 2^18
+For 1 thread average time is: 505 ms
+For 2 thread average time is: 355 ms
+For 3 thread average time is: 377 ms
+For 4 thread average time is: 386 ms
+For 5 thread average time is: 411 ms
+For 6 thread average time is: 417 ms
+
+List size: 524288 = 2^19
+For 1 thread average time is: 612 ms
+For 2 thread average time is: 413 ms
+For 3 thread average time is: 586 ms
+For 4 thread average time is: 610 ms
+For 5 thread average time is: 588 ms
+For 6 thread average time is: 589 ms
+

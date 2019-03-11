@@ -25,7 +25,7 @@ public class QSortTest {
 
     private void fillList(int size) {
         list = new ArrayList<>();
-        list.addAll(randomSource.ints().limit(size).boxed().collect(Collectors.toList()));
+        list.addAll(randomSource.ints(size).boxed().collect(Collectors.toList()));
     }
 
     private <T> int callPartition(List<T> listToPartition, T base) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
