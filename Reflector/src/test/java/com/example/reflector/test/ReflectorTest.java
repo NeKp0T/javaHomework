@@ -117,7 +117,7 @@ public class ReflectorTest {
                 "    <X, Y> void dMethod(X[] arg0, Y arg1) {\n" +
                 "        throw new UnsupportedOperationException();\n" +
                 "    }\n" +
-                "    <Z extends String> ClassWithGenericMethods(Z arg0) {\n" +
+                "    <Z extends java.lang.String> ClassWithGenericMethods(Z arg0) {\n" +
                 "        throw new UnsupportedOperationException();\n" +
                 "    }\n" +
                 "}\n";
