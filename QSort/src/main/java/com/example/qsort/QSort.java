@@ -9,9 +9,19 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-// TODO docs
+/**
+ * Provides multithreaded quicksort algorithm implementation for sorting lists of comparable type
+ */
 public class QSort {
-    // if threadCount < 0 pick optimal
+
+    /**
+     * Sorts provided list using quicksort algorithm in provided number of threads.
+     * Note that current thread is not used for sorting.
+     * @param list list to sort
+     * @param threadsCount count f threads to use for sorting. Note that current thread will not be used
+     * @throws IllegalArgumentException if threadCount is less then 1
+     * @throws InterruptedException if thread is interrupted while waiting for sorting to complete
+     */
     public static <T extends Comparable<T>> void parallelSort(List<T> list, int threadsCount) throws IllegalArgumentException, InterruptedException {
         if (threadsCount <= 0) {
             throw new IllegalArgumentException("threadCount should be more than zero");

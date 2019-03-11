@@ -24,6 +24,7 @@ public class QSortTest {
     }
 
     private void fillList(int size) {
+        list = new ArrayList<>();
         list.addAll(randomSource.ints().limit(size).boxed().collect(Collectors.toList()));
     }
 
@@ -94,7 +95,7 @@ public class QSortTest {
 
     @Test
     void randomPartitionTest() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-        for (int i = 0; i < 30; i++) {
+        for (int i = 0; i < 100; i++) {
             fillList(1000);
             checkPartition(list, list.get(1));
         }
@@ -108,20 +109,28 @@ public class QSortTest {
     }
 
     @Test
-    void OneThreadQSortTest() throws InterruptedException {
+    void oneThreadQSortTest() throws InterruptedException {
         list = new ArrayList<>(List.of(5,1,4,3,2));
         checkSortCorrectness(list, 1);
     }
 
     @Test
-    void FourThreadQSortTest() throws InterruptedException {
+    void fourThreadQSortTest() throws InterruptedException {
         list = new ArrayList<>(List.of(5,1,4,3,2));
         checkSortCorrectness(list, 4);
     }
 
     @Test
-    void NegativeThreadQSortTest() {
+    void negativeThreadQSortTest() {
         fillList(10);
         assertThrows(IllegalArgumentException.class, () -> checkSortCorrectness(list, -1));
+    }
+
+    @Test
+    void randomSortTest() throws InterruptedException {
+        for (int i = 0; i < 100; i++) {
+            fillList(100);
+            checkSortCorrectness(list, 4);
+        }
     }
 }
