@@ -2,14 +2,13 @@ package com.example.qsort;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.sql.SQLOutput;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 
 import static com.example.qsort.QSort.partition;
 
-public class QSortTask<T extends Comparable<T>> implements Runnable {
+class QSortTask<T extends Comparable<T>> implements Runnable {
     final List<T> list;
     final CountDownLatch latch;
     final ExecutorService threadPool;

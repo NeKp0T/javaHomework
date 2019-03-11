@@ -13,12 +13,12 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class QSortTest {
+class QSortTest {
     private ArrayList<Integer> list;
     private Random randomSource;
 
     @BeforeEach
-    void init() throws NoSuchMethodException {
+    void init() {
         list = new ArrayList<>();
         randomSource = new Random(533);
     }
@@ -28,7 +28,8 @@ public class QSortTest {
         list.addAll(randomSource.ints(size).boxed().collect(Collectors.toList()));
     }
 
-    private <T> int callPartition(List<T> listToPartition, T base) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+    private <T> int callPartition(List<T> listToPartition, T base) throws InvocationTargetException, IllegalAccessException {
+        // now it is package-private, but in case it will become private this code will be useful
         Method[] methods = QSort.class.getDeclaredMethods();
         Method partitionMethod = null;
         for (Method method : methods) {
@@ -36,7 +37,7 @@ public class QSortTest {
                 partitionMethod = method;
             }
         }
-//        Method partitionMethod = QSort.class.getMethod("partition", List.class, Comparable.class);
+
         partitionMethod.setAccessible(true);
         return (int) partitionMethod.invoke(null, listToPartition, base);
     }
