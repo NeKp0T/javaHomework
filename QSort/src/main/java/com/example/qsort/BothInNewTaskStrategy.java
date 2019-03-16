@@ -5,7 +5,7 @@ import java.util.concurrent.ExecutorService;
 /**
  * Execution strategy which passes both tasks to executor service
  */
-class BothInNewTaskStrategy implements RecursiveExecutionStrategy {
+public class BothInNewTaskStrategy implements RecursiveExecutionStrategy {
 
     /**
      * Constructs new instance that will use provided <code>ExecutorService</code>

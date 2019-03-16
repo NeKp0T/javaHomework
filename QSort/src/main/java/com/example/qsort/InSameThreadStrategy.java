@@ -3,7 +3,7 @@ package com.example.qsort;
 /**
  * Strategy that runs both subtasks
  */
-class InSameThreadStrategy implements RecursiveExecutionStrategy {
+public class InSameThreadStrategy implements RecursiveExecutionStrategy {
 
     /**
      *  {@inheritDoc}
