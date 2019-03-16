@@ -1,6 +1,7 @@
 package com.example.reflector.test;
 
 import com.example.reflector.Reflector;
+import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -8,6 +9,8 @@ import javax.tools.*;
 import java.io.*;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
@@ -317,7 +320,10 @@ public class ReflectorTest {
 
     void printCompileAndDiff(Class classToTest) throws IOException, ClassNotFoundException {
         String className = classToTest.getSimpleName();
-        File sourceFile   = new File("/tmp/" + className + ".java");
+
+        Path directory = Files.createTempDirectory("");
+        File sourceFile   = new File(directory.toFile(), className + ".java");
+
         try (FileWriter writer = new FileWriter(sourceFile)) {
             Reflector.printStructure(classToTest, writer);
         }
@@ -326,7 +332,7 @@ public class ReflectorTest {
         StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null, null);
 
         fileManager.setLocation(StandardLocation.CLASS_OUTPUT,
-                Collections.singletonList(new File("/tmp")));
+                Collections.singletonList(directory.toFile()));
 
         compiler.getTask(null,
                 fileManager,
@@ -337,7 +343,7 @@ public class ReflectorTest {
                 .call();
         fileManager.close();
 
-        ClassLoader classLoader = new URLClassLoader(new URL[]{new URL("file:///tmp/")});
+        ClassLoader classLoader = new URLClassLoader(new URL[]{new URL("file://" + directory.toString())});
         Class loadedClass = classLoader.loadClass( classToTest.getPackageName() + "." + className);
 
         var compareToLoadedWriter = new StringWriter();
@@ -348,8 +354,21 @@ public class ReflectorTest {
 
         assertEquals(compareToItselfWriter.toString(), compareToLoadedWriter.toString());
 
-        sourceFile.deleteOnExit();
-        File binaryFile   = new File("/tmp/" + className + ".class");
-        binaryFile.delete(); // TODO actually delete it & make tmp files crossplatform
+        try {
+            FileUtils.deleteDirectory(directory.toFile());
+        } catch (IOException ioException) {
+            System.out.println("Exception while deleting directory " + directory.toAbsolutePath());
+            throw ioException;
+        }
+    }
+
+    @Test
+    void test() throws IOException { // TODO delete
+
+        Path directory = Files.createTempDirectory("");
+        File sourceFile   = File.createTempFile("sourcefile", ".java", directory.toFile());
+        System.out.println(directory.toString());
+        System.out.println(sourceFile);
+        System.out.println(File.separatorChar);
     }
 }
