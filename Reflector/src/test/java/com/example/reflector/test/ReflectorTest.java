@@ -322,6 +322,7 @@ public class ReflectorTest {
     void javalangDeletion() throws IOException {
         String correct = "package com.example.reflector.test.testjava.lang.java;\n" +
                 "public class lang {\n" +
+                "    java.util.List<com.example.reflector.test.testjava.lang.java.lang> field;\n" +
                 "    void f(com.example.reflector.test.testjava.lang.java.lang arg0) {\n" +
                 "        throw new UnsupportedOperationException();\n" +
                 "    }\n" +
