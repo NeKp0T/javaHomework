@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -102,17 +104,59 @@ class QSortTest {
         }
     }
 
-    private <T extends Comparable<T>> void checkSortCorrectness(List<T> listToTest, int threadsCount) throws InterruptedException {
+    private <T extends Comparable<T>> void checkSortCorrectness(List<T> listToTest, int threadsCount)
+            throws InterruptedException {
         List<T> listCopy = new ArrayList<>(listToTest);
         QSort.parallelSort(list, threadsCount);
         listCopy.sort(Comparator.naturalOrder());
         assertEquals(listCopy, listToTest);
     }
 
+    private <T extends Comparable<T>> void checkSortCorrectness(List<T> listToTest) {
+        List<T> listCopy = new ArrayList<>(listToTest);
+        QSort.sort(list);
+        listCopy.sort(Comparator.naturalOrder());
+        assertEquals(listCopy, listToTest);
+    }
+
+    private <T extends Comparable<T>> void checkSortCorrectness(List<T> listToTest, RecursiveExecutionStrategy strategy)
+            throws InterruptedException {
+        List<T> listCopy = new ArrayList<>(listToTest);
+        QSort.strategySort(list, strategy);
+        listCopy.sort(Comparator.naturalOrder());
+        assertEquals(listCopy, listToTest);
+    }
+
     @Test
-    void oneThreadQSortTest() throws InterruptedException {
+    void oneThreadParallelQSortTest() throws InterruptedException {
         list = new ArrayList<>(List.of(5,1,4,3,2));
         checkSortCorrectness(list, 1);
+    }
+
+    @Test
+    void notParallelQSortTest() {
+        list = new ArrayList<>(List.of(5,1,4,3,2));
+        checkSortCorrectness(list);
+    }
+
+    @Test
+    void InSameThreadSortTest() throws InterruptedException {
+        list = new ArrayList<>(List.of(5,1,4,3,2));
+        checkSortCorrectness(list, new InSameThreadStrategy());
+    }
+
+    @Test
+    void OneInSameThread4Threads() throws InterruptedException {
+        var executor = Executors.newFixedThreadPool(4);
+        list = new ArrayList<>(List.of(5,1,4,3,2));
+        checkSortCorrectness(list, new OneInNewTaskStrategy(executor));
+    }
+
+    @Test
+    void BothInSameThread4Threads() throws InterruptedException {
+        var executor = Executors.newFixedThreadPool(4);
+        list = new ArrayList<>(List.of(5,1,4,3,2));
+        checkSortCorrectness(list, new BothInNewTaskStrategy(executor));
     }
 
     @Test
@@ -128,10 +172,24 @@ class QSortTest {
     }
 
     @Test
-    void randomSortTest() throws InterruptedException {
+    void nullAsListTest() {
+        assertThrows(NullPointerException.class, () -> QSort.parallelSort(null, 2));
+        assertThrows(NullPointerException.class, () -> QSort.sort(null));
+    }
+
+    @Test
+    void randomParallelSortTest() throws InterruptedException {
         for (int i = 0; i < 100; i++) {
             fillList(100);
             checkSortCorrectness(list, 4);
+        }
+    }
+
+    @Test
+    void randomNotParallelSortTest() {
+        for (int i = 0; i < 100; i++) {
+            fillList(100);
+            checkSortCorrectness(list);
         }
     }
 }

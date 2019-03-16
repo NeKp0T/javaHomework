@@ -4,19 +4,29 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
 
 import static com.example.qsort.QSort.partition;
 
+/**
+ * Runnable, that sorts provided list using qsort algorithm with provided execution stratege for making recursive calls.
+ * Any time list element is known to take it's place in ordered list.
+ * @param <T> type of list elements
+ */
 class QSortTask<T extends Comparable<T>> implements Runnable {
-    final List<T> list;
-    final CountDownLatch latch;
-    final ExecutorService threadPool;
+    private final List<T> list;
+    private final CountDownLatch latch;
+    private final RecursiveExecutionStrategy strategy;
 
-    QSortTask(@NotNull List<T> list, @NotNull CountDownLatch latch, @NotNull ExecutorService threadPool) {
+    /**
+     * Constructs new QSortTask.
+     * @param list list to sort
+     * @param latch
+     * @param strategy
+     */
+    QSortTask(@NotNull List<T> list, @NotNull CountDownLatch latch, @NotNull RecursiveExecutionStrategy strategy) {
         this.list = list;
         this.latch = latch;
-        this.threadPool = threadPool;
+        this.strategy = strategy;
     }
 
     @Override
@@ -36,12 +46,11 @@ class QSortTask<T extends Comparable<T>> implements Runnable {
         List<T> rightPart = list.subList(middlePosition + 1, list.size());
         latch.countDown();
 
-        threadPool.submit(getSortListTask(leftPart));
-        threadPool.submit(getSortListTask(rightPart));
+        strategy.executeSubtasks(getSortListTask(leftPart), getSortListTask(rightPart));
     }
 
-     private Runnable getSortListTask(List<T> listToSort) {
-        return new QSortTask<>(listToSort, latch, threadPool);
+     private QSortTask<T> getSortListTask(List<T> listToSort) {
+        return new QSortTask<>(listToSort, latch, strategy);
     }
 }
 
