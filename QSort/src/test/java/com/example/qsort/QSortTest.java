@@ -32,7 +32,7 @@ class QSortTest {
 
     private <T> int callPartition(List<T> listToPartition, T base) throws InvocationTargetException, IllegalAccessException {
         // now it is package-private, but in case it will become private this code will be useful
-        Method[] methods = QSort.class.getDeclaredMethods();
+        Method[] methods = QSortTask.class.getDeclaredMethods();
         Method partitionMethod = null;
         for (Method method : methods) {
             if (method.getName().equals("partition")) {

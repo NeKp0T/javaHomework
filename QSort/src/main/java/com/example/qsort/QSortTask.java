@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.concurrent.CountDownLatch;
 
-import static com.example.qsort.QSort.partition;
-
 /**
  * Runnable, that sorts provided list using qsort algorithm with provided execution stratege for making recursive calls.
  * Any time list element is known to take it's place in ordered list.
@@ -71,7 +69,7 @@ class QSortTask<T extends Comparable<T>> implements Runnable {
      * @return index, that every element in list before it is lower or equals to base,
      *          and every element after it is greater or equals to base.
      */
-    static <T extends Comparable<T>> int partition(@NotNull List<T> list, @NotNull T base) {
+    private static <T extends Comparable<T>> int partition(@NotNull List<T> list, @NotNull T base) {
         ListIterator<T> forward = list.listIterator();
         ListIterator<T> backward = list.listIterator(list.size());
         T leftItem = forward.next();
