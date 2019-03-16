@@ -40,6 +40,7 @@ public class QSort {
             threadPool.shutdownNow();
             throw e;
         }
+        threadPool.shutdown();
     }
 
     /**
