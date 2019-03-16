@@ -34,7 +34,7 @@ public class Reflector {
     /**
      * Prints possible implementation of provided class to provided <code>Writer</code>.
      * @param someClass class to print
-     * @Param writer <code>Writer</code> to write to
+     * @param writer <code>Writer</code> to write to
      * @throws IOException if exception happens while writing
      */
     public static void printStructure(Class<?> someClass, Writer writer) throws IOException {

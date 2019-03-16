@@ -290,7 +290,7 @@ public class ClassDifferencePrinter extends AbstractReflectorPrinter {
             writer.write("\n");
         }
 
-        Map.Entry<String, List<T>>[] otherClassMethodEntries = (Map.Entry<String, List<T>>[]) otherClassMethodsSet.entrySet().toArray(Map.Entry[]::new);
+        @SuppressWarnings("unchecked") Map.Entry<String, List<T>>[] otherClassMethodEntries = (Map.Entry<String, List<T>>[]) otherClassMethodsSet.entrySet().toArray(Map.Entry[]::new);
         Arrays.sort(otherClassMethodEntries, Comparator.comparing(Map.Entry::getKey));
         for (Map.Entry<String, List<T>> otherClassMethodsByNameEntry : otherClassMethodEntries) {
             if (!processedClassMethodsSet.containsKey(otherClassMethodsByNameEntry.getKey())) {

@@ -1,7 +1,5 @@
 package com.example.reflector.test;
 
-import java.awt.print.Printable;
-
 public class ClassWithGenerics2<U, V extends U> {
     U fieldA;
 
