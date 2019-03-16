@@ -35,7 +35,7 @@ public class QSort {
         ExecutorService threadPool = Executors.newFixedThreadPool(threadsCount);
 
         try {
-        strategySort(list, new OneInNewTaskStrategy(threadPool));
+            strategySort(list, new OneInNewTaskStrategy(threadPool));
         } catch (InterruptedException e) {
             threadPool.shutdownNow();
             throw e;

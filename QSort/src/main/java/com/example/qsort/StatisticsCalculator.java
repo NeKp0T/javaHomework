@@ -42,7 +42,7 @@ public class StatisticsCalculator {
         System.out.println("Random seed is " + RANDOM_SEED);
         System.out.println();
 
-        Random random = new Random(RANDOM_SEED);
+        var random = new Random(RANDOM_SEED);
 
         for (int listSizeLog = SIZE_LOG_FROM; listSizeLog <= SIZE_LOG_TO; listSizeLog++) {
             int listSize = 1 << listSizeLog;
