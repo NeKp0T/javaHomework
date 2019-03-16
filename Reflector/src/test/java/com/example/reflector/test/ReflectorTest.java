@@ -61,8 +61,8 @@ public class ReflectorTest {
                 "class ClassWithFields {\n" +
                 "\tchar[] charArr;\n" +
                 "\tint intField;\n" +
-                "\tjava.lang.String[] stringArr;\n" +
-                "\tjava.lang.String stringField;\n" +
+                "\tString[] stringArr;\n" +
+                "\tString stringField;\n" +
                 "\tClassWithFields() {\n" +
                 "\t\tthrow new UnsupportedOperationException();\n" +
                 "\t}\n" +
@@ -74,7 +74,7 @@ public class ReflectorTest {
     void printMethodsWithoutArguments() throws IOException {
         String correct = "package com.example.reflector.test;\n" +
                 "class ClassWithMethodsWithoutArguments {\n" +
-                "    java.lang.String stringFunc() {\n" +
+                "    String stringFunc() {\n" +
                 "        throw new UnsupportedOperationException();\n" +
                 "    }\n" +
                 "    void voidFunc() {\n" +
@@ -91,10 +91,10 @@ public class ReflectorTest {
     void printMethodsWithArguments() throws IOException {
         String correct = "package com.example.reflector.test;\n" +
                 "class ClassWithMethodsWithArguments {\n" +
-                "    java.lang.Integer multipleArguments(java.lang.String arg0, java.lang.Integer arg1, char arg2) {\n" +
+                "    Integer multipleArguments(String arg0, Integer arg1, char arg2) {\n" +
                 "        throw new UnsupportedOperationException();\n" +
                 "    }\n" +
-                "    java.lang.String stringFuncFromString(java.lang.String arg0) {\n" +
+                "    String stringFuncFromString(String arg0) {\n" +
                 "        throw new UnsupportedOperationException();\n" +
                 "    }\n" +
                 "    void voidFuncFromInt(int arg0) {\n" +
@@ -103,7 +103,7 @@ public class ReflectorTest {
                 "    ClassWithMethodsWithArguments() {\n" +
                 "        throw new UnsupportedOperationException();\n" +
                 "    }\n" +
-                "    ClassWithMethodsWithArguments(int arg0, char arg1, java.lang.String arg2) {\n" +
+                "    ClassWithMethodsWithArguments(int arg0, char arg1, String arg2) {\n" +
                 "        throw new UnsupportedOperationException();\n" +
                 "    }\n" +
                 "}";
@@ -126,7 +126,7 @@ public class ReflectorTest {
                 "    <X, Y> void dMethod(X[] arg0, Y arg1) {\n" +
                 "        throw new UnsupportedOperationException();\n" +
                 "    }\n" +
-                "    <Z extends java.lang.String> ClassWithGenericMethods(Z arg0) {\n" +
+                "    <Z extends String> ClassWithGenericMethods(Z arg0) {\n" +
                 "        throw new UnsupportedOperationException();\n" +
                 "    }\n" +
                 "}\n";
@@ -172,10 +172,10 @@ public class ReflectorTest {
                 ">class DifferentClassWithFields {\n" +
                 "<\tint intField;\n" +
                 "\n" +
-                "<\tjava.lang.String[] stringArr;\n" +
+                "<\tString[] stringArr;\n" +
                 "\n" +
-                "<|\tjava.lang.String stringField;\n" +
-                ">|\tjava.lang.Integer stringField;\n" +
+                "<|\tString stringField;\n" +
+                ">|\tInteger stringField;\n" +
                 "\n" +
                 ">\tint differentIntField;\n" +
                 "\n" +
@@ -195,8 +195,8 @@ public class ReflectorTest {
                 "<|\tvoid changesArgumentType(int arg0) \n" +
                 ">|\tvoid changesArgumentType(long arg0) \n" +
                 "\n" +
-                "<|\tjava.lang.String changesReturnType() \n" +
-                ">|\tjava.lang.Integer changesReturnType() \n" +
+                "<|\tString changesReturnType() \n" +
+                ">|\tInteger changesReturnType() \n" +
                 "\n" +
                 "<|\tpublic void changesVisibility() \n" +
                 ">|\tprivate void changesVisibility() \n" +
@@ -218,7 +218,7 @@ public class ReflectorTest {
                 "<|\tvoid method() \n" +
                 ">|\tprivate void method(int arg0, int arg1) \n" +
                 ">|\tlong method(int arg0) \n" +
-                ">|\tjava.lang.String method(int arg0, int arg1, int arg2, int arg3) \n" +
+                ">|\tString method(int arg0, int arg1, int arg2, int arg3) \n" +
                 "}";
         assertPrintsDifferenceCorrectly(correct, ClassMultipleMethodsWithSameNameDifference1.class, ClassMultipleMethodsWithSameNameDifference2.class);
     }
@@ -226,7 +226,7 @@ public class ReflectorTest {
     @Test
     void printsGenericClassParametersCorrectly() throws IOException {
         String correct = "package com.example.reflector.test;\n" +
-                "public class ClassWithGenerics1<U, V extends java.awt.print.Printable & java.lang.Iterable<java.lang.Integer>, X extends U> {\n" +
+                "public class ClassWithGenerics1<U, V extends java.awt.print.Printable & Iterable<Integer>, X extends U> {\n" +
                 "\tU fieldA;\n" +
                 "\t\n" +
                 "\tvoid f(U arg0, V arg1) {\n" +
@@ -245,7 +245,7 @@ public class ReflectorTest {
                 "\t\tthrow new UnsupportedOperationException();\n" +
                 "\t}\n" +
                 "\n" +
-                "\tvoid genericMethodD(java.util.Set<? extends java.lang.String> arg0) {\n" +
+                "\tvoid genericMethodD(java.util.Set<? extends String> arg0) {\n" +
                 "\t\tthrow new UnsupportedOperationException();\n" +
                 "\t}\n" +
                 "\n" +
@@ -260,7 +260,7 @@ public class ReflectorTest {
     @Test
     void genericAndWildcardDifference() throws IOException {
 
-        String correct = "<public class ClassWithGenerics1<U, V extends java.awt.print.Printable & java.lang.Iterable<java.lang.Integer>, X extends U> {\n" +
+        String correct = "<public class ClassWithGenerics1<U, V extends java.awt.print.Printable & Iterable<Integer>, X extends U> {\n" +
                 ">public class ClassWithGenerics2<U, V extends U> {\n" +
                 "<|\tU fieldA;\n" +
                 ">|\tU fieldA;\n" +
@@ -273,7 +273,7 @@ public class ReflectorTest {
                 "<|\t<T> T genericMethodB(T arg0) \n" +
                 ">|\t<W> W genericMethodB(W arg0) \n" +
                 "\n" +
-                "<|\tvoid genericMethodD(java.util.Set<? extends java.lang.String> arg0) \n" +
+                "<|\tvoid genericMethodD(java.util.Set<? extends String> arg0) \n" +
                 ">|\tvoid genericMethodD(java.util.Set<?> arg0) \n" +
                 "\n" +
                 "}";
@@ -318,6 +318,20 @@ public class ReflectorTest {
         printCompileAndDiff(ClassSuperclass1.class);
     }
 
+    @Test
+    void javalangDeletion() throws IOException {
+        String correct = "package com.example.reflector.test.testjava.lang.java;\n" +
+                "public class lang {\n" +
+                "    void f(com.example.reflector.test.testjava.lang.java.lang arg0) {\n" +
+                "        throw new UnsupportedOperationException();\n" +
+                "    }\n" +
+                "    public lang() {\n" +
+                "        throw new UnsupportedOperationException();\n" +
+                "    }\n" +
+                "}";
+        assertPrintsCorrectly(correct, com.example.reflector.test.testjava.lang.java.lang.class);
+    }
+
     void printCompileAndDiff(Class classToTest) throws IOException, ClassNotFoundException {
         String className = classToTest.getSimpleName();
 
@@ -360,15 +374,5 @@ public class ReflectorTest {
             System.out.println("Exception while deleting directory " + directory.toAbsolutePath());
             throw ioException;
         }
-    }
-
-    @Test
-    void test() throws IOException { // TODO delete
-
-        Path directory = Files.createTempDirectory("");
-        File sourceFile   = File.createTempFile("sourcefile", ".java", directory.toFile());
-        System.out.println(directory.toString());
-        System.out.println(sourceFile);
-        System.out.println(File.separatorChar);
     }
 }

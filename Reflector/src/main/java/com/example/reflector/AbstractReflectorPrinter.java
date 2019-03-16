@@ -128,7 +128,10 @@ abstract class AbstractReflectorPrinter {
      * Writes type name
      */
     protected void writeType(Type type) throws IOException {
-        writer.write(type.getTypeName().replaceAll("\\$", "."));
+        writer.write(type.getTypeName()
+                .replaceAll("\\$", ".")
+                .replaceAll("(?<=\\A|\\s|[^.\\w])java.lang.", "")
+        );
     }
 
     /**
@@ -203,7 +206,7 @@ abstract class AbstractReflectorPrinter {
     }
 
     void writeTypeParameter(TypeVariable type) throws IOException {
-        writer.write(type.toString());
+        writeType(type);
 
         List<Type> bounds = List.of(type.getBounds())
                 .stream()
