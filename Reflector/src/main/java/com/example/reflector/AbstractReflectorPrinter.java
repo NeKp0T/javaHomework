@@ -15,14 +15,15 @@ import java.util.stream.Collectors;
  * Provides some methods for writing information about classes, and default realization of some logic.
  */
 abstract class AbstractReflectorPrinter {
-    Class<?> processedClass;
-    Writer writer;
-    int tabCount;
+    protected Class<?> processedClass;
+    protected Writer writer;
+    protected int tabCount;
 
     /**
      * Main method, that starts class processing.
      */
     protected void process() throws IOException {
+        processPackage();
         processClassNameLine();
         tabCount++;
 
@@ -39,6 +40,11 @@ abstract class AbstractReflectorPrinter {
      * Processes whole line with class declaration.
      */
     protected abstract void processClassNameLine() throws IOException;
+
+    /**
+     * Processes class' package
+     */
+    abstract protected void processPackage() throws IOException;
 
     /**
      * Processes all class fields
@@ -131,7 +137,6 @@ abstract class AbstractReflectorPrinter {
     protected void writeArguments(Executable executable) throws IOException {
         writer.write("(");
         Type[] argumentTypes = executable.getGenericParameterTypes();
-//                TypeVariable<Method>[] typeParameters = executable.getTypeParameters();
         for (int i = 0; i < argumentTypes.length; i++) {
             writeType(argumentTypes[i]);
             writer.write(" arg" + i);
@@ -221,6 +226,11 @@ abstract class AbstractReflectorPrinter {
      */
     protected void sortMembers(Member[] members) {
         Arrays.sort(members, Comparator.comparing(Member::getName));
+    }
+
+    protected void writePackage(Class<?> someClass) throws IOException {
+        writer.write("package ");
+        writer.write(someClass.getPackageName());
     }
 
     /**

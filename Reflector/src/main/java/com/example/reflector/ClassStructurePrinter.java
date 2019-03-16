@@ -4,10 +4,15 @@ import java.io.IOException;
 import java.io.Writer;
 import java.lang.reflect.*;
 
+
+/**
+ * Class with only one public method, which takes one <code>Class</code> object and prints it in provided
+ * <code>Writer</code> in a way that class could be implemented.
+ */
 class ClassStructurePrinter extends AbstractReflectorPrinter {
 
     /**
-     * Writes given class to given writer in a way it could be declared.
+     * Writes given class to given writer in a way it could be implemented.
      */
     public static void writeClass(Class<?> someClass, Writer writer) throws IOException {
         new ClassStructurePrinter(someClass, writer, 0).process();
@@ -75,6 +80,19 @@ class ClassStructurePrinter extends AbstractReflectorPrinter {
             processSubclass(i);
         }
         writeLn("");
+    }
+
+    /**
+     * Processes class' package.
+     * If class is member class then it's package will not be printed.
+     */
+    @Override
+    protected void processPackage() throws IOException {
+        if (!processedClass.isMemberClass()) {
+            writeTabs();
+            writePackage(processedClass);
+            writer.write(";\n\n");
+        }
     }
 
     /**

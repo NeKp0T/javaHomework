@@ -13,6 +13,10 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * Class with only one public method, which takes two <code>Class</code> objects and prints difference between them
+ * in provided <code>Writer</code> in human-readable form
+ */
 public class ClassDifferencePrinter extends AbstractReflectorPrinter {
     private final Class<?> otherClass;
 
@@ -37,11 +41,24 @@ public class ClassDifferencePrinter extends AbstractReflectorPrinter {
     @Override
     protected void processClassNameLine() throws IOException {
         writer.write("<");
+        writeTabs();
         writeClassName(processedClass);
         writer.write(" {\n");
         writer.write(">");
         writeClassName(otherClass);
         writer.write(" {\n");
+    }
+
+    @Override
+    protected void processPackage() throws IOException {
+        if (!processedClass.getPackageName().equals(otherClass.getPackageName())) {
+            writer.write("<");
+            writePackage(processedClass);
+            writer.write(";\n");
+            writer.write(">");
+            writePackage(otherClass);
+            writer.write(";\n\n");
+        }
     }
 
     /**

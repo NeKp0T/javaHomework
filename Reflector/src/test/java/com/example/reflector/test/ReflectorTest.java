@@ -15,6 +15,8 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.example.reflector.test.otherpackage.*;
+
 public class ReflectorTest {
 
     private StringWriter writer;
@@ -52,7 +54,8 @@ public class ReflectorTest {
 
     @Test
     void printFieldsTest() throws IOException {
-        String correct = "class ClassWithFields {\n" +
+        String correct = "package com.example.reflector.test;\n" +
+                "class ClassWithFields {\n" +
                 "\tchar[] charArr;\n" +
                 "\tint intField;\n" +
                 "\tjava.lang.String[] stringArr;\n" +
@@ -66,7 +69,8 @@ public class ReflectorTest {
 
     @Test
     void printMethodsWithoutArguments() throws IOException {
-        String correct = "class ClassWithMethodsWithoutArguments {\n" +
+        String correct = "package com.example.reflector.test;\n" +
+                "class ClassWithMethodsWithoutArguments {\n" +
                 "    java.lang.String stringFunc() {\n" +
                 "        throw new UnsupportedOperationException();\n" +
                 "    }\n" +
@@ -82,7 +86,8 @@ public class ReflectorTest {
 
     @Test
     void printMethodsWithArguments() throws IOException {
-        String correct = "class ClassWithMethodsWithArguments {\n" +
+        String correct = "package com.example.reflector.test;\n" +
+                "class ClassWithMethodsWithArguments {\n" +
                 "    java.lang.Integer multipleArguments(java.lang.String arg0, java.lang.Integer arg1, char arg2) {\n" +
                 "        throw new UnsupportedOperationException();\n" +
                 "    }\n" +
@@ -104,7 +109,8 @@ public class ReflectorTest {
 
     @Test
     void printGenericMethods() throws IOException {
-        String correct = "public class ClassWithGenericMethods {\n" +
+        String correct = "package com.example.reflector.test;\n" +
+                "public class ClassWithGenericMethods {\n" +
                 "    <T> T aMethod(T arg0) {\n" +
                 "        throw new UnsupportedOperationException();\n" +
                 "    }\n" +
@@ -126,7 +132,8 @@ public class ReflectorTest {
 
     @Test
     void printClassWithSuperclass() throws IOException {
-        String correct = "public class ClassWithSuperclass1 extends com.example.reflector.test.ClassSuperclass1 {\n" +
+        String correct = "package com.example.reflector.test;\n" +
+                "public class ClassWithSuperclass1 extends com.example.reflector.test.ClassSuperclass1 {\n" +
                 "\tpublic ClassWithSuperclass1() {\n" +
                 "\t\tthrow new UnsupportedOperationException();\n" +
                 "\t}\n" +
@@ -136,7 +143,8 @@ public class ReflectorTest {
 
     @Test
     void printInnerNestedClasses() throws IOException {
-        String correct = "public class ClassWithInnerAndNestedClasses {\n" +
+        String correct = "package com.example.reflector.test;\n" +
+                "public class ClassWithInnerAndNestedClasses {\n" +
                 "\tpublic ClassWithInnerAndNestedClasses() {\n" +
                 "\t\tthrow new UnsupportedOperationException();\n" +
                 "\t}\n" +
@@ -214,7 +222,8 @@ public class ReflectorTest {
 
     @Test
     void printsGenericClassParametersCorrectly() throws IOException {
-        String correct = "public class ClassWithGenerics1<U, V extends java.awt.print.Printable & java.lang.Iterable<java.lang.Integer>, X extends U> {\n" +
+        String correct = "package com.example.reflector.test;\n" +
+                "public class ClassWithGenerics1<U, V extends java.awt.print.Printable & java.lang.Iterable<java.lang.Integer>, X extends U> {\n" +
                 "\tU fieldA;\n" +
                 "\t\n" +
                 "\tvoid f(U arg0, V arg1) {\n" +
@@ -269,6 +278,16 @@ public class ReflectorTest {
     }
 
     @Test
+    void packageDifference() throws IOException {
+        String correct = "<package com.example.reflector.test;\n" +
+                ">package com.example.reflector.test.otherpackage;\n" +
+                "<public class EmptyClassInThisPackage {\n" +
+                ">public class EmptyClassInThisOtherPackage {\n" +
+                "}";
+        assertPrintsDifferenceCorrectly(correct, EmptyClassInThisPackage.class, EmptyClassInThisOtherPackage.class);
+    }
+
+    @Test
     void printDiffOfClassesWithSuperclasses() throws IOException {
         StringWriter writerSuper = new StringWriter();
         StringWriter writerExtends = new StringWriter();
@@ -319,7 +338,7 @@ public class ReflectorTest {
         fileManager.close();
 
         ClassLoader classLoader = new URLClassLoader(new URL[]{new URL("file:///tmp/")});
-        Class loadedClass = classLoader.loadClass(className);
+        Class loadedClass = classLoader.loadClass( classToTest.getPackageName() + "." + className);
 
         var compareToLoadedWriter = new StringWriter();
         var compareToItselfWriter = new StringWriter();
@@ -331,6 +350,6 @@ public class ReflectorTest {
 
         sourceFile.deleteOnExit();
         File binaryFile   = new File("/tmp/" + className + ".class");
-        binaryFile.delete();
+        binaryFile.delete(); // TODO actually delete it & make tmp files crossplatform
     }
 }
