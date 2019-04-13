@@ -30,10 +30,10 @@ class ConcurrentQueue<T> {
                 synchronized (popMutex) {
                     first = newNode;
                     last = newNode;
+                    popMutex.notifyAll();
                 }
             }
         }
-        popMutex.notify();
     }
 
     /**
