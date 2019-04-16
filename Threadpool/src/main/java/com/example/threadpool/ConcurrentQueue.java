@@ -76,8 +76,8 @@ class ConcurrentQueue<T> {
      * A simple structure representing one node of a queue.
      */
     private class QueueElement {
-        QueueElement next;
-        private T value;
+        private QueueElement next;
+        private final T value;
 
         QueueElement(T value) {
             this.value = value;

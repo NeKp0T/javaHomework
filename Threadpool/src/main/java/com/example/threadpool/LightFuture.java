@@ -20,7 +20,7 @@ public interface LightFuture<T> {
     /**
      * Waits for computation to complete and returns it's result.
      *
-     * If exception occurs while computing it a new <code>LightExeutionException</code> will be thrown
+     * If exception occurs while computing it a new <code>LightExecutionException</code> will be thrown
      * with original exception as cause.
      *
      * Thread calling <code>get</code> will not be used for computation.
@@ -36,8 +36,8 @@ public interface LightFuture<T> {
      *
      *
      * @param function function to apply to the result of <code>LightFuture</code>
-     * @param <U>
-     * @return
+     * @param <U> return type of function to compute
+     * @return function result
      */
     <U> LightFuture<U> thenApply(Function<T, U> function);
 }

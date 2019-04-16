@@ -13,7 +13,7 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ThreadPoolImplTest {
-    final static int timesToRunEveryTest = 50;
+    private final static int timesToRunEveryTest = 50;
 
     private ThreadPoolImpl singleThreadPool;
     private ThreadPoolImpl fourThreadPool;
@@ -118,6 +118,7 @@ class ThreadPoolImplTest {
                         synchronized (waitForTask) { // acquires after waitForTask.wait() in main thread
                             waitForTask.notifyAll();
                         }
+                        //noinspection CatchMayIgnoreException
                         try {
                             freezeTask.wait();
                         } catch (InterruptedException e) {

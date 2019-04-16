@@ -180,6 +180,7 @@ public class ThreadPoolImpl {
                 caughtException = e;
             }
 
+            toCompute = null;
             ready = true;
             synchronized (mutex) {
                 mutex.notifyAll();

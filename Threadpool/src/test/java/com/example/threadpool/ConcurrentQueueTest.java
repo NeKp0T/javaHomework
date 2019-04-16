@@ -81,7 +81,7 @@ class ConcurrentQueueTest {
                 allThread.join();
             }
 
-            Arrays.stream(popped).peek(x -> assertEquals(1, x));
+            Arrays.stream(popped).forEach(x -> assertEquals(1, x));
         }
     }
 }
