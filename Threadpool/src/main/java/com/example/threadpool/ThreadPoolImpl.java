@@ -14,7 +14,8 @@ import java.util.function.Supplier;
  *
  * Tasks to compute {@link com.example.threadpool.LightFuture#thenApply(Function) thenApply} functions are added
  * in the pool right after original {@link com.example.threadpool.LightFuture LightFuture} is ready.
- * If original task terminated with error, then others will terminate throwing the same exception instance.
+ * If original task terminated with error, then others will terminate throwing exceptions with the same exception
+ * instance as cause.
  */
 public class ThreadPoolImpl {
 
@@ -180,7 +181,9 @@ public class ThreadPoolImpl {
             }
 
             ready = true;
-            mutex.notifyAll();
+            synchronized (mutex) {
+                mutex.notifyAll();
+            }
 
             synchronized (toApply) {
                 toApply.forEach(ThreadPoolImpl.this::addTask);

@@ -53,7 +53,6 @@ class ConcurrentQueueTest {
         final var random = new Random(533);
 
         for (int runNumber = 0; runNumber < timesToTest; runNumber++) {
-
             var popped = new int[threadCount * timesToPush];
 
             var pushers = new ArrayList<Thread>();

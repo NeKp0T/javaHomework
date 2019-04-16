@@ -21,7 +21,7 @@ public interface LightFuture<T> {
      * Waits for computation to complete and returns it's result.
      *
      * If exception occurs while computing it a new <code>LightExeutionException</code> will be thrown
-     * with original exception added as suppressed.
+     * with original exception as cause.
      *
      * Thread calling <code>get</code> will not be used for computation.
      * @return result of computation
