@@ -1,26 +1,34 @@
 package com.example.threadpool;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.ArrayList;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class ThreadPoolImplTest {
+    final static int timesToRunEveryTest = 50;
+
     private ThreadPoolImpl singleThreadPool;
     private ThreadPoolImpl fourThreadPool;
 
     private static Stream<Arguments> threadPoolsSource() {
-        return Stream.of(
-                Arguments.of(new ThreadPoolImpl(1)),
-                Arguments.of(new ThreadPoolImpl(4)),
-                Arguments.of(new ThreadPoolImpl(10))
-        );
+        int[] threadCounts = new int[]{1, 4, 10};
+        return Stream.generate(new Supplier<Arguments>() {
+            @Override
+            public Arguments get() {
+                return Arguments.of(new ThreadPoolImpl(threadCounts[iteration++ % threadCounts.length]));
+            }
+
+            int iteration = 0;
+
+        }).limit(threadCounts.length * timesToRunEveryTest);
     }
 
     @BeforeEach
@@ -44,7 +52,7 @@ class ThreadPoolImplTest {
         }
     }
 
-    @Test
+    @RepeatedTest(100)
     void singleThreadTaskOrder() throws LightExecutionException, InterruptedException {
         final int count = 5;
         var n = new int[1];
@@ -82,7 +90,7 @@ class ThreadPoolImplTest {
         assertEquals(1, thenTask.get());
     }
 
-    @Test
+    @RepeatedTest(timesToRunEveryTest)
     void thenApplyDoesNotBlock() throws LightExecutionException, InterruptedException {
         var waitForTask = new Object();
         synchronized (waitForTask) {
@@ -98,7 +106,7 @@ class ThreadPoolImplTest {
         }
     }
 
-    @Test
+    @RepeatedTest(timesToRunEveryTest)
     void shutdownInterrupts() throws InterruptedException, LightExecutionException {
         var waitForTask = new Object();
         var freezeTask = new Object();
@@ -125,7 +133,7 @@ class ThreadPoolImplTest {
         assertEquals(0, future.get());
     }
 
-    @Test
+    @RepeatedTest(timesToRunEveryTest)
     void poolHasFourThreads() throws LightExecutionException, InterruptedException {
 //      threadCount = 4;
         var mutexes = new Object[3];
@@ -149,7 +157,7 @@ class ThreadPoolImplTest {
         }
     }
 
-    @Test
+    @RepeatedTest(timesToRunEveryTest)
     void isReadyTest() throws LightExecutionException, InterruptedException {
         var waitForTask = new Object();
         LightFuture<Integer> task;
