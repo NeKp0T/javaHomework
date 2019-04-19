@@ -136,7 +136,6 @@ class ThreadPoolImplTest {
 
     @RepeatedTest(timesToRunEveryTest)
     void poolHasFourThreads() throws LightExecutionException, InterruptedException {
-//      threadCount = 4;
         var mutexes = new Object[3];
         for (int i = 0; i < mutexes.length; i++) {
             mutexes[i] = new Object();
