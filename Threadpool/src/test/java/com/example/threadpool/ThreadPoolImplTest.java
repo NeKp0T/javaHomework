@@ -114,16 +114,16 @@ class ThreadPoolImplTest {
 
         synchronized (waitForTask) {
             future = fourThreadPool.execute(() -> {
-                    synchronized (freezeTask) {
-                        synchronized (waitForTask) { // acquires after waitForTask.wait() in main thread
-                            waitForTask.notifyAll();
-                        }
-                        //noinspection CatchMayIgnoreException
-                        try {
-                            freezeTask.wait();
-                        } catch (InterruptedException e) {
-                        }
+                synchronized (freezeTask) {
+                    synchronized (waitForTask) { // acquires after waitForTask.wait() in main thread
+                        waitForTask.notifyAll();
                     }
+                    //noinspection CatchMayIgnoreException
+                    try {
+                        freezeTask.wait();
+                    } catch (InterruptedException e) {
+                    }
+                }
                 return 0;
             });
             waitForTask.wait(); // wakes up after waitForTask synchronization in the pool

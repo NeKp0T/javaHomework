@@ -39,5 +39,5 @@ public interface LightFuture<T> {
      * @param <U> return type of function to compute
      * @return function result
      */
-    <U> LightFuture<U> thenApply(Function<T, U> function);
+    <U> LightFuture<U> thenApply(Function<? super T, ? extends U> function);
 }

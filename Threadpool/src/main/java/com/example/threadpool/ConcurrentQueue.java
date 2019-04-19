@@ -20,7 +20,7 @@ class ConcurrentQueue<T> {
      * @param element element to add
      */
     void push(T element) {
-        QueueElement newNode = new QueueElement(element);
+        var newNode = new QueueElement(element);
         synchronized (pushMutex) {
             if (last != null) {
                 last.next = newNode;

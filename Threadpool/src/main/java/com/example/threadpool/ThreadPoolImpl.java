@@ -1,5 +1,7 @@
 package com.example.threadpool;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
@@ -50,7 +52,7 @@ public class ThreadPoolImpl {
      * @param <T> type of computation result
      * @return {@link com.example.threadpool.LightFuture LightFuture} representing computation result
      */
-    public <T> LightFuture<T> execute(Supplier<T> supplier) {
+    public <T> LightFuture<T> execute(@NotNull Supplier<T> supplier) {
         var newTask = new Task<>(supplier);
         addTask(newTask);
         return newTask;
@@ -84,8 +86,8 @@ public class ThreadPoolImpl {
      */
     private class Task<T> implements LightFuture<T>, Runnable {
 
-        // main field to synchronize on. TODO rename
-        final Object mutex;
+        // main field to synchronize on.
+        private final Object mutex;
 
         private Supplier<T> toCompute;
 
@@ -121,36 +123,37 @@ public class ThreadPoolImpl {
         @Override
         public T get() throws LightExecutionException, InterruptedException {
             if (ready) {
-                if (caughtException == null) {
-                    return result;
-                } else {
-                    throw new LightExecutionException(caughtException);
-                }
+                return getUnsynchronized();
             }
 
             synchronized (mutex) {
                 while (!ready) {
                     mutex.wait();
                 }
-                if (caughtException == null) {
-                    return result;
-                } else {
-                    throw new LightExecutionException(caughtException);
-                }
+                return getUnsynchronized();
+            }
+        }
+
+        private T getUnsynchronized() throws LightExecutionException {
+            if (caughtException == null) {
+                return result;
+            } else {
+                throw new LightExecutionException(caughtException);
             }
         }
 
         /**
          * {@inheritDoc}
+         * @param function
          */
         @Override
-        public <U> LightFuture<U> thenApply(Function<T, U> function) {
+        public <U> LightFuture<U> thenApply(@NotNull Function<? super T, ? extends U> function) {
             // new task will be executed strictly after this becomes ready
-            Task<U> newTask = new Task<>(() -> {
+            var newTask = new Task<>(() -> {
                 if (caughtException != null) {
                     throw caughtException;
                 }
-                return function.apply(result);
+                return (U) function.apply(result);
             });
 
             if (ready) {
