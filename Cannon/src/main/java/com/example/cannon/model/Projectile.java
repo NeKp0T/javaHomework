@@ -68,11 +68,9 @@ public abstract class Projectile extends RoundObject {
         }
 
         Unit closest = getWorld().getClosestUnit(position);
-        if (closest != null) {
-            if (closest.getDistance(position) <= getRadius()) {
-                if (onUnitCollision(closest)) {
-                    return true;
-                }
+        if (closest != null && closest.getDistance(position) <= getRadius()) {
+            if (onUnitCollision(closest)) {
+                return true;
             }
         }
         if (getWorld().getTerrain().detectCollisionCircle(position, getRadius())) {

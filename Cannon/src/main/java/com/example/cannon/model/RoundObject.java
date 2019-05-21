@@ -1,7 +1,6 @@
 package com.example.cannon.model;
 
 import javafx.scene.canvas.GraphicsContext;
-import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
