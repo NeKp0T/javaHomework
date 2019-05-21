@@ -1,7 +1,7 @@
 package com.example.cannon.model;
 
 /**
- * A unit that has hitpoints and in registred in the world differently separately.
+ * A unit that has hitpoints and in registered in the world differently separately.
  */
 public class Unit extends MovingObject {
     private int hp;
@@ -13,7 +13,7 @@ public class Unit extends MovingObject {
      * @param maxhp maximum hp a unit can have
      * @param speed speed as in MovingObject
      */
-    public Unit(int radius, int climbHeight, Vector2 position, World world, int maxhp, int speed) { // TODO assert maxhp > 0
+    protected Unit(int radius, int climbHeight, Vector2 position, World world, int maxhp, int speed) { // TODO assert maxhp > 0
         super(radius, climbHeight, position, world, speed);
         this.maxhp = maxhp;
         hp = maxhp;
@@ -28,9 +28,10 @@ public class Unit extends MovingObject {
     }
 
     /**
-     * @param amount amount of demage to receive
+     * @param amount amount of damage to receive
      * @return if this unit dead after receiving damage
      */
+    @SuppressWarnings("UnusedReturnValue")
     public boolean receiveDamage(int amount) {
         System.out.println("Received " + amount + " damage");
         if (isAlive() && amount > 0) {
@@ -46,6 +47,7 @@ public class Unit extends MovingObject {
      * Restores hp, but can not make hp higher than maxhp
      * @param amount amount of hp to restore
      */
+    @SuppressWarnings("unused")
     public void heal(int amount) {
         if (isAlive() && amount > 0 && hp <= maxhp) {
             hp += amount;
@@ -60,7 +62,7 @@ public class Unit extends MovingObject {
      * are free to redefine it.
      */
     protected void die() {
-        System.out.println("Khghrhh...");
+        System.out.println("F");
         alive = false;
         unregister();
     }

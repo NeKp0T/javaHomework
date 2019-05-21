@@ -10,6 +10,7 @@ import javafx.scene.canvas.GraphicsContext;
  * and unbound by calling <code>unregister()</code> method to remove it from
  * the world.
  */
+@SuppressWarnings("WeakerAccess")
 public class RoundObject {
     /**
      * Minimal distance to the ground on which object considers itself falling
@@ -21,10 +22,10 @@ public class RoundObject {
     private static final int FALL_PER_STEP = 6;
 
     /**
-     * A radius of round object.
+     * A radius of a round object.
      * It is used for collision calculations.
      */
-    protected final int radius;
+    private final int radius;
 
     private World world;
 
@@ -39,6 +40,7 @@ public class RoundObject {
      * If this object should be affected by gravity or not.
      * Subclasses that redefine physics might use it for their own purposes freely.
      */
+    @SuppressWarnings("CanBeFinal")
     protected boolean affectedByGravity = true;
 
     /**
@@ -64,14 +66,14 @@ public class RoundObject {
      * @return distance from unit's edge to specified position
      */
     public double getDistance(Vector2 position) {
-        return this.position.difference(position).length() - radius;
+        return this.position.difference(position).length() - getRadius();
     }
 
     /**
      * @return if object collides with terrain of the world
      */
     protected boolean detectTerrainCollision() {
-        return world.getTerrain().detectCollisionCircle(position, radius);
+        return world.getTerrain().detectCollisionCircle(position, getRadius());
     }
 
     /**
@@ -121,7 +123,7 @@ public class RoundObject {
      */
     public void render(GraphicsContext graphics) {
         Vector2 canvasPosition = getCanvasPosition();
-        graphics.strokeOval(canvasPosition.x - radius, canvasPosition.y - radius, radius * 2, radius * 2);
+        graphics.strokeOval(canvasPosition.x - getRadius(), canvasPosition.y - getRadius(), getRadius() * 2, radius * 2);
     }
 
     /**

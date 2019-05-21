@@ -26,7 +26,7 @@ public class Terrain {
     private static final int COLLISION_RADIUS_CHECK = 3;
 
     /**
-     * Constructs and returns a sinusoida-like terrain with specified parameters
+     * Constructs and returns a sine-wave-like terrain with specified parameters
      */
     public static Terrain constructSinusoidalTerrain(int width, int height) {
         Terrain construct = new Terrain(width, height);
@@ -109,6 +109,7 @@ public class Terrain {
     }
 
     // currently unused
+    @SuppressWarnings("unused")
     private Vector2 collisionVector(Vector2 position) {
         int x = (int) Math.round(position.x);
         int y = (int) Math.round(position.y);

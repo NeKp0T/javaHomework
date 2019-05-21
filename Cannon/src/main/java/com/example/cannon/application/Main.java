@@ -1,7 +1,5 @@
 package com.example.cannon.application;
 
-import com.example.cannon.model.RoundObject;
-import com.example.cannon.model.World;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
@@ -12,8 +10,6 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 
 
-// TODO delete all the System.out logs
-// TODO move all interactions with world to GameInstance
 public class Main extends Application {
     private static final int STEP_TIME = 10; // ms
 

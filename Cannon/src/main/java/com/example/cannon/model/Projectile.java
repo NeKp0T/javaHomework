@@ -13,13 +13,13 @@ public abstract class Projectile extends RoundObject {
      */
     private final static double COLLISION_CHECK_PRECISION = 3;
 
-    protected Vector2 velocity;
+    protected final Vector2 velocity;
 
     /**
      * Constructs a new projectile with provided parameters
      * @param velocity initial velocity
      */
-    public Projectile(int radius, Vector2 position, World world, Vector2 velocity) {
+    protected Projectile(int radius, Vector2 position, World world, Vector2 velocity) {
         super(radius, position, world);
         this.velocity = new Vector2(velocity);
     }
@@ -63,13 +63,13 @@ public abstract class Projectile extends RoundObject {
     private boolean checkCollisions() {
         Unit closest = getWorld().getClosestUnit(position);
         if (closest != null) {
-            if (closest.getDistance(position) <= radius) {
+            if (closest.getDistance(position) <= getRadius()) {
                 if (onUnitCollision(closest)) {
                     return true;
                 }
             }
         }
-        if (getWorld().getTerrain().detectCollisionCircle(position, radius)) {
+        if (getWorld().getTerrain().detectCollisionCircle(position, getRadius())) {
             return onTerrainCollision();
         }
         return false;
@@ -80,6 +80,7 @@ public abstract class Projectile extends RoundObject {
      * It should return <code>true</code> if projectile wants to explode
      * @return <code>true</code> if projectile should explode after collision
      */
+    @SuppressWarnings("SameReturnValue")
     protected abstract boolean onTerrainCollision();
 
     /**

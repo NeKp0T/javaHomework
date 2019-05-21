@@ -13,14 +13,14 @@ public abstract class OwnedProjectile extends Projectile {
     /**
      * An owner of this projectile
      */
-    protected final Unit owner;
+    private final Unit owner;
 
     /**
      * Constructs new OwnedProjectile
      * @param speed vector which will be rotated by owner.getAngle() to get initial velocity
      * @param owner an owner of constructed projectile
      */
-    public OwnedProjectile(int radius, Vector2 speed, Unit owner) {
+    protected OwnedProjectile(int radius, Vector2 speed, Unit owner) {
         super(radius, owner.getPositionCopy(), owner.getWorld(), speed.rotated(owner.getAngle()));
         this.owner = owner;
     }

@@ -32,7 +32,7 @@ public class MovingObject extends RoundObject {
     /**
      * Makes object face right
      */
-    public void orientRight() {
+    protected void orientRight() {
         if (!facesRight) {
             flipAngle();
             facesRight = true;
@@ -42,7 +42,7 @@ public class MovingObject extends RoundObject {
     /**
      * Makes object face left
      */
-    public void orientLeft() {
+    protected void orientLeft() {
         if (facesRight) {
             flipAngle();
             facesRight = false;
@@ -57,6 +57,7 @@ public class MovingObject extends RoundObject {
      * Tries to move a MovingObject by it's speed blocks to the right. Also makes object face right.
      * @return <code>false</code> if met an impassable obstruction or a deep enough pit
      */
+    @SuppressWarnings("UnusedReturnValue")
     public boolean tryMoveRight() {
         orientRight();
         return tryMove(1);
@@ -66,6 +67,7 @@ public class MovingObject extends RoundObject {
      * Tries to move a MovingObject by it's speed blocks to the left. Also makes object face left.
      * @return <code>false</code> if met an impassable obstruction or a deep enough pit
      */
+    @SuppressWarnings("UnusedReturnValue")
     public boolean tryMoveLeft() {
         orientLeft();
         return tryMove(-1);
@@ -92,11 +94,11 @@ public class MovingObject extends RoundObject {
         super.render(graphics);
 
         Vector2 canvasPosition = getCanvasPosition();
-        Vector2 cannonEnd = new Vector2(radius * 1.3, 0).rotated(-angle).sum(canvasPosition);
+        Vector2 cannonEnd = new Vector2(getRadius() * 1.3, 0).rotated(-angle).sum(canvasPosition);
 
         graphics.strokeLine(canvasPosition.x, canvasPosition.y, cannonEnd.x, cannonEnd.y);
 
-        var vectorToFront = new Vector2(radius, 0);
+        var vectorToFront = new Vector2(getRadius(), 0);
         if (!facesRight) {
             vectorToFront.x = -vectorToFront.x;
         }
@@ -132,6 +134,7 @@ public class MovingObject extends RoundObject {
 
             // if falls more than climbHeight, then interrupt movement
             var positionBeforeFall = new Vector2(position);
+            //noinspection StatementWithEmptyBody
             while (fallOneStep() != 0 && (positionBeforeFall.y - position.y) < climbHeight);
             if ((positionBeforeFall.y - position.y) >= climbHeight) {
                 position = positionBeforeFall;

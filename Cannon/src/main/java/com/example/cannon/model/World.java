@@ -10,9 +10,9 @@ import java.util.List;
  * Represents a game world with terrain and all game objects in it
  */
 public class World {
-    private Terrain terrain;
-    private List<RoundObject> objects = new ArrayList<>();
-    private List<Unit> units = new ArrayList<>();
+    private final Terrain terrain;
+    private final List<RoundObject> objects = new ArrayList<>();
+    private final List<Unit> units = new ArrayList<>();
 
     /**
      * Gravity acceleration per tick

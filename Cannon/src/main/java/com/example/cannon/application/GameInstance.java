@@ -38,6 +38,7 @@ public class GameInstance {
     /**
      * @return if game has not ended yet
      */
+    @SuppressWarnings("UnusedReturnValue")
     private boolean nextMove() {
         int oldCurrentPlayerNumber = currentPlayerNumber;
         do {
@@ -97,7 +98,7 @@ public class GameInstance {
 
     private final World world;
 
-    private List<PlayerUnit> players;
+    private final List<PlayerUnit> players;
     private int currentPlayerNumber;
 
     private void increaseCurrentPlayerNumber() {

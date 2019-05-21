@@ -15,7 +15,7 @@ public class Bomb extends OwnedProjectile {
     }
 
     /**
-     * Constructs a new rocket with specified owner
+     * Constructs a new bomb with specified owner
      */
     protected Bomb(Unit owner) {
         super(RADIUS, new Vector2(SPEED, 0), owner);

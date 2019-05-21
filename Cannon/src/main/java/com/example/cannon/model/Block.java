@@ -57,7 +57,7 @@ class Block {
         WALL(false, Color.BROWN),
         BACKGROUND(true, Color.LIGHTGREEN)
         ;
-        public final boolean passable;
+        private final boolean passable;
         public final Color color;
         BlockType(boolean passable, Color color) {
             this.passable = passable;
