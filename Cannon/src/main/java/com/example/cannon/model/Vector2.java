@@ -38,6 +38,16 @@ public class Vector2 {
         return new Vector2(this).substract(other);
     }
 
+    public Vector2 divided(double divider) {
+        return new Vector2(x / divider, y / divider);
+    }
+
+    public Vector2 rotated(double angle) {
+        double cos = Math.cos(angle);
+        double sin = Math.sin(angle);
+        return new Vector2(x * cos - y * sin, x * sin + y * cos);
+    }
+
     public double lengthSq() {
         return x*x + y*y;
     }

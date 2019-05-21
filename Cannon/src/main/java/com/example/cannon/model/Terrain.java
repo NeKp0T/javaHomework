@@ -1,11 +1,17 @@
 package com.example.cannon.model;
 
+import javafx.scene.canvas.Canvas;
+import javafx.scene.image.PixelWriter;
+import javafx.scene.paint.Color;
+
 import java.util.ArrayList;
+import java.util.function.Function;
+import java.util.function.IntConsumer;
 import java.util.stream.Stream;
 
 public class Terrain {
-    private final int width;
-    private final int height;
+    public final int width;
+    public final int height;
 
     private final Block[][] terrain;
 
@@ -14,25 +20,43 @@ public class Terrain {
      */
     private static final int COLLISION_RADIUS_CHECK = 3;
 
-    public Terrain(int width, int height) {
-        this.width = width;
-        this.height = height;
-
-        terrain = new Block[height][width];
+    public static Terrain constructSinusoidalTerrain(int width, int height) {
+        Terrain construct = new Terrain(width, height);
         // hardcoded terrain initialization
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 if (y < (height / 7) * (2 + Math.sin(x * 10.0 / width))) {
-                    terrain[x][y] = new Block(1);
+                    construct.terrain[x][y] = new Block(Block.GROUND);
                 } else {
-                    terrain[x][y] = new Block(0);
+                    construct.terrain[x][y] = new Block(Block.EMPTY);
                 }
             }
+            construct.terrain[width / 2][y].updateType(Block.OTHER);
         }
+        return construct;
+    }
+
+    private Terrain(int width, int height) {
+        this.width = width;
+        this.height = height;
+
+        terrain = new Block[width][height];
     }
 
     public boolean detectCollisionCircle(Vector2 position, double radius) {
-        boolean ok = true;
+        int rUp = (int) Math.ceil(radius) + 1;
+        int xRound = (int) Math.round(position.x);
+        int yRound = (int) Math.round(position.y);
+
+        for (int x = xRound - rUp; x <= xRound + rUp; x++) {
+            for (int y = yRound - rUp; y <= yRound + rUp; y++) {
+                if (inBounds(x, y) && position.difference(new Vector2(x, y)).lengthSq() <= radius * radius) {
+                    if (!terrain[x][y].isFree()) {
+                        return true;
+                    }
+                }
+            }
+        }
 
         return detectBoundboxCollisionCircle(position, radius);
     }
@@ -64,6 +88,7 @@ public class Terrain {
         return inBounds(x, y) && terrain[x][y].isFree();
     }
 
+    // TODO find more places to use
     private Stream<Block> inCircle(Vector2 middle, double r) {
         int x = (int) Math.round(middle.x);
         int y = (int) Math.round(middle.y);
@@ -71,7 +96,7 @@ public class Terrain {
         var blocks = new ArrayList<Block>();
         for (int dx = -rInt; dx <= rInt; dx++) {
             for (int dy = -rInt; dy <= rInt; dy++) {
-                int xNew = x + dy;
+                int xNew = x + dx;
                 int yNew = y + dy;
                 if (new Vector2(xNew, yNew).difference(middle).lengthSq() <= r * r
                     && inBounds(xNew, yNew)) {
@@ -84,5 +109,22 @@ public class Terrain {
 
     private boolean inBounds(int x, int y) {
         return x >= 0 && x < width && y >= 0 && y < height;
+    }
+
+    public void setCanvas(Canvas terrainCanvas, Function<Integer, ? extends Color> colorPicker) {
+        PixelWriter pixelWriter = terrainCanvas.getGraphicsContext2D().getPixelWriter();
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                final int xCanvas = x;
+                final int yCanvas = height - y - 1;
+                IntConsumer lambdaToSet = t -> pixelWriter.setColor(xCanvas, yCanvas, colorPicker.apply(t));
+                terrain[x][y].onUpdateSet(lambdaToSet);
+                lambdaToSet.accept(terrain[x][y].getType());
+            }
+        }
+    }
+
+    public void destroyInRadius(Vector2 position, double radius) {
+        inCircle(position, radius).forEach(block -> block.updateType(Block.EMPTY));
     }
 }

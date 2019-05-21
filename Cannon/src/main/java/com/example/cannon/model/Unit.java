@@ -1,12 +1,12 @@
 package com.example.cannon.model;
 
-public class Unit extends RoundObject {
+public class Unit extends MovingObject {
     private int hp;
     private int maxhp;
     private boolean alive = true;
 
-    Unit(int radius, int climbHeight, Vector2 position, World world, int maxhp) { // TODO assert maxhp > 0
-        super(radius, climbHeight, position, world);
+    public Unit(int radius, int climbHeight, Vector2 position, World world, int maxhp, int speed) { // TODO assert maxhp > 0
+        super(radius, climbHeight, position, world, speed);
         this.maxhp = maxhp;
         hp = maxhp;
         world.addUnit(this);
@@ -26,7 +26,15 @@ public class Unit extends RoundObject {
         return isAlive();
     }
 
-    private void die() {
+    public void heal(int amount) {
+        if (isAlive() && amount > 0 && hp <= maxhp) {
+            hp += amount;
+            if (hp > maxhp)
+                hp = maxhp;
+        }
+    }
+
+    protected void die() {
         alive = false;
     }
 }
