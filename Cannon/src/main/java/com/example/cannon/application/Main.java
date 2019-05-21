@@ -1,6 +1,5 @@
 package com.example.cannon.application;
 
-import com.example.cannon.model.Block;
 import com.example.cannon.model.RoundObject;
 import com.example.cannon.model.World;
 import javafx.animation.KeyFrame;
@@ -9,13 +8,8 @@ import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.layout.*;
-import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-
-import java.util.function.Function;
-
-import static com.example.cannon.application.ApplicationState.*;
 
 
 // TODO delete all the System.out logs
@@ -25,7 +19,7 @@ public class Main extends Application {
 
     private GameInstance game;
     private Canvas objectsCanvas;
-    private ApplicationState state = WAITING_COMMAND;
+    private ApplicationState state = ApplicationState.WAITING_COMMAND;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -33,14 +27,14 @@ public class Main extends Application {
 
         game = new GameInstance(2);
 
-        var mainScene = new Scene(createContent(game.world));
+        var mainScene = new Scene(createContent(game));
 
         primaryStage.setScene(mainScene);
         primaryStage.setResizable(false);
         primaryStage.show();
 
         mainScene.setOnKeyPressed(event -> {
-            if (state != WAITING_COMMAND) {
+            if (state != ApplicationState.WAITING_COMMAND) {
                 return;
             }
             switch (event.getCode()) {
@@ -59,6 +53,15 @@ public class Main extends Application {
                 case SPACE:
                     game.commandPlayer(GameInstance.Control.FIRE);
                     break;
+                case DIGIT1:
+                    game.commandPlayer(GameInstance.Control.SELECT_0);
+                    break;
+                case DIGIT2:
+                    game.commandPlayer(GameInstance.Control.SELECT_1);
+                    break;
+                case DIGIT3:
+                    game.commandPlayer(GameInstance.Control.SELECT_2);
+                    break;
             }
 
             cycle();
@@ -67,15 +70,15 @@ public class Main extends Application {
     }
 
     private void cycle() {
-        state = SIMULATING;
+        state = ApplicationState.SIMULATING;
         var simulatingTimeline = new Timeline();
         var simulateKeyframe = new KeyFrame(
                 Duration.millis(STEP_TIME),
                 ax -> {
-                    if (game.world.physicsStep()) {
+                    if (game.worldPhysicsStep()) {
                         simulatingTimeline.playFromStart();
                     } else {
-                        state = WAITING_COMMAND;
+                        state = ApplicationState.WAITING_COMMAND;
                     }
                     renderObjects();
                 });
@@ -83,39 +86,31 @@ public class Main extends Application {
         simulatingTimeline.playFromStart();
     }
 
-    private Pane createContent(World world) {
+    private Pane createContent(GameInstance game) {
         var root = new BorderPane();
 
         Canvas terrainCanvas = new Canvas();
-        terrainCanvas.setHeight(world.getTerrain().height);
-        terrainCanvas.setWidth(world.getTerrain().width);
+        terrainCanvas.setHeight(game.getTerrainHeight());
+        terrainCanvas.setWidth(game.getTerrainWidth());
         objectsCanvas = new Canvas();
-        objectsCanvas.setHeight(world.getTerrain().height);
-        objectsCanvas.setWidth(world.getTerrain().width);
+        objectsCanvas.setHeight(game.getTerrainHeight());
+        objectsCanvas.setWidth(game.getTerrainWidth());
 
-        Function<Integer, Color> colorPicker = t -> {
-            if (t == Block.EMPTY) {
-                return Color.TRANSPARENT;
-            }
-            if (t == Block.GROUND) {
-                return Color.LIGHTGRAY;
-            }
-            return Color.GREEN;
-        };
-
-        world.getTerrain().setCanvas(terrainCanvas, colorPicker);
+        game.setCanvas(terrainCanvas);
 
         renderObjects();
-        root.setCenter(objectsCanvas);
-        root.getChildren().add(terrainCanvas);
+        root.setCenter(terrainCanvas);
+        root.getChildren().add(objectsCanvas);
 
         return root;
     }
 
     private void renderObjects() {
         objectsCanvas.getGraphicsContext2D().clearRect(0, 0, objectsCanvas.getWidth(), objectsCanvas.getHeight());
-        for (RoundObject obj : game.world.getObjects()) {
-            obj.render(objectsCanvas.getGraphicsContext2D());
-        }
+        game.renderObjects(objectsCanvas.getGraphicsContext2D());
+    }
+
+    private enum ApplicationState {
+        WAITING_COMMAND, SIMULATING
     }
 }

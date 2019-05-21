@@ -5,19 +5,39 @@ import com.example.cannon.model.Unit;
 import com.example.cannon.model.Vector2;
 import com.example.cannon.model.World;
 
+/**
+ * A projectile that has a Unit owner with whom it does not collide.
+ * It rotates itself by ut's owner angle when created.
+ */
 public abstract class OwnedProjectile extends Projectile {
-    private final Unit owner;
+    /**
+     * An owner of this projectile
+     */
+    protected final Unit owner;
 
-    public OwnedProjectile(int radius, Vector2 position, World world, Vector2 speed, Unit owner) {
-        super(radius, position, world, speed.rotated(owner.getAngle()));
+    /**
+     * Constructs new OwnedProjectile
+     * @param speed vector which will be rotated by owner.getAngle() to get initial velocity
+     * @param owner an owner of constructed projectile
+     */
+    public OwnedProjectile(int radius, Vector2 speed, Unit owner) {
+        super(radius, owner.getPositionCopy(), owner.getWorld(), speed.rotated(owner.getAngle()));
         this.owner = owner;
     }
 
+    /**
+     * It should return <code>true</code> if projectile wants to explode
+     * @return always true in this implementation
+     */
     @Override
     protected final boolean onTerrainCollision() {
         return true;
     }
 
+    /**
+     * It should return <code>true</code> if projectile wants to explode
+     * @return returns <code>true</code> if unit it collided with is not it's owner
+     */
     @Override
     protected final boolean onUnitCollision(Unit unit) {
         return unit != owner;

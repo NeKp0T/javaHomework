@@ -1,22 +1,34 @@
 package com.example.cannon.model;
 
-import com.example.cannon.GameException;
 
+/**
+ * A base class for projectiles.
+ * Projectiles are fully physically simulated (i.e. have velocity affected by gravity)
+ * which do something on collision and are expected to explode sometime
+ */
 public abstract class Projectile extends RoundObject {
+    /**
+     * Collision checks are performed at least each <code>COLLISION_CHECK_PRECISION</code> units of
+     * projectile's trajectory
+     */
     private final static double COLLISION_CHECK_PRECISION = 3;
 
-    private Vector2 speed;
+    protected Vector2 velocity;
 
-    public Projectile(int radius, Vector2 position, World world, Vector2 speed) {
+    /**
+     * Constructs a new projectile with provided parameters
+     * @param velocity initial velocity
+     */
+    public Projectile(int radius, Vector2 position, World world, Vector2 velocity) {
         super(radius, position, world);
-        this.speed = new Vector2(speed);
+        this.velocity = new Vector2(velocity);
     }
 
     /**
-     * Moves projectile on <code>speed</code> vector in the world.
+     * Moves projectile by <code>velocity</code> vector in the world.
      *
-     * Checks collisions and destroys projectile by calling <code>stop()</code> if
-     * any collision requires.
+     * Checks collisions and destroys projectile with calling <code>onStop()</code> first if
+     * any collision asks.
      *
      * @return if it still exists in the world.
      */
@@ -24,8 +36,9 @@ public abstract class Projectile extends RoundObject {
         if (!isInWorld()) {
             throw new RuntimeException("Trying to move a destroyed projectile");
         }
+
         int parts = timesToCheckCollision();
-        Vector2 positionChange = speed.divided(parts);
+        Vector2 positionChange = velocity.divided(parts);
         for (int i = 0; i < parts; i++) {
             if (checkCollisions()) {
                 stop();
@@ -38,7 +51,7 @@ public abstract class Projectile extends RoundObject {
             return true;
         }
 
-        speed.y -= world.getG();
+        velocity.y -= getWorld().getG();
         return true;
     }
 
@@ -48,48 +61,57 @@ public abstract class Projectile extends RoundObject {
     }
 
     private boolean checkCollisions() {
-        Unit closest = world.getClosestUnit(position);
+        Unit closest = getWorld().getClosestUnit(position);
         if (closest != null) {
-            if (closest.position.difference(position).lengthSq() <= (radius * radius)) {
+            if (closest.getDistance(position) <= radius) {
                 if (onUnitCollision(closest)) {
                     return true;
                 }
             }
         }
-        if (world.getTerrain().detectCollisionCircle(position, radius)) {
+        if (getWorld().getTerrain().detectCollisionCircle(position, radius)) {
             return onTerrainCollision();
         }
         return false;
     }
 
     /**
-     * @return <code>true</code> if projectile should be destroyed after collision
+     * This function is called every time projectile collides with terrain.
+     * It should return <code>true</code> if projectile wants to explode
+     * @return <code>true</code> if projectile should explode after collision
      */
     protected abstract boolean onTerrainCollision();
 
     /**
+     * This function is called every time projectile collides with a unit.
+     * Unit collisions are tested before terrain collisions.
+     * It should return <code>true</code> if projectile wants to explode
      * @param unit a unit projectile collided with
-     * @return <code>true</code> if projectile should be destroyed after collision
+     * @return <code>true</code> if projectile should explode after collision
      */
     protected abstract boolean onUnitCollision(Unit unit);
 
     /**
-     * What to do when ceasing to exist.
+     * What to do when ceasing to exist (projectile is expected to explode in this function).
+     * Do not call <code>unregister()</code> here! It is called automatically after collision.
      */
     protected abstract void onStop();
 
     /**
      * Describes how many times per one tick movement collision should be checked.
      *
-     * Guarantees that <code>speed.length()</code> divided by return value
+     * Guarantees that <code>velocity.length()</code> divided by return value
      * will be less then <code>COLLISION_CHECK_PRECISION</code>
      *
-     * @return number of times to check collision per one transition on <code>speed</code> vector
+     * @return number of times to check collision per one transition by <code>velocity</code> vector
      */
     private int timesToCheckCollision() {
-        return (int) Math.ceil(speed.length() / COLLISION_CHECK_PRECISION);
+        return (int) Math.ceil(velocity.length() / COLLISION_CHECK_PRECISION);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean physicsStep() {
         return moveOneStep();

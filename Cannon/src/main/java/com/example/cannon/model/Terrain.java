@@ -2,36 +2,48 @@ package com.example.cannon.model;
 
 import javafx.scene.canvas.Canvas;
 import javafx.scene.image.PixelWriter;
-import javafx.scene.paint.Color;
 
 import java.util.ArrayList;
-import java.util.function.Function;
-import java.util.function.IntConsumer;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
+/**
+ * A class to store and manipulate terrain of a world.
+ *
+ * Terrain consists of a matrix of blocks which are initialized in constructor
+ * and then never replaced. Blocks can be changed using through their methods though.
+ */
 public class Terrain {
     public final int width;
     public final int height;
 
     private final Block[][] terrain;
 
-    /**
-     * Radius to calculate collision vector
-     */
+//    /**
+//     * Radius to calculate collision vector
+//     */
+    // currently unused
     private static final int COLLISION_RADIUS_CHECK = 3;
 
+    /**
+     * Constructs and returns a sinusoida-like terrain with specified parameters
+     */
     public static Terrain constructSinusoidalTerrain(int width, int height) {
         Terrain construct = new Terrain(width, height);
         // hardcoded terrain initialization
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 if (y < (height / 7) * (2 + Math.sin(x * 10.0 / width))) {
-                    construct.terrain[x][y] = new Block(Block.GROUND);
+                    construct.terrain[x][y] = new Block(Block.BlockType.GROUND);
                 } else {
-                    construct.terrain[x][y] = new Block(Block.EMPTY);
+                    if (y * 3 < height) {
+                        construct.terrain[x][y] = new Block(Block.BlockType.BACKGROUND);
+                    } else {
+                        construct.terrain[x][y] = new Block(Block.BlockType.EMPTY);
+                    }
                 }
             }
-            construct.terrain[width / 2][y].updateType(Block.OTHER);
+            construct.terrain[width / 2][y].updateType(Block.BlockType.WALL);
         }
         return construct;
     }
@@ -43,14 +55,19 @@ public class Terrain {
         terrain = new Block[width][height];
     }
 
-    public boolean detectCollisionCircle(Vector2 position, double radius) {
+    /**
+     * Checks if a circle with specified center and radius intersects with
+     * any of non-passable blocks or a boundbox.
+     * @return <code>true</code> if there is a collision
+     */
+    public boolean detectCollisionCircle(Vector2 center, double radius) {
         int rUp = (int) Math.ceil(radius) + 1;
-        int xRound = (int) Math.round(position.x);
-        int yRound = (int) Math.round(position.y);
+        int xRound = (int) Math.round(center.x);
+        int yRound = (int) Math.round(center.y);
 
         for (int x = xRound - rUp; x <= xRound + rUp; x++) {
             for (int y = yRound - rUp; y <= yRound + rUp; y++) {
-                if (inBounds(x, y) && position.difference(new Vector2(x, y)).lengthSq() <= radius * radius) {
+                if (inBounds(x, y) && center.difference(new Vector2(x, y)).lengthSq() <= radius * radius) {
                     if (!terrain[x][y].isFree()) {
                         return true;
                     }
@@ -58,7 +75,32 @@ public class Terrain {
             }
         }
 
-        return detectBoundboxCollisionCircle(position, radius);
+        return detectBoundboxCollisionCircle(center, radius);
+    }
+
+    /**
+     * Binds all blocks to provided canvas so that this canvas always represent
+     * actual blocks state
+     * Canvas is expected to match dimensions of a terrain.
+     */
+    public void setCanvas(Canvas terrainCanvas) {
+        PixelWriter pixelWriter = terrainCanvas.getGraphicsContext2D().getPixelWriter();
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                final int xCanvas = x;
+                final int yCanvas = height - y - 1;
+                Consumer<Block.BlockType> lambdaToSet = t -> pixelWriter.setColor(xCanvas, yCanvas, t.color);
+                terrain[x][y].onUpdateSet(lambdaToSet);
+                lambdaToSet.accept(terrain[x][y].getType());
+            }
+        }
+    }
+
+    /**
+     * Makes all blocks in provided circle empty
+     */
+    public void destroyInRadius(Vector2 center, double radius) {
+        inCircle(center, radius).forEach(block -> block.updateType(Block.BlockType.EMPTY));
     }
 
     private boolean detectBoundboxCollisionCircle(Vector2 position, double radius) {
@@ -66,6 +108,7 @@ public class Terrain {
                 || (width - position.x) <= radius || (height - position.y) <= radius;
     }
 
+    // currently unused
     private Vector2 collisionVector(Vector2 position) {
         int x = (int) Math.round(position.x);
         int y = (int) Math.round(position.y);
@@ -84,6 +127,9 @@ public class Terrain {
         return result;
     }
 
+    /**
+     * Checks if provided coordinates contain a passable block
+     */
     private boolean free(int x, int y) {
         return inBounds(x, y) && terrain[x][y].isFree();
     }
@@ -109,22 +155,5 @@ public class Terrain {
 
     private boolean inBounds(int x, int y) {
         return x >= 0 && x < width && y >= 0 && y < height;
-    }
-
-    public void setCanvas(Canvas terrainCanvas, Function<Integer, ? extends Color> colorPicker) {
-        PixelWriter pixelWriter = terrainCanvas.getGraphicsContext2D().getPixelWriter();
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                final int xCanvas = x;
-                final int yCanvas = height - y - 1;
-                IntConsumer lambdaToSet = t -> pixelWriter.setColor(xCanvas, yCanvas, colorPicker.apply(t));
-                terrain[x][y].onUpdateSet(lambdaToSet);
-                lambdaToSet.accept(terrain[x][y].getType());
-            }
-        }
-    }
-
-    public void destroyInRadius(Vector2 position, double radius) {
-        inCircle(position, radius).forEach(block -> block.updateType(Block.EMPTY));
     }
 }

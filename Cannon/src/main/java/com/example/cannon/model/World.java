@@ -1,12 +1,14 @@
 package com.example.cannon.model;
 
-import com.sun.javafx.collections.ImmutableObservableList;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Represents a game world with terrain and all game objects in it
+ */
 public class World {
     private Terrain terrain;
     private List<RoundObject> objects = new ArrayList<>();
@@ -18,12 +20,16 @@ public class World {
     private double g = 0.2;
 
     /**
-     * Generates a sample world.
+     * Generates a sample world
      */
     public World() {
         terrain = Terrain.constructSinusoidalTerrain(1000, 720);
     }
 
+    /**
+     * Simulates one step of physics
+     * @return if something changed in this step and further simulation is required
+     */
     public boolean physicsStep() {
         boolean changed = false;
 
@@ -37,51 +43,48 @@ public class World {
         return changed;
     }
 
+    /**
+     * @return terrain of a world
+     */
     public Terrain getTerrain() {
         return terrain;
     }
 
+    /**
+     * @return an unmodifiable collection of all game objects in this world.
+     */
     public List<RoundObject> getObjects() {
         return Collections.unmodifiableList(objects);
     }
 
     /**
      * @param position position to find the closest unit to
-     * @return closest unit of <code>null</code> if no such units found.
+     * @return closest unit or <code>null</code> if units found.
      */
     public @Nullable Unit getClosestUnit(Vector2 position) {
         Unit result = null;
-        double resultDeltaSq = (terrain.height + terrain.width) * (terrain.height + terrain.width); // more than anything
+        double resultDelta = terrain.height + terrain.width; // more than anything
         for (var unit : units) {
-            double unitDeltaSq = position.difference(unit.position).lengthSq();
-            if (resultDeltaSq > unitDeltaSq) {
-                resultDeltaSq = unitDeltaSq;
+            double unitDelta = unit.getDistance(position);
+            if (resultDelta > unitDelta) {
+                resultDelta = unitDelta;
                 result = unit;
             }
         }
         return result;
     }
 
+    /**
+     * Deals specified amount of damage in provided circular area.
+     * Does not destroy blocks.
+     */
     public void dealDamageInRadius(Vector2 center, double radius, int damage) {
-        for (var unit : units) {
-            if (unit.position.difference(center).lengthSq() <= radius * radius) {
+        var copyOfUnits = new ArrayList<>(units);
+        for (var unit : copyOfUnits) {
+            if (unit.getDistance(center) <= radius) {
                 unit.receiveDamage(damage);
             }
         }
-    }
-
-    void addObject(RoundObject obj) {
-        objects.add(obj);
-    }
-
-    void addUnit(Unit unit) {
-        units.add(unit);
-    }
-
-    void remove(RoundObject obj) {
-        objects.remove(obj);
-        if (obj instanceof Unit)
-            units.remove(obj);
     }
 
     /**
@@ -109,5 +112,34 @@ public class World {
         }
 
         return null;
+    }
+
+    /**
+     * Adds a RoundObject in the world.
+     * This function is called once for every object in RoundObject constructor
+     * @param obj object to register
+     */
+    void addObject(RoundObject obj) {
+        objects.add(obj);
+    }
+
+    /**
+     * Registers a Unit as unit in the world. Does not register it as a RoundObject since
+     * it is done in RoundObject constructor
+     * This function is called once for every unit in Unit constructor
+     * @param unit unit to register
+     */
+    void addUnit(Unit unit) {
+        units.add(unit);
+    }
+
+    /**
+     * Unregisters a RoundObject or a Unit from the world
+     * @param obj RoundObject or a Unit to remove from the world
+     */
+    void remove(RoundObject obj) {
+        objects.remove(obj);
+        if (obj instanceof Unit)
+            units.remove(obj);
     }
 }

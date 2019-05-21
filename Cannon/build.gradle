@@ -18,7 +18,7 @@ javafx {
     modules = [ 'javafx.controls' ]
 }
 
-mainClassName = 'com.example.cannon.Main'
+mainClassName = 'com.example.cannon.application.Main'
 
 dependencies {
     testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.4.0-M1'

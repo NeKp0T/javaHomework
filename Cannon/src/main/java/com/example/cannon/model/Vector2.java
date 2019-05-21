@@ -1,5 +1,9 @@
 package com.example.cannon.model;
 
+/**
+ * A modifiable vector of two double values.
+ * All the methods do not change base vector unless their docs specifically say so.
+ */
 public class Vector2 {
     public double x;
     public double y;
@@ -18,13 +22,21 @@ public class Vector2 {
         y = other.y;
     }
 
+    /**
+     * Increases vector by provided vector
+     * @return this
+     */
     public Vector2 add(Vector2 other) {
         x += other.x;
         y += other.y;
         return this;
     }
 
-    public Vector2 substract(Vector2 other) {
+    /**
+     * Decreases vector by provided vector
+     * @return this
+     */
+    public Vector2 subtract(Vector2 other) {
         x -= other.x;
         y -= other.y;
         return this;
@@ -35,7 +47,7 @@ public class Vector2 {
     }
 
     public Vector2 difference(Vector2 other) {
-        return new Vector2(this).substract(other);
+        return new Vector2(this).subtract(other);
     }
 
     public Vector2 divided(double divider) {
@@ -48,6 +60,9 @@ public class Vector2 {
         return new Vector2(x * cos - y * sin, x * sin + y * cos);
     }
 
+    /**
+     * @return squared length of a vector
+     */
     public double lengthSq() {
         return x*x + y*y;
     }
