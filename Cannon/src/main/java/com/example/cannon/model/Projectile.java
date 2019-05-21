@@ -1,6 +1,8 @@
 package com.example.cannon.model;
 
 
+import org.jetbrains.annotations.NotNull;
+
 /**
  * A base class for projectiles.
  * Projectiles are fully physically simulated (i.e. have velocity affected by gravity)
@@ -13,13 +15,13 @@ public abstract class Projectile extends RoundObject {
      */
     private final static double COLLISION_CHECK_PRECISION = 3;
 
-    protected final Vector2 velocity;
+    protected final @NotNull Vector2 velocity;
 
     /**
      * Constructs a new projectile with provided parameters
      * @param velocity initial velocity
      */
-    protected Projectile(int radius, Vector2 position, World world, Vector2 velocity) {
+    protected Projectile(int radius, @NotNull Vector2 position, @NotNull World world, @NotNull Vector2 velocity) {
         super(radius, position, world);
         this.velocity = new Vector2(velocity);
     }
@@ -34,7 +36,7 @@ public abstract class Projectile extends RoundObject {
      */
     protected boolean moveOneStep() {
         if (!isInWorld()) {
-            throw new RuntimeException("Trying to move a destroyed projectile");
+            throw new DeadObjectException();
         }
 
         int parts = timesToCheckCollision();
@@ -61,6 +63,10 @@ public abstract class Projectile extends RoundObject {
     }
 
     private boolean checkCollisions() {
+        if (!isInWorld()) {
+            throw new DeadObjectException();
+        }
+
         Unit closest = getWorld().getClosestUnit(position);
         if (closest != null) {
             if (closest.getDistance(position) <= getRadius()) {
@@ -90,7 +96,7 @@ public abstract class Projectile extends RoundObject {
      * @param unit a unit projectile collided with
      * @return <code>true</code> if projectile should explode after collision
      */
-    protected abstract boolean onUnitCollision(Unit unit);
+    protected abstract boolean onUnitCollision(@NotNull Unit unit);
 
     /**
      * What to do when ceasing to exist (projectile is expected to explode in this function).

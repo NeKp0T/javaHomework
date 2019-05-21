@@ -1,5 +1,6 @@
 package com.example.cannon.model;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -10,9 +11,9 @@ import java.util.List;
  * Represents a game world with terrain and all game objects in it
  */
 public class World {
-    private final Terrain terrain;
-    private final List<RoundObject> objects = new ArrayList<>();
-    private final List<Unit> units = new ArrayList<>();
+    private final @NotNull Terrain terrain;
+    private final @NotNull List<RoundObject> objects = new ArrayList<>();
+    private final @NotNull List<Unit> units = new ArrayList<>();
 
     /**
      * Gravity acceleration per tick
@@ -46,14 +47,14 @@ public class World {
     /**
      * @return terrain of a world
      */
-    public Terrain getTerrain() {
+    public @NotNull Terrain getTerrain() {
         return terrain;
     }
 
     /**
      * @return an unmodifiable collection of all game objects in this world.
      */
-    public List<RoundObject> getObjects() {
+    public @NotNull List<RoundObject> getObjects() {
         return Collections.unmodifiableList(objects);
     }
 
@@ -78,7 +79,7 @@ public class World {
      * Deals specified amount of damage in provided circular area.
      * Does not destroy blocks.
      */
-    public void dealDamageInRadius(Vector2 center, double radius, int damage) {
+    public void dealDamageInRadius(@NotNull Vector2 center, double radius, int damage) {
         var copyOfUnits = new ArrayList<>(units);
         for (var unit : copyOfUnits) {
             if (unit.getDistance(center) <= radius) {
@@ -98,7 +99,7 @@ public class World {
      * Tries to find an appropriate position for a round object with provided radius with provided X coordinate
      * @return found position or null if could not find one
      */
-    public Vector2 fitRound(int radius, double desirableX) {
+    public @Nullable Vector2 fitRound(int radius, double desirableX) {
         for (int dx = 0; dx < terrain.width; dx++) {
             for (int direction = -1; direction <= 1; direction += 2) {
                 Vector2 position = new Vector2(desirableX + direction * dx, radius);
@@ -119,7 +120,7 @@ public class World {
      * This function is called once for every object in RoundObject constructor
      * @param obj object to register
      */
-    void addObject(RoundObject obj) {
+    void addObject(@NotNull RoundObject obj) {
         objects.add(obj);
     }
 
@@ -129,7 +130,7 @@ public class World {
      * This function is called once for every unit in Unit constructor
      * @param unit unit to register
      */
-    void addUnit(Unit unit) {
+    void addUnit(@NotNull Unit unit) {
         units.add(unit);
     }
 
@@ -137,7 +138,7 @@ public class World {
      * Unregisters a RoundObject or a Unit from the world
      * @param obj RoundObject or a Unit to remove from the world
      */
-    void remove(RoundObject obj) {
+    void remove(@NotNull RoundObject obj) {
         objects.remove(obj);
         if (obj instanceof Unit)
             units.remove(obj);

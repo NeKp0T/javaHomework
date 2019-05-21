@@ -3,7 +3,6 @@ package com.example.cannon.implementations;
 import com.example.cannon.model.Projectile;
 import com.example.cannon.model.Unit;
 import com.example.cannon.model.Vector2;
-import com.example.cannon.model.World;
 
 /**
  * A projectile that has a Unit owner with whom it does not collide.

@@ -1,6 +1,7 @@
 package com.example.cannon.model;
 
 import javafx.scene.canvas.GraphicsContext;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Game object that can move on surfaces and has a direction of sight.
@@ -23,7 +24,7 @@ public class MovingObject extends RoundObject {
      *                    finishing movement
      * @param speed how much it can move in one movement
      */
-    MovingObject(int radius, int climbHeight, Vector2 position, World world, int speed) {
+    MovingObject(int radius, int climbHeight, @NotNull Vector2 position, @NotNull World world, int speed) {
         super(radius, position, world);
         this.climbHeight = climbHeight;
         this.speed = speed;
@@ -90,7 +91,7 @@ public class MovingObject extends RoundObject {
      * {@inheritDoc}
      */
     @Override
-    public void render(GraphicsContext graphics) {
+    public void render(@NotNull GraphicsContext graphics) {
         super.render(graphics);
 
         Vector2 canvasPosition = getCanvasPosition();
@@ -120,6 +121,10 @@ public class MovingObject extends RoundObject {
      * @return <code>false</code> if an obstruction was met
      */
     private boolean tryMove(int dx) {
+        if (!isInWorld()) {
+            throw new DeadObjectException();
+        }
+
         for (int i = 0; i < speed; i++) {
             var positionBeforeMove = new Vector2(position);
             position.x += dx;

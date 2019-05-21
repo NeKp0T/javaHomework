@@ -1,5 +1,7 @@
 package com.example.cannon.model;
 
+import org.jetbrains.annotations.NotNull;
+
 /**
  * A modifiable vector of two double values.
  * All the methods do not change base vector unless their docs specifically say so.
@@ -17,7 +19,7 @@ public class Vector2 {
         this(0, 0);
     }
 
-    public Vector2(Vector2 other) {
+    public Vector2(@NotNull Vector2 other) {
         x = other.x;
         y = other.y;
     }
@@ -26,7 +28,8 @@ public class Vector2 {
      * Increases vector by provided vector
      * @return this
      */
-    public Vector2 add(Vector2 other) {
+    @NotNull
+    public Vector2 add(@NotNull Vector2 other) {
         x += other.x;
         y += other.y;
         return this;
@@ -36,24 +39,29 @@ public class Vector2 {
      * Decreases vector by provided vector
      * @return this
      */
-    public Vector2 subtract(Vector2 other) {
+    @NotNull
+    public Vector2 subtract(@NotNull Vector2 other) {
         x -= other.x;
         y -= other.y;
         return this;
     }
 
-    public Vector2 sum(Vector2 other) {
+    @NotNull
+    public Vector2 sum(@NotNull Vector2 other) {
         return new Vector2(this).add(other);
     }
 
-    public Vector2 difference(Vector2 other) {
+    @NotNull
+    public Vector2 difference(@NotNull Vector2 other) {
         return new Vector2(this).subtract(other);
     }
 
+    @NotNull
     public Vector2 divided(double divider) {
         return new Vector2(x / divider, y / divider);
     }
 
+    @NotNull
     public Vector2 rotated(double angle) {
         double cos = Math.cos(angle);
         double sin = Math.sin(angle);

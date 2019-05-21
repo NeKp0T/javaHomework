@@ -2,6 +2,7 @@ package com.example.cannon.model;
 
 import javafx.scene.canvas.Canvas;
 import javafx.scene.image.PixelWriter;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.function.Consumer;
@@ -17,7 +18,7 @@ public class Terrain {
     public final int width;
     public final int height;
 
-    private final Block[][] terrain;
+    private final @NotNull Block[][] terrain;
 
 //    /**
 //     * Radius to calculate collision vector
@@ -28,7 +29,7 @@ public class Terrain {
     /**
      * Constructs and returns a sine-wave-like terrain with specified parameters
      */
-    public static Terrain constructSinusoidalTerrain(int width, int height) {
+    public static @NotNull Terrain constructSinusoidalTerrain(int width, int height) {
         Terrain construct = new Terrain(width, height);
         // hardcoded terrain initialization
         for (int y = 0; y < height; y++) {
@@ -60,7 +61,7 @@ public class Terrain {
      * any of non-passable blocks or a boundbox.
      * @return <code>true</code> if there is a collision
      */
-    public boolean detectCollisionCircle(Vector2 center, double radius) {
+    public boolean detectCollisionCircle(@NotNull Vector2 center, double radius) {
         int rUp = (int) Math.ceil(radius) + 1;
         int xRound = (int) Math.round(center.x);
         int yRound = (int) Math.round(center.y);
@@ -83,7 +84,7 @@ public class Terrain {
      * actual blocks state
      * Canvas is expected to match dimensions of a terrain.
      */
-    public void setCanvas(Canvas terrainCanvas) {
+    public void setCanvas(@NotNull Canvas terrainCanvas) {
         PixelWriter pixelWriter = terrainCanvas.getGraphicsContext2D().getPixelWriter();
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
@@ -99,18 +100,18 @@ public class Terrain {
     /**
      * Makes all blocks in provided circle empty
      */
-    public void destroyInRadius(Vector2 center, double radius) {
+    public void destroyInRadius(@NotNull Vector2 center, double radius) {
         inCircle(center, radius).forEach(block -> block.updateType(Block.BlockType.EMPTY));
     }
 
-    private boolean detectBoundboxCollisionCircle(Vector2 position, double radius) {
+    private boolean detectBoundboxCollisionCircle(@NotNull Vector2 position, double radius) {
         return position.x <= radius || position.y <= radius
                 || (width - position.x) <= radius || (height - position.y) <= radius;
     }
 
     // currently unused
     @SuppressWarnings("unused")
-    private Vector2 collisionVector(Vector2 position) {
+    private @NotNull Vector2 collisionVector(@NotNull Vector2 position) {
         int x = (int) Math.round(position.x);
         int y = (int) Math.round(position.y);
 
@@ -135,8 +136,7 @@ public class Terrain {
         return inBounds(x, y) && terrain[x][y].isFree();
     }
 
-    // TODO find more places to use
-    private Stream<Block> inCircle(Vector2 middle, double r) {
+    private @NotNull Stream<Block> inCircle(@NotNull Vector2 middle, double r) {
         int x = (int) Math.round(middle.x);
         int y = (int) Math.round(middle.y);
         int rInt = (int) Math.round(r) + 1;

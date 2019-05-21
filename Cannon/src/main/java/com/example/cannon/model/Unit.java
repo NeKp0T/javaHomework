@@ -1,5 +1,7 @@
 package com.example.cannon.model;
 
+import org.jetbrains.annotations.NotNull;
+
 /**
  * A unit that has hitpoints and in registered in the world differently separately.
  */
@@ -13,7 +15,7 @@ public class Unit extends MovingObject {
      * @param maxhp maximum hp a unit can have
      * @param speed speed as in MovingObject
      */
-    protected Unit(int radius, int climbHeight, Vector2 position, World world, int maxhp, int speed) { // TODO assert maxhp > 0
+    protected Unit(int radius, int climbHeight, @NotNull Vector2 position, @NotNull World world, int maxhp, int speed) {
         super(radius, climbHeight, position, world, speed);
         this.maxhp = maxhp;
         hp = maxhp;

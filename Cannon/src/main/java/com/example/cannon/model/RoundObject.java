@@ -1,6 +1,9 @@
 package com.example.cannon.model;
 
 import javafx.scene.canvas.GraphicsContext;
+import org.jetbrains.annotations.NonNls;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 // TODO notnull everywhere
 
@@ -27,12 +30,12 @@ public class RoundObject {
      */
     private final int radius;
 
-    private World world;
+    private @Nullable World world;
 
     /**
      * @return A world this unit is bound to or <code>null</code> if it is unregistered
      */
-    public final World getWorld() {
+    public final @Nullable World getWorld() {
         return world;
     }
 
@@ -46,12 +49,12 @@ public class RoundObject {
     /**
      * Position of object in the world
      */
-    protected Vector2 position;
+    protected @NotNull Vector2 position;
 
     /**
      * Constructs a new <code>RoundObject</code> in a specified place of provided world
      */
-    protected RoundObject(int radius, Vector2 position, World world) {
+    protected RoundObject(int radius, @NotNull Vector2 position, @NotNull World world) {
         this.position = position;
         this.radius = radius;
         this.world = world;
@@ -65,7 +68,7 @@ public class RoundObject {
      * @param position position to check distance to
      * @return distance from unit's edge to specified position
      */
-    public double getDistance(Vector2 position) {
+    public double getDistance(@NotNull Vector2 position) {
         return this.position.difference(position).length() - getRadius();
     }
 
@@ -121,7 +124,7 @@ public class RoundObject {
      *
      * @param graphics context to draw in
      */
-    public void render(GraphicsContext graphics) {
+    public void render(@NotNull GraphicsContext graphics) {
         Vector2 canvasPosition = getCanvasPosition();
         graphics.strokeOval(canvasPosition.x - getRadius(), canvasPosition.y - getRadius(), getRadius() * 2, radius * 2);
     }
@@ -154,6 +157,10 @@ public class RoundObject {
      * @return how much object fell in this step. If object didn't fall returned value if precisely zero.
      */
     protected double fallOneStep() {
+        if (!isInWorld()) {
+            throw new DeadObjectException();
+        }
+
         if (!affectedByGravity || detectTerrainCollision()) {
             return 0;
         }
