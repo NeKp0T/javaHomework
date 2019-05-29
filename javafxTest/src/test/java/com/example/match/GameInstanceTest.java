@@ -63,6 +63,8 @@ class GameInstanceTest {
 
             }
         });
+        game.click(x1, y1);
+        game.click(x2, y2);
         assertTrue(openedCell[0]);
         assertTrue(openedCell[1]);
     }
