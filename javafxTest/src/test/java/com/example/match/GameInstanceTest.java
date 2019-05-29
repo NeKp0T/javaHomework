@@ -47,6 +47,7 @@ class GameInstanceTest {
         game = new GameInstance(4, new GameCallbacks() {
             @Override
             public void onCellOpen(int x, int y, int value) {
+                assertEquals(game.getValue(x, y), value);
                 if (x == x1 && y == y1) {
                     openedCell[0] = true;
                     return;

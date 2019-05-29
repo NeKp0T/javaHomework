@@ -143,6 +143,14 @@ public class GameInstance {
         return state;
     }
 
+    /**
+     * A getter for values in cells.
+     * Throws ArrayIndexOutOfBoundsException if wrong coordinates are passed
+     */
+    public int getValue(int x, int y) {
+        return values[x][y];
+    }
+
     private boolean canPick(int x, int y) {
         return (state == READY || state == PICKED_ONE) && !cantPick[x][y];
     }
