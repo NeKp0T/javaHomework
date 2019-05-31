@@ -9,16 +9,41 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.*;
 
+/**
+ * Test runner can run test methods in all classes
+ * in .class or .jar files in provided directory.
+ *
+ * All classes are loaded prior to execution.
+ *
+ * Any methods are executed only in classes that contain at least
+ * one method annotated with {@code @Test}.
+ *
+ * Each class's methods are executed in the same thread, but
+ * generally <code>Runtime.getRuntime().availableProcessors()</code>
+ * threads used.
+ *
+ * It continues to execute methods even if any of previous
+ * executed methods failed.
+ */
 public class TestRunner {
     private final ExecutorService testExecutor;
     private final List<TestLogger> loggers = new LinkedList<>();
     private final List<Class<?>> classes = new LinkedList<>();
 
+    /**
+     * Constructs a new <code>TestRunner</code>
+     */
     public TestRunner() {
         testExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
     }
 
-    public void test(File file, PrintStream output) throws IOException {
+    /**
+     * @param file   a single file or a directory to search for them.
+     * @param output where to write test logs
+     * @throws FileNotFoundException if provided file does not exists
+
+     */
+    public void test(File file, PrintStream output) throws FileNotFoundException {
         if (!file.exists()) {
             throw new FileNotFoundException();
         }
@@ -79,15 +104,13 @@ public class TestRunner {
     private void loadFile(URLClassLoader classLoader, File file, int stripFrom) {
         Path filePath = file.getAbsoluteFile().toPath();
         String fileWithPackage = filePath.subpath(stripFrom, filePath.getNameCount()).toString();
-//        System.out.println("file: " + fileWithPackage); TODO remove all this coments
 
         if (fileWithPackage.endsWith(".class") || fileWithPackage.endsWith(".jar")) {
             String className = fileWithPackage.substring(0, fileWithPackage.lastIndexOf('.')).replace(File.separatorChar, '.');
-//            System.out.println("class: " + className);
             try {
                 classes.add(classLoader.loadClass(className));
             } catch (ClassNotFoundException e) {
-//                System.out.println("Cant load ");
+                // should not happen
             }
         }
     }

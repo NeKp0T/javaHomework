@@ -4,7 +4,6 @@ import com.example.junit.logic.TestRunner;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.InOrder;
-import org.mockito.Matchers;
 
 import javax.tools.JavaCompiler;
 import javax.tools.ToolProvider;
@@ -13,11 +12,12 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 
-import static org.mockito.AdditionalMatchers.*;
 import static org.mockito.Mockito.*;
 
 
+@SuppressWarnings("SpellCheckingInspection")
 class TestRunnerTest {
 
     @Test
@@ -81,7 +81,13 @@ class TestRunnerTest {
         for (String s : output) {
             inOrder.verify(mock).println(ArgumentMatchers.eq(s));
         }
-        verify(mock, times(output.length)).println(ArgumentMatchers.anyString());
+
+        int timesRunningTimeCounted = (int) Arrays.stream(output)
+                .filter(s -> (s.contains("Ok") || s.contains("Error")) && (!s.contains("ignored")))
+                .count();
+
+        verify(mock, times(output.length + timesRunningTimeCounted))
+                .println(ArgumentMatchers.anyString());
 
         dir.delete();
     }

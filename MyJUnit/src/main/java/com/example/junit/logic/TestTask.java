@@ -6,14 +6,16 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 class TestTask implements Runnable {
-    private Class<?> testClass;
-    private TestLogger logger;
+    private final Class<?> testClass;
+    private final TestLogger logger;
 
     public TestTask(Class<?> classToTest, TestLogger logger) {
         this.testClass = classToTest;
@@ -86,15 +88,20 @@ class TestTask implements Runnable {
             Class<? extends Throwable> expectedException = testAnnotation.expected();
 
             boolean logOk = true;
+            Instant timeBefore = Instant.now();
+            Instant timeAfter = null;
             try {
                 testMethod.invoke(testClassInstance);
             } catch (IllegalAccessException e) {
+                timeAfter = Instant.now();
                 logger.logIllegalAccess(testMethod, Test.class);
                 logOk = false;
             } catch (IllegalArgumentException e) {
+                timeAfter = Instant.now();
                 logger.logMethodRequiresArguments(testMethod, Test.class);
                 logOk = false;
             } catch (InvocationTargetException e) {
+                timeAfter = Instant.now();
                 logOk = false;
                 Throwable thrown = e.getTargetException();
                 if (expectedException.isInstance(thrown)) {
@@ -104,9 +111,14 @@ class TestTask implements Runnable {
                 }
             }
 
+            if (timeAfter == null) {
+                timeAfter = Instant.now();
+            }
+
             if (logOk) {
                 logger.logOk(testMethod);
             }
+            logger.logTime(testMethod, Duration.between(timeBefore, timeAfter));
 
             for (Method afterMethod : after) {
                 tryToInvoke(testClassInstance, afterMethod, After.class);

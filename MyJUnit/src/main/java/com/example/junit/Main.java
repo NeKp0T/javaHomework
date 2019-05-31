@@ -12,8 +12,7 @@ public class Main {
             System.out.println("Please provide one argument");
             return;
         }
-        for (int i = 0; i < args.length; i++) {
-            String argument = args[i];
+        for (String argument : args) {
             if (argument.length() > 0 && argument.charAt(0) == '-') {
                 if ("-h".equals(argument) || "--help".equals(argument)) {
                     printHelp();

@@ -3,14 +3,17 @@ package com.example.junit.logic;
 import java.io.PrintStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.Arrays;
+import java.time.Duration;
 import java.util.LinkedList;
 import java.util.List;
 
-public class TestLogger {
+/**
+ * Allows to logs various events and copy logs into PrintStream
+ */
+class TestLogger {
     private static final String ERROR = "Error: ";
     private static final String OK = "Ok: ";
-    private List<String> logs = new LinkedList<>();
+    private final List<String> logs = new LinkedList<>();
 
     public void logNoSuitableConstructor(Class<?> clazz) {
         log(ERROR + clazz.getName() + " doesn't have a public constructor without arguments");
@@ -19,10 +22,6 @@ public class TestLogger {
     public void logIllegalAccess(Method method, Class<? extends Annotation> annotation) {
         log(ERROR + "Access to method " + method + " annotated with " + annotation + " denied");
     }
-
-    private void log(String s) {
-        logs.add(s);
-    } // TODO move down
 
     public void logMethodRequiresArguments(Method method, Class<? extends Annotation> annotation) {
         log(ERROR + "Method " + method + " annotated with " + annotation + " requires arguments");
@@ -46,17 +45,28 @@ public class TestLogger {
         logException(e);
     }
 
-    private void logException(Throwable e) {
-        log(e.getStackTrace()[0].toString());
-    }
-
     public void logOk(Method testMethod) {
         log(OK + "Test " + testMethod + " passed");
     }
 
+    public void logTime(Method testMethod, Duration between) {
+        log("" + testMethod + " finished in " + between.toMillis() + " ms");
+    }
+
+    /**
+     * Prints all logs into provided {@link PrintStream}
+     */
     public void writeToOutput(PrintStream output) {
         for (String s : logs) {
             output.println(s);
         }
+    }
+
+    private void logException(Throwable e) {
+        log(e.getStackTrace()[0].toString());
+    }
+
+    private void log(String s) {
+        logs.add(s);
     }
 }
