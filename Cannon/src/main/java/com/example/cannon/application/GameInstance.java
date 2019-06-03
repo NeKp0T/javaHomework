@@ -88,10 +88,6 @@ public class GameInstance {
         }
     }
 
-    private void endGame() {
-        winner = currentPlayerNumber;
-    }
-
     /**
      * Simulates a step of world physics and tells whether it needs to be simulated further.
      * @return <code>true</code> if simulation should be called again
