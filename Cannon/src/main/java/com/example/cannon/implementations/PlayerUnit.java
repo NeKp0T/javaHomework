@@ -18,7 +18,11 @@ public class PlayerUnit extends Unit {
 
     private int selectedWeaponId = 0;
 
-    private static final List<Consumer<? super PlayerUnit>> arsenal = List.of(Bomb::fire, Rocket::fire);
+    private static final List<Consumer<? super PlayerUnit>> arsenal = List.of(
+            Bomb::fire,
+            Rocket::fire,
+            LightAmmo::fire
+    );
 
     /**
      * Constructs a new PlayerUnit in provided world in a specified position.

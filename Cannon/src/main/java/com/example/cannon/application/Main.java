@@ -3,8 +3,10 @@ package com.example.cannon.application;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
+import javafx.scene.control.Alert;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -65,6 +67,28 @@ public class Main extends Application {
         cycle();
     }
 
+    private void endGame(int winner) {
+        if (state == ApplicationState.GAME_ENDED) {
+            return;
+        }
+        state = ApplicationState.GAME_ENDED;
+
+        var alert = new Alert(Alert.AlertType.INFORMATION);
+
+        if (winner >= 0) {
+            alert.setTitle("Win");
+            alert.setHeaderText("We have a winner");
+            alert.setContentText("It's player " + (winner + 1));
+        } else {
+            alert.setTitle("Draw");
+            alert.setHeaderText(null);
+            alert.setContentText("They are all dead");
+        }
+
+        alert.showAndWait();
+        System.out.println("winner alerted");
+    }
+
     private void cycle() {
         state = ApplicationState.SIMULATING;
         var simulatingTimeline = new Timeline();
@@ -75,6 +99,10 @@ public class Main extends Application {
                         simulatingTimeline.playFromStart();
                     } else {
                         state = ApplicationState.WAITING_COMMAND;
+
+                        if (game.getWinner() != -1) {
+                            Platform.runLater(() -> endGame(game.getWinner()));
+                        }
                     }
                     renderObjects();
                 });
@@ -85,7 +113,7 @@ public class Main extends Application {
     private Pane createContent(GameInstance game) {
         var root = new BorderPane();
 
-        Canvas terrainCanvas = new Canvas();
+        var terrainCanvas = new Canvas();
         terrainCanvas.setHeight(game.getTerrainHeight());
         terrainCanvas.setWidth(game.getTerrainWidth());
         objectsCanvas = new Canvas();
@@ -107,6 +135,6 @@ public class Main extends Application {
     }
 
     private enum ApplicationState {
-        WAITING_COMMAND, SIMULATING
+        WAITING_COMMAND, SIMULATING, GAME_ENDED
     }
 }

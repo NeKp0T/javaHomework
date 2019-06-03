@@ -3,6 +3,9 @@ package com.example.cannon.implementations;
 import com.example.cannon.model.Unit;
 import com.example.cannon.model.Vector2;
 
+/**
+ * A slow big and heavy explosive projectile
+ */
 public class Bomb extends OwnedProjectile {
     private static final double SPEED = 5;
     private static final int RADIUS = 7;

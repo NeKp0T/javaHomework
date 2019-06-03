@@ -9,6 +9,7 @@ import javafx.scene.canvas.GraphicsContext;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Represents an instance of a game which can be controlled from
@@ -18,6 +19,7 @@ import java.util.List;
 public class GameInstance {
 
     /**
+     * Constructs a new GameInstance with provided number of players and a default world.
      * @param playerCount number of players in the game
      * @throws WorldCreationException if could not construct a world with specified parameters
      */
@@ -36,16 +38,15 @@ public class GameInstance {
     }
 
     /**
-     * @return if game has not ended yet
+     * Changes current player.
      */
-    @SuppressWarnings("UnusedReturnValue")
-    private boolean nextMove() {
+    private void nextMove() {
         int oldCurrentPlayerNumber = currentPlayerNumber;
+        System.out.println("old " + oldCurrentPlayerNumber); // TODO delete
         do {
             increaseCurrentPlayerNumber();
-        } while(currentPlayerNumber != oldCurrentPlayerNumber && !players.get(currentPlayerNumber).isAlive());
-
-        return currentPlayerNumber != oldCurrentPlayerNumber;
+        } while (currentPlayerNumber != oldCurrentPlayerNumber && !players.get(currentPlayerNumber).isAlive());
+        System.out.println("next " + currentPlayerNumber); // TODO delete
     }
 
     /**
@@ -87,12 +88,26 @@ public class GameInstance {
         }
     }
 
+    private void endGame() {
+        winner = currentPlayerNumber;
+    }
+
     /**
      * Simulates a step of world physics and tells whether it needs to be simulated further.
      * @return <code>true</code> if simulation should be called again
      */
     public boolean worldPhysicsStep() {
-        return world.physicsStep();
+        boolean needNextStep = world.physicsStep();
+
+        List<PlayerUnit> alive = players.stream().filter(PlayerUnit::isAlive).collect(Collectors.toList());
+        if (winner == -1 && alive.size() == 0) {
+            winner = -2;
+        }
+        if (alive.size() == 1) {
+            winner = players.indexOf(alive.get(0));
+        }
+
+        return needNextStep;
     }
 
 
@@ -100,6 +115,8 @@ public class GameInstance {
 
     private final List<PlayerUnit> players;
     private int currentPlayerNumber;
+
+    private int winner = -1;
 
     private void increaseCurrentPlayerNumber() {
         currentPlayerNumber = (currentPlayerNumber + 1) % players.size();
@@ -115,6 +132,7 @@ public class GameInstance {
     }
 
     /**
+     * A getter for a terrain height
      * @return height of a game world
      */
     public double getTerrainHeight() {
@@ -122,6 +140,7 @@ public class GameInstance {
     }
 
     /**
+     * A getter for a terrain width
      * @return width of a game world
      */
     public double getTerrainWidth() {
@@ -138,9 +157,19 @@ public class GameInstance {
     }
 
     /**
+     * Provides information about whether the game has ended and who won.
+     * @return winner player number, <code>-2</code> if a game ended in a
+     * draw or <code>-1</code> if the game has not ended yet
+     */
+    public int getWinner() {
+        return winner;
+    }
+
+    /**
      * A enum representing commands sent to a game by a player
      */
     public enum Control {
         AIM_LEFT, AIM_RIGHT, LEFT, RIGHT, FIRE, SELECT_0, SELECT_1, SELECT_2
     }
+
 }

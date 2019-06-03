@@ -16,7 +16,7 @@ public class MovingObject extends RoundObject {
     private final int speed;
 
     private boolean facesRight = true;
-    protected double angle = Math.toRadians(30);
+    private double angle = Math.toRadians(30);
 
     /**
      * Constructs new MovingObject
@@ -95,7 +95,7 @@ public class MovingObject extends RoundObject {
         super.render(graphics);
 
         Vector2 canvasPosition = getCanvasPosition();
-        Vector2 cannonEnd = new Vector2(getRadius() * 1.3, 0).rotated(-angle).sum(canvasPosition);
+        var cannonEnd = new Vector2(getRadius() * 1.3, 0).rotated(-angle).sum(canvasPosition);
 
         graphics.strokeLine(canvasPosition.x, canvasPosition.y, cannonEnd.x, cannonEnd.y);
 

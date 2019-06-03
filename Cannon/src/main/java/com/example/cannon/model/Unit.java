@@ -3,7 +3,7 @@ package com.example.cannon.model;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * A unit that has hitpoints and in registered in the world differently separately.
+ * A unit that has hitpoints and is registered in the world differently from other MovingObjects.
  */
 public class Unit extends MovingObject {
     private int hp;

@@ -4,46 +4,45 @@ import com.example.cannon.model.Unit;
 import com.example.cannon.model.Vector2;
 
 /**
- * Rocket is a projectile propelled by it's engines
+ * A light projectile that is less affected by gravity
  */
-public class Rocket extends OwnedProjectile {
+public class LightAmmo extends OwnedProjectile {
 
-    private static final double SPEED = 5;
+    private static final double SPEED = 7;
     private static final int RADIUS = 3;
 
     /**
-     * Makes specified unit fire a rocket
+     * Makes specified unit fire a light projectile
      */
     public static void fire(Unit owner) {
-        new Rocket(owner);
+        new LightAmmo(owner);
     }
 
     /**
-     * Constructs a new rocket with specified owner
+     * Constructs a new light projectile with specified owner
      */
-    protected Rocket(Unit owner) {
+    protected LightAmmo(Unit owner) {
         super(RADIUS, new Vector2(SPEED, 0), owner);
     }
 
     /**
-     * Rocket explodes destroying ground and dealing damage in area.
+     * Projectile explodes dealing damage in area.
      * Closer units receive more damage
      */
     @Override
     protected void onStop() {
         getWorld().dealDamageInRadius(position, 20, 25);
         getWorld().dealDamageInRadius(position, 10, 25);
-        getWorld().getTerrain().destroyInRadius(position, 20);
     }
 
     /**
-     * Rocket accelerates as it flies
+     * It's so light, gravity affects it twice less
      */
     @Override
     protected boolean moveOneStep() {
         boolean returnValue = super.moveOneStep();
         if (isInWorld()) {
-            velocity.add(velocity.divided(velocity.length()).multiplied(0.18));
+            velocity.y += getWorld().getG() / 2; // take back half of gravity effect
         }
         return returnValue;
     }

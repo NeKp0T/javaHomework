@@ -47,6 +47,13 @@ public class Vector2 {
     }
 
     @NotNull
+    public Vector2 multiply(double mult) {
+        x *= mult;
+        y *= mult;
+        return this;
+    }
+
+    @NotNull
     public Vector2 sum(@NotNull Vector2 other) {
         return new Vector2(this).add(other);
     }
@@ -62,6 +69,11 @@ public class Vector2 {
     }
 
     @NotNull
+    public Vector2 multiplied(double mult) {
+        return new Vector2(this).multiply(mult);
+    }
+
+    @NotNull
     public Vector2 rotated(double angle) {
         double cos = Math.cos(angle);
         double sin = Math.sin(angle);
@@ -72,7 +84,7 @@ public class Vector2 {
      * @return squared length of a vector
      */
     public double lengthSq() {
-        return x*x + y*y;
+        return x * x + y * y;
     }
 
     public double length() {
