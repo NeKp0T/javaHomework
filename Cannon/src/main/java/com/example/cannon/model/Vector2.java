@@ -47,9 +47,9 @@ public class Vector2 {
     }
 
     @NotNull
-    public Vector2 multiply(double mult) {
-        x *= mult;
-        y *= mult;
+    public Vector2 multiply(double multiplier) {
+        x *= multiplier;
+        y *= multiplier;
         return this;
     }
 
@@ -69,8 +69,8 @@ public class Vector2 {
     }
 
     @NotNull
-    public Vector2 multiplied(double mult) {
-        return new Vector2(this).multiply(mult);
+    public Vector2 multiplied(double multiplier) {
+        return new Vector2(this).multiply(multiplier);
     }
 
     @NotNull

@@ -140,7 +140,8 @@ public class World {
      */
     void remove(@NotNull RoundObject obj) {
         objects.remove(obj);
-        if (obj instanceof Unit)
+        if (obj instanceof Unit) {
             units.remove(obj);
+        }
     }
 }

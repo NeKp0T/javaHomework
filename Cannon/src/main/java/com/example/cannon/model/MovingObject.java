@@ -11,6 +11,7 @@ public class MovingObject extends RoundObject {
      * By how much an object rotates in one rotate call.
      */
     private static final double ROTATE_PRECISION = Math.toRadians(5);
+    public static final double CANNON_LENGTH_MULTILIER = 1.3;
 
     private final int climbHeight;
     private final int speed;
@@ -95,7 +96,7 @@ public class MovingObject extends RoundObject {
         super.render(graphics);
 
         Vector2 canvasPosition = getCanvasPosition();
-        var cannonEnd = new Vector2(getRadius() * 1.3, 0).rotated(-angle).sum(canvasPosition);
+        var cannonEnd = new Vector2(getRadius() * CANNON_LENGTH_MULTILIER, 0).rotated(-angle).sum(canvasPosition);
 
         graphics.strokeLine(canvasPosition.x, canvasPosition.y, cannonEnd.x, cannonEnd.y);
 

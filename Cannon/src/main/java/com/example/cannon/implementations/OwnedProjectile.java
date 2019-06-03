@@ -29,7 +29,7 @@ public abstract class OwnedProjectile extends Projectile {
      * @return always true in this implementation
      */
     @Override
-    protected final boolean onTerrainCollision() {
+    protected boolean onTerrainCollision() {
         return true;
     }
 
@@ -38,7 +38,7 @@ public abstract class OwnedProjectile extends Projectile {
      * @return returns <code>true</code> if unit it collided with is not it's owner
      */
     @Override
-    protected final boolean onUnitCollision(Unit unit) {
+    protected boolean onUnitCollision(Unit unit) {
         return unit != owner;
     }
 

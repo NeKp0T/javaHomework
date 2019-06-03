@@ -14,7 +14,7 @@ import java.util.stream.Stream;
  * Terrain consists of a matrix of blocks which are initialized in constructor
  * and then never replaced. Blocks can be changed using through their methods though.
  */
-public class Terrain {
+public final class Terrain {
     public final int width;
     public final int height;
 
