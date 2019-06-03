@@ -1,0 +1,44 @@
+plugins {
+    id 'java'
+    id 'application'
+    id 'org.openjfx.javafxplugin' version '0.0.7'
+}
+
+group 'com.example'
+version '1.0'
+
+
+sourceCompatibility = 11
+repositories {
+    mavenCentral()
+}
+
+javafx {
+    version = "11.0.2"
+    modules = [ 'javafx.controls' ]
+}
+
+mainClassName = 'com.example.cannon.application.Main'
+
+dependencies {
+    testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.4.0-M1'
+    testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.4.0-M1'
+    testCompile group: 'org.junit.platform', name: 'junit-platform-launcher', version: '1.4.0-M1'
+
+    // https://mvnrepository.com/artifact/org.jetbrains/annotations
+    compile group: 'org.jetbrains', name: 'annotations', version: '17.0.0'
+    // https://mvnrepository.com/artifact/org.xerial/sqlite-jdbc
+    compile group: 'org.xerial', name: 'sqlite-jdbc', version: '3.25.2'
+
+    // https://mvnrepository.com/artifact/org.openjdk.jcstress/jcstress-core
+    testCompile group: 'org.openjdk.jcstress', name: 'jcstress-core', version: '0.5'
+
+
+}
+
+test {
+    useJUnitPlatform()
+    testLogging {
+        events 'PASSED', 'FAILED', 'SKIPPED'
+    }
+}
