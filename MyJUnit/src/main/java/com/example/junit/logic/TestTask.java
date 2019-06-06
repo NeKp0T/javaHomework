@@ -13,15 +13,26 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * A task that tests a whole class
+ */
 class TestTask implements Runnable {
     private final Class<?> testClass;
     private final TestLogger logger;
 
+    /**
+     * Constructs a task to test provided class with provided logger.
+     * @param classToTest class to test
+     * @param logger      logger to log tests output to
+     */
     public TestTask(Class<?> classToTest, TestLogger logger) {
         this.testClass = classToTest;
         this.logger = logger;
     }
 
+    /**
+     * Starts testing
+     */
     @Override
     public void run() {
         if (needsLaunch(testClass)) {

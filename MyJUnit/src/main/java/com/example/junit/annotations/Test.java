@@ -27,9 +27,9 @@ public @interface Test {
     Class<? extends Throwable> expected() default ThrowNothing.class;
 
     /**
-     * Cause to ignore test. If set to anything except "N/A", test will be ignored.
+     * Cause to ignore test. If set to anything except empty string, test will be ignored.
      */
     String ignoreCause() default DONT_IGNORE;
 
-    String DONT_IGNORE = "N/A";
+    String DONT_IGNORE = "";
 }

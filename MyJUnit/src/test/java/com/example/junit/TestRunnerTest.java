@@ -65,7 +65,7 @@ class TestRunnerTest {
     void throwsWrong() throws IOException {
         var expected = new String[2];
         expected[0] = "Error: Method public void com.example.junit.testclasses.ThrowWrongTest.test() has thrown unexpected exception class java.lang.NullPointerException:";
-        expected[1] = "com.example.junit.testclasses.ThrowWrongTest.test(ThrowWrongTest.java:10)";
+        expected[1] = "com.example.junit.testclasses.ThrowWrongTest.test(ThrowWrongTest.java:10)"; // TODO
         test("ThrowWrongTest", expected);
     }
 
