@@ -5,9 +5,12 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Path;
+import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.*;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 /**
  * Test runner can run test methods in all classes
@@ -98,16 +101,48 @@ public class TestRunner {
         }
     }
 
+    private void loadJar(String pathToJar) throws IOException {
+        JarFile jarFile = new JarFile(pathToJar);
+        Enumeration<JarEntry> e = jarFile.entries();
+
+        URL[] urls = { new URL("jar:file:" + pathToJar+"!/") };
+        URLClassLoader cl = URLClassLoader.newInstance(urls);
+
+        while (e.hasMoreElements()) {
+            JarEntry je = e.nextElement();
+            if(je.isDirectory() || !je.getName().endsWith(".class")){
+                continue;
+            }
+
+            String className = je.getName().substring(0,je.getName().length() - ".class".length());
+            className = className.replace('/', '.');
+            try {
+                Class c = cl.loadClass(className);
+                classes.add(c);
+            } catch (ClassNotFoundException ex) {
+                // should not happen
+            }
+
+        }
+    }
+
     private void loadFile(URLClassLoader classLoader, File file, int stripFrom) {
         Path filePath = file.getAbsoluteFile().toPath();
         String fileWithPackage = filePath.subpath(stripFrom, filePath.getNameCount()).toString();
 
-        if (fileWithPackage.endsWith(".class") || fileWithPackage.endsWith(".jar")) {
+        if (fileWithPackage.endsWith(".class")) {
             String className = fileWithPackage.substring(0, fileWithPackage.lastIndexOf('.')).replace(File.separatorChar, '.');
             try {
                 classes.add(classLoader.loadClass(className));
             } catch (ClassNotFoundException e) {
                 // should not happen
+            }
+        }
+        if (fileWithPackage.endsWith(".jar")) {
+            try {
+                loadJar(fileWithPackage);
+            } catch (IOException e) {
+                // this too should not happen
             }
         }
     }
