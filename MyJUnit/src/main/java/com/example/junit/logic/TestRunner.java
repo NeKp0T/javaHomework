@@ -128,6 +128,17 @@ public class TestRunner {
 
     private void loadFile(URLClassLoader classLoader, File file, int stripFrom) {
         Path filePath = file.getAbsoluteFile().toPath();
+
+        if (filePath.toString().endsWith(".jar")) {
+            try {
+                loadJar(filePath.toString());
+            } catch (IOException e) {
+                System.out.println("Exception while parsing jar");
+                // this too should not happen
+            }
+            return;
+        }
+
         String fileWithPackage = filePath.subpath(stripFrom, filePath.getNameCount()).toString();
 
         if (fileWithPackage.endsWith(".class")) {
@@ -136,13 +147,6 @@ public class TestRunner {
                 classes.add(classLoader.loadClass(className));
             } catch (ClassNotFoundException e) {
                 // should not happen
-            }
-        }
-        if (fileWithPackage.endsWith(".jar")) {
-            try {
-                loadJar(fileWithPackage);
-            } catch (IOException e) {
-                // this too should not happen
             }
         }
     }

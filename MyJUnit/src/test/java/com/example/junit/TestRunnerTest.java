@@ -1,6 +1,7 @@
 package com.example.junit;
 
 import com.example.junit.logic.TestRunner;
+import com.example.junit.testclasses.SimpleTest;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.InOrder;
@@ -19,6 +20,20 @@ import static org.mockito.Mockito.*;
 
 @SuppressWarnings("SpellCheckingInspection")
 class TestRunnerTest {
+
+    @Test
+    void jarTest() throws IOException {
+        PrintStream mock = mock(PrintStream.class);
+
+        new TestRunner().test(new File("./src/test/res/SimpleTestJar.jar"), mock);
+
+        InOrder inOrder = inOrder(mock);
+        inOrder.verify(mock).println(ArgumentMatchers.eq("Ok: Test public void com.example.junit.testclasses.SimpleTest.testMethod() passed"));
+
+
+        verify(mock, times(2))
+                .println(ArgumentMatchers.anyString());
+    }
 
     @Test
     void simpleTest() throws IOException {
