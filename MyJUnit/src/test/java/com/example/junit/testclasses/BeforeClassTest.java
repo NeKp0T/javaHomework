@@ -7,7 +7,7 @@ public class BeforeClassTest {
     private static int x;
 
     @BeforeClass
-    public void beforeClass() {
+    public static void beforeClass() {
         x = 1;
     }
 

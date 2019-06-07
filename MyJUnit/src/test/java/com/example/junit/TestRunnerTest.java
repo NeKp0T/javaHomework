@@ -40,36 +40,50 @@ class TestRunnerTest {
     }
 
     @Test
-    void beforeAndAfter() throws IOException {
-        test("BeforeAfterTest", new String[]{
-                "Ok: Test public void com.example.junit.testclasses.BeforeAfterTest.test1() passed",
-                "Ok: Test public void com.example.junit.testclasses.BeforeAfterTest.test2() passed"
+    void beforeAndAfterAndConcurrentTests() throws IOException {
+        test("BeforeAfterTest", new String[][]{
+                new String[]{"Ok: Test public void com.example.junit.testclasses.BeforeAfterTest.test1() passed"},
+                new String[]{"Ok: Test public void com.example.junit.testclasses.BeforeAfterTest.test2() passed"}
         });
     }
 
     @Test
     void ignore() throws IOException {
         test("IgnoreTest", new String[]{
-                "Ok: Method void com.example.junit.testclasses.IgnoreTest.test() ignored, cause = fortest"
+                "Ok: Method public void com.example.junit.testclasses.IgnoreTest.test() ignored, cause = fortest"
+        });
+    }
+
+    @Test
+    void privateMethod() throws IOException {
+        test("PrivateMethodTest", new String[]{
+                "Error: Access to method private void com.example.junit.testclasses.PrivateMethodTest.test() annotated with interface com.example.junit.annotations.Test denied",
+                "       not calling private void com.example.junit.testclasses.PrivateMethodTest.test()"
         });
     }
 
     @Test
     void throwsCorrect() throws IOException {
         test("ThrowCorrectTest", new String[]{
-                "Ok: Method public void com.example.junit.testclasses.ThrowCorrectTest.test() has thrown java.lang.NullPointerException as expected"
+                "Ok: Method public void com.example.junit.testclasses.ThrowCorrectTest.test() has thrown java.lang.NullPointerException as expected",
+                "Ok: Test public void com.example.junit.testclasses.ThrowCorrectTest.test() passed"
         });
     }
 
     @Test
     void throwsWrong() throws IOException {
-        var expected = new String[2];
+        var expected = new String[3];
         expected[0] = "Error: Method public void com.example.junit.testclasses.ThrowWrongTest.test() has thrown unexpected exception class java.lang.NullPointerException:";
-        expected[1] = "com.example.junit.testclasses.ThrowWrongTest.test(ThrowWrongTest.java:10)"; // TODO
+        expected[1] = "com.example.junit.testclasses.ThrowWrongTest.test(ThrowWrongTest.java:11)";
+        expected[2] = "Error: Test public void com.example.junit.testclasses.ThrowWrongTest.test() failed";
         test("ThrowWrongTest", expected);
     }
 
     private void test(String className, String[] output) throws IOException {
+        test(className, new String[][]{output});
+    }
+
+    private void test(String className, String[][] outputGroups) throws IOException {
         File dir = Files.createTempDirectory("testMyJunit").toFile();
         compileClass(Path.of("com", "example", "junit", "testclasses", className + ".java"), dir);
 
@@ -77,16 +91,21 @@ class TestRunnerTest {
 
         new TestRunner().test(dir, mock);
 
-        InOrder inOrder = inOrder(mock);
-        for (String s : output) {
-            inOrder.verify(mock).println(ArgumentMatchers.eq(s));
+        for (String[] output : outputGroups) {
+            InOrder inOrder = inOrder(mock);
+            for (String s : output) {
+                inOrder.verify(mock).println(ArgumentMatchers.eq(s));
+            }
         }
 
-        int timesRunningTimeCounted = (int) Arrays.stream(output)
-                .filter(s -> (s.contains("Ok") || s.contains("Error")) && (!s.contains("ignored")))
+        int timesRunningTimeCounted = (int) Arrays.stream(outputGroups)
+                .flatMap(Arrays::stream)
+                .filter(s -> (s.contains("Ok: Test ") || s.contains("Error: Test")) && (s.contains(" failed") || s.contains(" passed")))
                 .count();
 
-        verify(mock, times(output.length + timesRunningTimeCounted))
+        int sumLength = Arrays.stream(outputGroups).mapToInt(x -> x.length).sum();
+
+        verify(mock, times(sumLength + timesRunningTimeCounted))
                 .println(ArgumentMatchers.anyString());
 
         dir.delete();

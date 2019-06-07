@@ -6,7 +6,7 @@ import com.example.junit.annotations.Test;
 
 public class BeforeAfterTest {
 
-    private static int x = 10;
+    private int x = 10;
 
     @Before
     public void before() {

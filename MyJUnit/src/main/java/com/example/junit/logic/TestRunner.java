@@ -63,20 +63,17 @@ public class TestRunner {
             loadDirectory(classLoader, file, pathLength);
         }
 
-        var futures = new LinkedList<Future>();
+        var latch = new CountDownLatch(classes.size());
         for (Class<?> clazz : classes) {
-            futures.add(testClass(clazz));
+            testClass(clazz, latch);
         }
 
-        for (Future future : futures) {
-            try {
-                future.get();
-            } catch (InterruptedException e) {
-                testExecutor.shutdownNow();
-                return;
-            } catch (ExecutionException e) {
-                throw new RuntimeException(e); // should not happen
-            }
+
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            testExecutor.shutdownNow();
+            return;
         }
 
         for (TestLogger logger : loggers) {
@@ -84,10 +81,10 @@ public class TestRunner {
         }
     }
 
-    private Future testClass(Class<?> classToTest) {
+    private void testClass(Class<?> classToTest, CountDownLatch latch) {
         var logger = new TestLogger();
         loggers.add(logger);
-        return testExecutor.submit(new TestTask(classToTest, logger));
+        testExecutor.submit(new TestClassTask(classToTest, logger, testExecutor, latch));
     }
 
     private void loadDirectory(URLClassLoader classLoader, File directory, int stripFrom) {

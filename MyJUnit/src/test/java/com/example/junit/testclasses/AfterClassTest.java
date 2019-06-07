@@ -12,7 +12,7 @@ public class AfterClassTest {
     }
 
     @AfterClass
-    public void afterClass() {
+    public static void afterClass() {
         if (x != 1) {
             throw new RuntimeException();
         }
