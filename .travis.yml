@@ -11,5 +11,6 @@ env:
  - PROJECT_DIR=Phonebook
  - PROJECT_DIR=QSort
  - PROJECT_DIR=Threadpool
+ - PROJECT_DIR=MyJUnit
 script: cd $PROJECT_DIR && if [[ -f gradlew ]] ; then ./gradlew check; else mvn test; fi;
 
