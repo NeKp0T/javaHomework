@@ -61,9 +61,9 @@ public class Main {
     }
 
     private static void printHelp() {
-        System.out.println(help);
+        System.out.println(HELP);
     }
 
-    private static final String help = "USAGE:" +
+    private static final String HELP = "USAGE:" +
             "    appname -h | [-t path | path]*";
 }
