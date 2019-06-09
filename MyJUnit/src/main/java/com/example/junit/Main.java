@@ -37,23 +37,27 @@ public class Main {
             }
             String path = args[i];
 
-            var tester = new TestRunner();
-            var f = new File(path);
-            if (!f.exists()) {
-                System.out.println("File does not exist: " + path);
-                continue;
-            }
-            if (!f.isDirectory()) {
-                System.out.println("File is not a directory: " + path);
-                continue;
-            }
-            try {
-                tester.test(f, System.out);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            runTests(path);
         }
 
+    }
+
+    private static void runTests(String path) {
+        var tester = new TestRunner();
+        var f = new File(path);
+        if (!f.exists()) {
+            System.out.println("File does not exist: " + path);
+            return;
+        }
+        if (!f.isDirectory()) {
+            System.out.println("File is not a directory: " + path);
+            return;
+        }
+        try {
+            tester.test(f, System.out);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private static void printHelp() {

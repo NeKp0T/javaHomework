@@ -1,7 +1,6 @@
 package com.example.junit;
 
 import com.example.junit.logic.TestRunner;
-import com.example.junit.testclasses.SimpleTest;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.InOrder;
@@ -94,17 +93,23 @@ class TestRunnerTest {
         test("ThrowWrongTest", expected);
     }
 
+    @Test
+    void testLoadsAllClasses() throws IOException {
+        PrintStream mock = runTestClasses(new String[]{"SimpleTest", "UsesOtherClass"});
+
+        InOrder inOrder = inOrder(mock);
+        inOrder.verify(mock).println(ArgumentMatchers.contains("Ok"));
+        inOrder.verify(mock).println(ArgumentMatchers.contains("Ok"));
+
+        verify(mock, never()).println(ArgumentMatchers.contains("Error"));
+    }
+
     private void test(String className, String[] output) throws IOException {
         test(className, new String[][]{output});
     }
 
     private void test(String className, String[][] outputGroups) throws IOException {
-        File dir = Files.createTempDirectory("testMyJunit").toFile();
-        compileClass(Path.of("com", "example", "junit", "testclasses", className + ".java"), dir);
-
-        PrintStream mock = mock(PrintStream.class);
-
-        new TestRunner().test(dir, mock);
+        PrintStream mock = runTestClasses(new String[]{className});
 
         for (String[] output : outputGroups) {
             InOrder inOrder = inOrder(mock);
@@ -122,8 +127,21 @@ class TestRunnerTest {
 
         verify(mock, times(sumLength + timesRunningTimeCounted))
                 .println(ArgumentMatchers.anyString());
+    }
+
+    private PrintStream runTestClasses(String[] classNames) throws IOException {
+        File dir = Files.createTempDirectory("testMyJunit").toFile();
+        for (String className : classNames) {
+            compileClass(Path.of("com", "example", "junit", "testclasses", className + ".java"), dir);
+        }
+
+        PrintStream mock = mock(PrintStream.class);
+
+        new TestRunner().test(dir, mock);
 
         dir.delete();
+
+        return mock;
     }
 
     private void compileClass(Path filename, File outputDirectory) throws IOException {

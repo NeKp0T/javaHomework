@@ -1,7 +1,5 @@
 package com.example.junit.logic;
 
-import com.example.junit.annotations.BeforeClass;
-
 import java.io.PrintStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
